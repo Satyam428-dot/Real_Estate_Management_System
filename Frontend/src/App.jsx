@@ -1,5 +1,16 @@
-export default function App(){
+import { Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
+
+function App() {
   return (
-<h2>Hello Ayush</h2>
+    <>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        {/* <Route path="/Student" element={<Student />} /> */}
+        {/* <Route path="/Course" element={<Course />} /> */}
+      </Routes>
+    </>
   );
 }
+
+export default App;

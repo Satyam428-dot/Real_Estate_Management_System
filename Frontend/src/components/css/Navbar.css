@@ -1,0 +1,28 @@
+.navbar {
+  height: 80px;
+}
+
+.nav-link {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.nav-link:hover {
+  color: #0d6efd !important;
+}
+
+.btn {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.logo-text {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  letter-spacing: 0.5px;
+}
+
+.logo-hq {
+  color: #1e88e5;
+}
