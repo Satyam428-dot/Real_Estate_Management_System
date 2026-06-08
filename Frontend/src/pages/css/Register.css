@@ -63,15 +63,15 @@ label {
 }
 
 .register-btn {
+  background: #4f46e5 !important;
+  color: white !important;
   height: 50px;
   border-radius: 12px;
-  background: #4f46e5;
-  color: white;
-  border: none;
+  border: none !important;
 }
 
 .register-btn:hover {
-  background: #4338ca;
+  background: #4338ca !important;
 }
 
 .divider {
@@ -105,9 +105,11 @@ label {
 }
 
 .social-btn {
+  background: #ffffff !important;
+  color: #111827 !important;
   flex: 1;
   height: 50px;
-  border: 1px solid #ddd;
+  border: 1px solid #ddd !important;
   border-radius: 12px;
 
   display: flex;
