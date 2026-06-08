@@ -3,16 +3,15 @@ import home_icon from "../../assets/home_icon.avif";
 import { useNavigate } from "react-router-dom";
 
 export default function Navbar() {
-
-  const navigate=useNavigate();
-  const registerClick=(e)=>{
-    navigate("/Register")
+  const navigate = useNavigate();
+  const registerClick = (e) => {
+    navigate("/Register");
   };
 
-  const loginClick=(e)=>{
-    navigate("/Login")
+  const loginClick = (e) => {
+    navigate("/Login");
   };
-  
+
   return (
     <nav className="navbar navbar-expand-lg bg-white shadow-sm px-5">
       <div className="container-fluid">
@@ -67,8 +66,12 @@ export default function Navbar() {
 
         {/* Buttons */}
         <div className="d-flex gap-2">
-          <button className="btn btn-primary" onClick={registerClick}>REGISTER</button>
-          <button className="btn btn-outline-primary" onClick={loginClick}>SIGN IN</button>
+          <button className="btn btn-primary" onClick={registerClick}>
+            REGISTER
+          </button>
+          <button className="btn btn-outline-primary" onClick={loginClick}>
+            SIGN IN
+          </button>
         </div>
       </div>
     </nav>
