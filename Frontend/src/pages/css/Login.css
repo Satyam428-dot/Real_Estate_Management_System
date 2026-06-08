@@ -76,25 +76,34 @@
 }
 
 .login-btn {
-  background: #2f6cff;
-  color: white;
+  background: #2f6cff !important;
+  color: white !important;
   height: 50px;
   border-radius: 12px;
-  border: none;
+  border: none !important;
 }
+
 
 .login-btn:hover {
-  background: #1f58d6;
+  background: #1f58d6 !important;
 }
 
+
 .google-btn {
+  background: #ffffff !important;
+  color: #111827 !important;
   height: 50px;
   border-radius: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid #ddd !important;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+}
+
+
+.google-btn:hover {
+  background: #f3f4f6 !important;
 }
 
 .signup-text {
