@@ -4,7 +4,7 @@
   box-sizing: border-box;
 }
 
-body {
+body.register-active {
   overflow: hidden;
 }
 
@@ -168,7 +168,7 @@ label {
 }
 
 @media (max-width: 992px) {
-  body {
+  body.register-active {
     overflow: auto;
   }
 

@@ -1,9 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import buildingImage from "../assets/d1.png";
 import "./css/Register.css"
 import { Link } from "react-router-dom";
 
 const Register = () => {
+  useEffect(() => {
+    document.body.classList.add("register-active");
+    return () => {
+      document.body.classList.remove("register-active");
+    };
+  }, []);
+
   return (
     <div className="register-wrapper">
       <div className="register-container">
