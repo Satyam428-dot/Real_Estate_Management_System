@@ -5,6 +5,7 @@ import LoginPage from "./pages/Login";
 import Properties from "./pages/Properties";
 import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
+import Agents from "./pages/Agents";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import DashboardOverview from "./pages/admin/DashboardOverview";
@@ -25,7 +26,7 @@ function App() {
         <Route path="/properties" element={<Properties />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/blog" element={<Blog />} />
-
+        <Route path="/agents" element={<Agents />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminDashboard />}>
