@@ -14,7 +14,7 @@ export default function AdminSidebar() {
   return (
     <aside className="admin-sidebar">
       <ul className="sidebar-menu">
-        <NavLink to="/admin" className="nav-link">
+        <NavLink to="/admin/dashboard" className="nav-link">
           <li className="sidebar-item">
             <FaHome className="sidebar-icon" />
             <span>Dashboard Overview</span>
