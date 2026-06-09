@@ -1,0 +1,135 @@
+.page-shell {
+  background: #f7f9fc;
+}
+
+.page-hero {
+  position: relative;
+  min-height: 46vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-size: cover;
+  background-position: center;
+}
+
+.contact-hero {
+  background-image: linear-gradient(rgba(12, 24, 39, 0.55), rgba(12, 24, 39, 0.55)),
+    url("../../assets/hero_house.jpg");
+}
+
+.page-hero-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.page-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  padding: 1.5rem;
+  color: #fff;
+}
+
+.page-kicker {
+  margin-bottom: 0.85rem;
+  color: #8ec5ff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+}
+
+.page-subtext {
+  max-width: 620px;
+  margin: 0 auto;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.contact-section {
+  padding: 4.5rem 1rem 1rem;
+}
+
+.contact-panel,
+.contact-form-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  padding: 2rem;
+  text-align: left;
+}
+
+.contact-panel h2,
+.contact-form-card h2 {
+  margin-bottom: 0.85rem;
+  color: #1f2a37;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.contact-copy {
+  color: #667085;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+
+.contact-info-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.contact-info-card {
+  border: 1px solid #e4ebf3;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  background: #f9fbfe;
+}
+
+.contact-info-card h3 {
+  margin-bottom: 0.35rem;
+  color: #0f172a;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.contact-info-card p {
+  color: #5f6b7a;
+}
+
+.contact-form-card .form-label {
+  color: #334155;
+  font-weight: 600;
+}
+
+.contact-form-card .form-control {
+  border-radius: 12px;
+  border: 1px solid #d6deea;
+  padding: 0.9rem 1rem;
+  box-shadow: none;
+}
+
+.contact-form-card .form-control:focus {
+  border-color: #1e88e5;
+  box-shadow: 0 0 0 0.15rem rgba(30, 136, 229, 0.18);
+}
+
+.contact-btn {
+  padding: 0.85rem 1.75rem;
+  font-size: 0.92rem;
+  letter-spacing: 0.8px;
+}
+
+@media (max-width: 768px) {
+  .contact-section {
+    padding-top: 3rem;
+  }
+
+  .contact-panel,
+  .contact-form-card {
+    padding: 1.5rem;
+  }
+
+  .page-hero {
+    min-height: 38vh;
+  }
+}

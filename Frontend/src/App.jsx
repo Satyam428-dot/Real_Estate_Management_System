@@ -3,6 +3,9 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import LoginPage from "./pages/Login";
 import Properties from "./pages/Properties";
+import Contact from "./pages/Contact";
+import Blog from "./pages/Blog";
+
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import DashboardOverview from "./pages/admin/DashboardOverview";
 import ViewAllUsers from "./pages/admin/ViewAllUsers";
@@ -20,18 +23,11 @@ function App() {
         <Route path="/Register" element={<Register />} />
         <Route path="/Login" element={<LoginPage />} />
         <Route path="/properties" element={<Properties />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/blog" element={<Blog />} />
+
 
         {/* Admin Routes */}
-        {/* <Route path="/admin" element={<AdminDashboard />} />
-        <Route index element={<DashboardOverview />} />
-        <Route path="dashboard" element={<DashboardOverview />} />
-        <Route path="users" element={<ViewAllUsers />} />
-        <Route path="owners" element={<ApproveOwners />} />
-        <Route path="properties" element={<ApproveProperties />} />
-        <Route path="listings" element={<ManageListings />} />
-        <Route path="reports" element={<ViewReports />} />
-      </Routes> */}
-
         <Route path="/admin" element={<AdminDashboard />}>
           <Route index element={<DashboardOverview />} />
           <Route path="dashboard" element={<DashboardOverview />} />
