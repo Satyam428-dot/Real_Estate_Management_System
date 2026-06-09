@@ -1,0 +1,10 @@
+.admin-layout {
+  display: flex;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 30px;
+  background-color: #f8fafc;
+  min-height: calc(100vh - 70px);
+}
