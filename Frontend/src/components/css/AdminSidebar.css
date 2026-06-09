@@ -39,3 +39,15 @@
 .sidebar-icon {
   font-size: 18px;
 }
+
+.nav-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-link.active .sidebar-item {
+  background-color: #e8f3ff;
+  color: #1e88e5;
+  border-left: 4px solid #1e88e5;
+  font-weight: 600;
+}

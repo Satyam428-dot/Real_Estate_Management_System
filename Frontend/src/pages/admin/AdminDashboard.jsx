@@ -1,6 +1,7 @@
 import AdminNavbar from "../../components/jsx/AdminNavbar";
 import AdminSidebar from "../../components/jsx/AdminSidebar";
 import "./AdminDashboard.css";
+import { Outlet } from "react-router-dom";
 
 export default function AdminDashboard() {
   return (
@@ -11,7 +12,7 @@ export default function AdminDashboard() {
         <AdminSidebar />
 
         <div className="admin-content">
-          <h1>Welcome Admin</h1>
+          <Outlet />
         </div>
       </div>
     </>
