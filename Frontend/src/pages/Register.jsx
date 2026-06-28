@@ -136,6 +136,7 @@ import React, { useEffect, useState } from "react";
 import buildingImage from "../assets/d1.png";
 import "./css/Register.css";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const Register = () => {
   useEffect(() => {
@@ -146,18 +147,27 @@ const Register = () => {
     };
   }, []);
 
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState("CUSTOMER");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
     // Check empty fields
-    if (!name || !email || !phone || !role || !password || !confirmPassword) {
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !phone ||
+      !role ||
+      !password ||
+      !confirmPassword
+    ) {
       alert("Please fill all fields");
       return;
     }
@@ -168,36 +178,34 @@ const Register = () => {
       return;
     }
 
-    // Get existing users
-    const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
-
-    // Check duplicate email
-    const emailExists = existingUsers.find((user) => user.email === email);
-
-    if (emailExists) {
-      alert("Email already registered");
-      return;
-    }
-
     // Create user object
+    const userRoles = role;
     const newUser = {
-      id: Date.now(),
-      name,
+      firstName,
+      lastName,
       email,
       phone,
       password,
-      role,
+      userRoles,
     };
 
-    // Save user
-    existingUsers.push(newUser);
+    console.log(newUser);
+    // -----------------------Save user------------------------------------------
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/register",
+        newUser,
+      );
 
-    localStorage.setItem("users", JSON.stringify(existingUsers));
-
-    alert("🎉 User Registered Successfully!");
+      alert("🎉 User Registered Successfully!");
+    } catch (error) {
+      console.log(error);
+      alert("Error saving user");
+    }
 
     // Clear form
-    setName("");
+    setFirstName("");
+    setLastName("");
     setEmail("");
     setPhone("");
     setRole("CUSTOMER");
@@ -221,16 +229,29 @@ const Register = () => {
           </p>
 
           <form onSubmit={handleRegister}>
-            {/* Name */}
+            {/* first Name */}
             <div className="mb-3">
-              <label>Name</label>
+              <label>First Name</label>
 
               <input
                 type="text"
                 className="form-control"
-                placeholder="Enter your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your first name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+
+            {/* last Name */}
+            <div className="mb-3">
+              <label>Last Name</label>
+
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter your last name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
               />
             </div>
 
@@ -252,7 +273,7 @@ const Register = () => {
               <label>Contact Number</label>
 
               <input
-                type="tel"
+                type="text"
                 className="form-control"
                 placeholder="Enter your contact number"
                 value={phone}
