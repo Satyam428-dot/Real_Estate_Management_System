@@ -148,6 +148,7 @@ const Register = () => {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [role, setRole] = useState("CUSTOMER");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -156,7 +157,7 @@ const Register = () => {
     e.preventDefault();
 
     // Check empty fields
-    if (!name || !email || !role || !password || !confirmPassword) {
+    if (!name || !email || !phone || !role || !password || !confirmPassword) {
       alert("Please fill all fields");
       return;
     }
@@ -183,6 +184,7 @@ const Register = () => {
       id: Date.now(),
       name,
       email,
+      phone,
       password,
       role,
     };
@@ -197,6 +199,7 @@ const Register = () => {
     // Clear form
     setName("");
     setEmail("");
+    setPhone("");
     setRole("CUSTOMER");
     setPassword("");
     setConfirmPassword("");
@@ -241,6 +244,19 @@ const Register = () => {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            {/* Phone */}
+            <div className="mb-3">
+              <label>Contact Number</label>
+
+              <input
+                type="tel"
+                className="form-control"
+                placeholder="Enter your contact number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
               />
             </div>
 
