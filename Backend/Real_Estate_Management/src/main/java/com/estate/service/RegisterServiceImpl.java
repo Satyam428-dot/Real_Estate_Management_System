@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.estate.dtos.RegisterDto;
 import com.estate.entities.User;
-import com.estate.repository.RegisterRepository;
+import com.estate.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class RegisterServiceImpl implements RegisterService {
-	private final RegisterRepository registerRepo;
+	private final UserRepository userRepo;
 	private final ModelMapper mapper;
 
 	@Override
@@ -23,7 +23,7 @@ public class RegisterServiceImpl implements RegisterService {
 		User userEntity = mapper.map(registerDto, User.class);
 
 //		System.out.println(userEntity);
-		User persistentUser = registerRepo.save(userEntity);
+		User persistentUser = userRepo.save(userEntity);
 		if (persistentUser != null) {
 			return "User added successfully";
 		} else {
