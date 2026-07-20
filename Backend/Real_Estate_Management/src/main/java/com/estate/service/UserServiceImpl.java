@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.estate.customExceptions.ResourceNotFoundException;
 import com.estate.entities.User;
 import com.estate.entities.UserRole;
 import com.estate.repository.UserRepository;
@@ -33,6 +34,12 @@ public class UserServiceImpl implements UserService {
 	public List<User> getAllCustomers() {
 		List<User> customers = userRepo.findByUserRoles(UserRole.CUSTOMER);
 		return customers;
+	}
+
+	@Override
+	public User getUserById(long id) {
+		User user = userRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("The user not found"));
+		return user;
 	}
 
 }

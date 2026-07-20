@@ -1,4 +1,4 @@
-package com.estate.custom;
+package com.estate.customExceptions;
 
 public class InvalidCredentialException extends RuntimeException {
 	/**
