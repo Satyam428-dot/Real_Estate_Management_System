@@ -1,0 +1,201 @@
+/* ---------------- Page ---------------- */
+
+.users-page {
+  background: #f4f7fe;
+  min-height: 100vh;
+  padding-top: 15px !important;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.page-title {
+  color: #1b2559;
+  font-size: 40px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+/* ---------------- Filter Card ---------------- */
+
+.filter-card {
+  border-radius: 16px !important;
+  margin-bottom: 22px;
+}
+
+.search-input,
+.filter-select {
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid #e0e5f2;
+  font-size: 14px;
+}
+
+.search-input {
+  width: 300px;
+}
+
+.filter-select {
+  width: 170px;
+}
+
+.btn-search {
+  height: 42px;
+  border-radius: 10px;
+  background: #1890ff !important;
+  border: none !important;
+  font-weight: 600;
+}
+
+.btn-reset {
+  height: 42px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* ---------------- Table Card ---------------- */
+
+.table-card {
+  border-radius: 16px !important;
+  margin-bottom: 24px;
+}
+
+.table-title {
+  color: #1b2559;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.custom-table-container {
+  border: 1px solid #e0e5f2;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.custom-blue-table {
+  margin-bottom: 0;
+}
+
+/* ---------------- Header ---------------- */
+
+.custom-blue-table th {
+  background: #1890ff !important;
+  color: white !important;
+  border: none !important;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 14px 12px;
+}
+
+/* ---------------- Body ---------------- */
+
+.custom-blue-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #edf2f7 !important;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* Zebra */
+
+.custom-blue-table tbody tr:nth-child(even) td {
+  background: #f7faff;
+}
+
+.custom-blue-table tbody tr:nth-child(odd) td {
+  background: white;
+}
+
+/* Hover */
+
+.custom-blue-table tbody tr:hover td {
+  background: #e7f2ff !important;
+}
+
+/* Email */
+
+.email-cell {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------------- Action Column ---------------- */
+
+.action-column {
+  width: 280px;
+  text-align: center;
+}
+
+/* ---------------- Buttons ---------------- */
+
+.btn-action {
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 5px 14px !important;
+  font-size: 13px;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-action:hover {
+  transform: translateY(-1px);
+}
+
+/* View */
+
+.btn-view {
+  background: #e7f0ff !important;
+  color: #1890ff !important;
+}
+
+.btn-view:hover {
+  background: #1890ff !important;
+  color: white !important;
+}
+
+/* Edit */
+
+.btn-edit {
+  background: #e5f8f1 !important;
+  color: #05cd99 !important;
+}
+
+.btn-edit:hover {
+  background: #05cd99 !important;
+  color: white !important;
+}
+
+/* Disable */
+
+.btn-disable {
+  background: #fff3e2 !important;
+  color: #ffb547 !important;
+}
+
+.btn-disable:hover {
+  background: #ffb547 !important;
+  color: white !important;
+}
+
+/* Delete */
+
+.btn-delete {
+  background: #ffe8e8 !important;
+  color: #ee5d50 !important;
+}
+
+.btn-delete:hover {
+  background: #ee5d50 !important;
+  color: white !important;
+}
+
+/* .users-page {
+  border: 4px solid red !important;
+}
+
+.admin-content {
+  border: 4px solid blue !important;
+} */
