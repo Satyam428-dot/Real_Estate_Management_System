@@ -116,17 +116,19 @@ body {
 
 .grid {
     display: grid;
-    grid-template-columns: 3fr 1fr;
+    grid-template-columns: 1fr;
     gap: 20px;
 }
 
 .cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);   
+     display: grid;
+    grid-template-columns: repeat(4, minmax(250px, 1fr));
     gap: 20px;
+    margin-top: 20px;
 }
 
 .property-card {
+     width: 100%;
     background: #fff;
     border-radius: 12px;
     padding: 15px;

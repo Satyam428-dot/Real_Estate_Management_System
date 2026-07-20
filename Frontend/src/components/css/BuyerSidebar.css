@@ -1,0 +1,161 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+.buyer-sidebar{
+    width:280px;
+    height:100vh;
+    background:#ffffff;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    border-right:1px solid #e5e7eb;
+    box-shadow:4px 0 18px rgba(0,0,0,.06);
+    position:sticky;
+    top:0;
+}
+
+.sidebar-logo{
+    padding:30px 20px;
+    text-align:center;
+    border-bottom:1px solid #ececec;
+}
+
+.sidebar-logo h2{
+    color:#2f46ff;
+    font-size:30px;
+    font-weight:700;
+}
+
+.sidebar-logo p{
+    color:#7b7b7b;
+    margin-top:6px;
+    font-size:14px;
+}
+
+.sidebar-menu{
+    list-style:none;
+    padding:20px 15px;
+    flex:1;
+}
+
+.nav-link{
+    text-decoration:none;
+    color:#555;
+}
+
+.sidebar-item{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:14px 18px;
+    margin-bottom:10px;
+    border-radius:12px;
+    transition:.3s;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:500;
+}
+
+.sidebar-icon{
+    font-size:18px;
+    min-width:22px;
+}
+
+.sidebar-item:hover{
+    background:#eef2ff;
+    color:#2f46ff;
+    transform:translateX(6px);
+}
+
+.nav-link.active .sidebar-item{
+    background:#2f46ff;
+    color:#fff;
+    box-shadow:0 8px 20px rgba(47,70,255,.35);
+}
+
+.nav-link.active .sidebar-icon{
+    color:#fff;
+}
+
+.logout-section{
+    padding:20px;
+    border-top:1px solid #ececec;
+}
+
+.logout-btn{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    background:#ff4d4f;
+    color:#fff;
+    border:none;
+    padding:14px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:600;
+    transition:.3s;
+}
+
+.logout-btn:hover{
+    background:#d9363e;
+    transform:translateY(-2px);
+    box-shadow:0 8px 18px rgba(255,77,79,.35);
+}
+
+::-webkit-scrollbar{
+    width:6px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#c5c5c5;
+    border-radius:10px;
+}
+
+@media(max-width:992px){
+
+    .buyer-sidebar{
+        width:90px;
+    }
+
+    .sidebar-logo p,
+    .sidebar-logo h2{
+        display:none;
+    }
+
+    .sidebar-item span{
+        display:none;
+    }
+
+    .sidebar-item{
+        justify-content:center;
+        padding:16px;
+    }
+
+    .logout-btn{
+        font-size:0;
+    }
+
+    .logout-btn svg{
+        font-size:22px;
+    }
+}
+
+@media(max-width:768px){
+
+    .buyer-sidebar{
+        position:fixed;
+        left:-100%;
+        transition:.4s;
+        z-index:1000;
+    }
+
+    .buyer-sidebar.show{
+        left:0;
+    }
+}
