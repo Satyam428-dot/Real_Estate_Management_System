@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.estate.dtos.PropertyRequestDTO;
 import com.estate.dtos.PropertyResponseDTO;
+import com.estate.dtos.PropertyUpdateDTO;
 import com.estate.entities.Property;
 import com.estate.entities.User;
 import com.estate.repository.PropertyRepository;
@@ -53,6 +54,24 @@ public class PropertyServiceImpl implements PropertyService {
 		Property property = propertyRepo.findById(id)
 				 .orElseThrow(() -> new RuntimeException("Property not found"));
 		return mapper.map(property, PropertyResponseDTO.class);
+		
+	}
+
+
+	@Override
+	public PropertyResponseDTO updateProperty(Long id, PropertyUpdateDTO dto) {
+		Property Updatedproperty = propertyRepo.findById(id)
+				.orElseThrow(()-> new RuntimeException("Property not found"));
+		
+		return mapper.map(Updatedproperty , PropertyResponseDTO.class);
+	}
+
+
+	@Override
+	public void deleteProperty(Long id) {
+		Property property = propertyRepo.findById(id)
+				.orElseThrow(()-> new RuntimeException("Property not found"));
+		propertyRepo.delete(property);
 		
 	}
 
