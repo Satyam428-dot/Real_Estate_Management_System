@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.estate.custom.InvalidCredentialException;
+import com.estate.customExceptions.InvalidCredentialException;
 import com.estate.dtos.LoginDto;
 import com.estate.entities.User;
 import com.estate.service.LoginService;
