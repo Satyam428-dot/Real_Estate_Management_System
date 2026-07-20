@@ -3,7 +3,7 @@ package com.estate.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.estate.custom.InvalidCredentialException;
+import com.estate.customExceptions.InvalidCredentialException;
 import com.estate.dtos.LoginDto;
 import com.estate.entities.User;
 import com.estate.repository.UserRepository;
