@@ -15,6 +15,8 @@ import ApproveProperties from "./pages/admin/ApproveProperties";
 import ManageListings from "./pages/admin/ManageListing";
 import ViewReports from "./pages/admin/ViewReport";
 
+import BuyerDashboard from "./pages/buyer/BuyerDashboard";
+
 function App() {
   return (
     <>
@@ -38,6 +40,10 @@ function App() {
           <Route path="listings" element={<ManageListings />} />
           <Route path="reports" element={<ViewReports />} />
         </Route>
+
+         {/* Buyer Dashboard */}
+          <Route path="/buyer" element={<BuyerDashboard />} />
+          
       </Routes>
     </>
   );
