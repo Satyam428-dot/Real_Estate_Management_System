@@ -3,18 +3,17 @@ import Navbar from "../components/jsx/Navbar";
 import Footer from "../components/jsx/Footer";
 import "./css/Properties.css";
 
-// Import Indian Building Images
 import indianLuxuryVilla from "../assets/indian_luxury_villa.png";
 import indianTechApartment from "../assets/indian_tech_apartment.png";
 import indianSeafacingPenthouse from "../assets/indian_seafacing_penthouse.png";
 import indianHeritageBungalow from "../assets/indian_heritage_bungalow.png";
 
-// Premium Indian Mock Properties Data
+
 const MOCK_PROPERTIES = [
   {
     id: 1,
     title: "Imperial Residency Villa",
-    price: 85000000, // 8.5 Crore
+    price: 85000000,
     address: "Plot No. 12, Gulmohar Road, Juhu, Mumbai, MH 400049",
     city: "Mumbai",
     type: "House",
@@ -35,7 +34,7 @@ const MOCK_PROPERTIES = [
   {
     id: 2,
     title: "Sleek Tech Loft",
-    price: 45000, // 45k/mo Rent
+    price: 45000, 
     address: "Flat 402, Sunshine Heights, Indiranagar, Bangalore, KA 560038",
     city: "Bangalore",
     type: "Apartment",
@@ -56,7 +55,7 @@ const MOCK_PROPERTIES = [
   {
     id: 3,
     title: "Marine Drive Penthouse",
-    price: 42000000, // 4.2 Crore
+    price: 42000000, 
     address: "15th Floor, Sea Breeze Apartments, Marine Drive, Mumbai, MH 400020",
     city: "Mumbai",
     type: "Condo",
@@ -77,7 +76,7 @@ const MOCK_PROPERTIES = [
   {
     id: 4,
     title: "Elegant Green Meadows",
-    price: 18000000, // 1.8 Crore
+    price: 18000000, 
     address: "Villa 24, Clover Greens, Koregaon Park, Pune, MH 411001",
     city: "Pune",
     type: "House",
@@ -98,7 +97,7 @@ const MOCK_PROPERTIES = [
   {
     id: 5,
     title: "Skyline Premium Suite",
-    price: 125000000, // 12.5 Crore
+    price: 125000000, 
     address: "Block C, Amrapali Towers, Connaught Place, New Delhi, DL 110001",
     city: "Delhi",
     type: "Apartment",
@@ -119,7 +118,7 @@ const MOCK_PROPERTIES = [
   {
     id: 6,
     title: "Cozy Heritage Bungalow",
-    price: 35000, // 35k/mo Rent
+    price: 35000, 
     address: "House No. 89, Jubilee Hills Road No. 10, Hyderabad, TS 500033",
     city: "Hyderabad",
     type: "Townhouse",
