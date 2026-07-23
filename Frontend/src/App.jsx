@@ -15,7 +15,7 @@ import ApproveProperties from "./pages/admin/ApproveProperties";
 import ManageListings from "./pages/admin/ManageListing";
 import ViewReports from "./pages/admin/ViewReport";
 
-import BuyerDashboard from "./pages/buyer/BuyerDashboard";
+// import BuyerDashboard from "./pages/buyer/BuyerDashboard";
 
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerOverview from "./pages/owner/OwnerOverview";
@@ -44,8 +44,8 @@ function App() {
           <Route path="reports" element={<ViewReports />} />
         </Route>
 
-         {/* Buyer Dashboard */}
-          <Route path="/buyer" element={<BuyerDashboard />} />
+         {/* Buyer Dashboard (commented out until page is created) */}
+         {/* <Route path="/buyer" element={<BuyerDashboard />} /> */}
 
         {/* Owner Routes */}
         <Route path="/owner" element={<OwnerDashboard />}>
