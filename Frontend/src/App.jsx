@@ -17,6 +17,9 @@ import ViewReports from "./pages/admin/ViewReport";
 
 import BuyerDashboard from "./pages/buyer/BuyerDashboard";
 
+import OwnerDashboard from "./pages/owner/OwnerDashboard";
+import OwnerOverview from "./pages/owner/OwnerOverview";
+
 function App() {
   return (
     <>
@@ -43,6 +46,12 @@ function App() {
 
          {/* Buyer Dashboard */}
           <Route path="/buyer" element={<BuyerDashboard />} />
+
+        {/* Owner Routes */}
+        <Route path="/owner" element={<OwnerDashboard />}>
+          <Route index element={<OwnerOverview />} />
+          <Route path="dashboard" element={<OwnerOverview />} />
+        </Route>
           
       </Routes>
     </>
