@@ -1,118 +1,59 @@
+import React from "react";
 import { NavLink } from "react-router-dom";
 import {
-  FaHome,
-  FaSearch,
-  FaHeart,
-  FaBalanceScale,
-  FaCalendarCheck,
-  FaClipboardCheck,
-  FaComments,
-  FaBell,
-  FaStar,
-  FaUserCircle,
-  FaHeadset,
-  FaSignOutAlt,
-} from "react-icons/fa";
-
+  LayoutDashboard,
+  Building,
+  Heart,
+  GitCompare,
+  Calendar,
+  Bookmark,
+  MessageSquare,
+  Bell,
+  Star,
+  User,
+  HelpCircle,
+  LogOut,
+} from "lucide-react";
 import "../css/BuyerSidebar.css";
 
 export default function BuyerSidebar() {
+  const sidebarItems = [
+    { name: "Dashboard", path: "/buyer/dashboard", icon: <LayoutDashboard size={18} /> },
+    { name: "Browse Properties", path: "/buyer/browse", icon: <Building size={18} /> },
+    { name: "Saved Properties", path: "/buyer/saved", icon: <Heart size={18} /> },
+    { name: "Schedule Visit", path: "/buyer/visits", icon: <Calendar size={18} /> },
+    { name: "My Bookings", path: "/buyer/bookings", icon: <Bookmark size={18} /> },
+    { name: "My Inquiries", path: "/buyer/inquiries", icon: <MessageSquare size={18} /> },
+    { name: "Notifications", path: "/buyer/notifications", icon: <Bell size={18} />, badge: 5 },
+    { name: "Reviews & Ratings", path: "/buyer/reviews", icon: <Star size={18} /> },
+    
+  ];
+
   return (
     <aside className="buyer-sidebar">
-
-      <div className="sidebar-logo">
-        <h2>Real Estate</h2>
-        <p>Buyer Panel</p>
+      {/* Brand Logo Header */}
+      <div className="brand">
+        <Building className="brand-logo" size={26} />
+        <div>
+          <h2>Real Estate</h2>
+          <p>Find Your Dream Property</p>
+        </div>
       </div>
 
-      <ul className="sidebar-menu">
-
-        <NavLink to="/buyer" className="nav-link">
-          <li className="sidebar-item">
-            <FaHome className="sidebar-icon" />
-            <span>Dashboard</span>
-          </li>
-        </NavLink>
-
-        <NavLink to="/buyer/properties" className="nav-link">
-          <li className="sidebar-item">
-            <FaSearch className="sidebar-icon" />
-            <span>Browse Properties</span>
-          </li>
-        </NavLink>
-
-        <NavLink to="/buyer/saved" className="nav-link">
-          <li className="sidebar-item">
-            <FaHeart className="sidebar-icon" />
-            <span>Saved Properties</span>
-          </li>
-        </NavLink>
-
-        <NavLink to="/buyer/compare" className="nav-link">
-          <li className="sidebar-item">
-            <FaBalanceScale className="sidebar-icon" />
-            <span>Compare Properties</span>
-          </li>
-        </NavLink>
-
-        <NavLink to="/buyer/visit" className="nav-link">
-          <li className="sidebar-item">
-            <FaCalendarCheck className="sidebar-icon" />
-            <span>Schedule Visit</span>
-          </li>
-        </NavLink>
-
-        <NavLink to="/buyer/bookings" className="nav-link">
-          <li className="sidebar-item">
-            <FaClipboardCheck className="sidebar-icon" />
-            <span>My Bookings</span>
-          </li>
-        </NavLink>
-
-        <NavLink to="/buyer/inquiries" className="nav-link">
-          <li className="sidebar-item">
-            <FaComments className="sidebar-icon" />
-            <span>My Inquiries</span>
-          </li>
-        </NavLink>
-
-        <NavLink to="/buyer/notifications" className="nav-link">
-          <li className="sidebar-item">
-            <FaBell className="sidebar-icon" />
-            <span>Notifications</span>
-          </li>
-        </NavLink>
-
-        <NavLink to="/buyer/reviews" className="nav-link">
-          <li className="sidebar-item">
-            <FaStar className="sidebar-icon" />
-            <span>Reviews & Ratings</span>
-          </li>
-        </NavLink>
-
-        <NavLink to="/buyer/profile" className="nav-link">
-          <li className="sidebar-item">
-            <FaUserCircle className="sidebar-icon" />
-            <span>My Profile</span>
-          </li>
-        </NavLink>
-
-        <NavLink to="/buyer/support" className="nav-link">
-          <li className="sidebar-item">
-            <FaHeadset className="sidebar-icon" />
-            <span>Help & Support</span>
-          </li>
-        </NavLink>
-
-      </ul>
-
-      <div className="logout-section">
-        <button className="logout-btn">
-          <FaSignOutAlt />
-          Logout
-        </button>
-      </div>
-
+      {/* Navigation List */}
+      <nav className="sidebar-nav">
+        {sidebarItems.map((item, index) => (
+          <NavLink
+            key={index}
+            to={item.path}
+            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+          >
+            <span className="nav-icon">{item.icon}</span>
+            <span className="nav-text">{item.name}</span>
+            {item.badge && <span className="badge">{item.badge}</span>}
+          </NavLink>
+        ))}
+      </nav>
     </aside>
   );
 }
