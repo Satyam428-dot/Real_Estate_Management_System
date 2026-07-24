@@ -20,6 +20,10 @@ import BrowseProperties from "./pages/buyer/BrowseProperties";
 import SavedProperties from "./pages/buyer/SavedProperties";
 // import ScheduledVisits from "./pages/buyer/ScheduledVisits";
 
+// Owner Imports
+import OwnerDashboard from "./pages/owner/OwnerDashboard";
+import OwnerOverview from "./pages/owner/OwnerOverview";
+
 function App() {
   return (
     <Routes>
@@ -46,6 +50,12 @@ function App() {
         <Route path="browse" element={<BrowseProperties />} />
         <Route path="saved" element={<SavedProperties />} />
         {/* <Route path="visits" element={<ScheduledVisits />} /> */}
+      </Route>
+
+      {/* Owner Routes */}
+      <Route path="/owner" element={<OwnerDashboard />}>
+        <Route index element={<OwnerOverview />} />
+        <Route path="dashboard" element={<OwnerOverview />} />
       </Route>
     </Routes>
   );
