@@ -10,7 +10,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class RegisterDto {
-	private long id;
+//	private long id;
 	private String firstName;
 	private String lastName;
 	private String email;
