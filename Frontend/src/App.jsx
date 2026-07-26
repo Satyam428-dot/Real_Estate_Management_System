@@ -26,6 +26,7 @@ import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerOverview from "./pages/owner/OwnerOverview";
 import MyProperties from "./pages/owner/MyProperties";
 import AddProperty from "./pages/owner/AddProperty";
+import MyInquiries from "./pages/buyer/MyInquiries";
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
         <Route path="saved" element={<SavedProperties />} />
         <Route path="visits" element={<ScheduledVisits />} />
         <Route path="bookings" element={<MyBookings />} />
+        <Route path="inquiries" element={<MyInquiries />} />
       </Route>
 
       {/* Owner Routes */}
