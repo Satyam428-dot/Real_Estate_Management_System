@@ -1,0 +1,485 @@
+/* Container & Global Setup */
+.visits-page-container {
+  padding: 32px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
+}
+
+/* Page Title Header */
+.visits-header {
+  margin-bottom: 24px;
+}
+
+.visits-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.visits-header p {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Main Two-Column Layout */
+.visits-main-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 28px;
+}
+
+/* Filter Toolbar */
+.visits-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.status-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  background-color: #f1f5f9;
+}
+
+.tab-btn.active {
+  background-color: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.date-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.date-dropdown {
+  appearance: none;
+  padding: 10px 36px 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  color: #334155;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+}
+
+.dropdown-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  pointer-events: none;
+}
+
+/* Visit Cards List */
+.visits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.visit-card {
+  display: flex;
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 16px;
+  gap: 20px;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.visit-card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
+}
+
+.visit-image-wrapper {
+  width: 190px;
+  height: 120px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.visit-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Visit Main Details */
+.visit-info {
+  flex: 1.2;
+}
+
+.visit-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.visit-location {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 12px 0;
+}
+
+.visit-specs {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.visit-specs span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Date, Time & Agent Details */
+.visit-schedule-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-left: 1px solid #f1f5f9;
+  padding-left: 18px;
+}
+
+.schedule-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.schedule-icon {
+  color: #64748b;
+}
+
+.agent-item {
+  align-items: flex-start;
+  margin-top: 2px;
+}
+
+.agent-name {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.agent-title {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* Visit Actions Section */
+.visit-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 100%;
+  min-width: 140px;
+  gap: 16px;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.upcoming {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.completed {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.status-badge.cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.btn-reschedule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #bfdbfe;
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-reschedule:hover {
+  background-color: #dbeafe;
+}
+
+.btn-cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  text-decoration: underline;
+}
+
+/* Sidebar Cards Base */
+.sidebar-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.sidebar-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+}
+
+/* Calendar Widget */
+.calendar-month-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.current-month {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.month-nav-btn {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  text-align: center;
+}
+
+.day-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.day-number {
+  font-size: 12px;
+  color: #334155;
+  padding: 6px 0;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+}
+
+.day-number.muted {
+  color: #cbd5e1;
+}
+
+.day-number.has-dot::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 3px;
+  background-color: #2563eb;
+  border-radius: 50%;
+}
+
+.day-number.active-date {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.day-number.active-date::after {
+  display: none;
+}
+
+/* Summary Widget */
+.summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #475569;
+}
+
+.summary-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.summary-count {
+  font-weight: 700;
+}
+
+.total-item {
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.text-blue {
+  color: #2563eb;
+}
+.text-green {
+  color: #10b981;
+}
+.text-red {
+  color: #ef4444;
+}
+
+/* Help Widget */
+.help-card p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 16px 0;
+}
+
+.support-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.support-btn:hover {
+  background-color: #dbeafe;
+}
+
+.no-visits {
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 12px;
+  text-align: center;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+/* Responsive Styles */
+@media (max-width: 1100px) {
+  .visits-main-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .visit-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .visit-image-wrapper {
+    width: 100%;
+    height: 180px;
+  }
+
+  .visit-schedule-details {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 12px;
+    width: 100%;
+  }
+
+  .visit-actions {
+    width: 100%;
+    align-items: flex-start;
+  }
+}

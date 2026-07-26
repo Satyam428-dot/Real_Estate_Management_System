@@ -21,6 +21,7 @@ public class UserController {
 	private final UserService userService;
 
 	// ---------------------Get all users-----------------------------------
+//	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping
 	public ResponseEntity<?> getAllUsers() {
 		try {
@@ -32,6 +33,7 @@ public class UserController {
 	}
 
 	// ---------------------Get all owners-----------------------------------
+//	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping("/role/owners")
 	public ResponseEntity<?> getAllOwners() {
 		try {
@@ -43,6 +45,7 @@ public class UserController {
 	}
 
 	// ---------------------Get all Customers-----------------------------------
+//	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping("/role/customers")
 	public ResponseEntity<?> getAllCustomers() {
 		try {
@@ -54,6 +57,7 @@ public class UserController {
 	}
 
 	// ------------------------Get User By Id-------------------------------------
+//	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getUserById(@PathVariable long id) {
 		try {
