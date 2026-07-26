@@ -25,6 +25,8 @@ import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerOverview from "./pages/owner/OwnerOverview";
 import MyProperties from "./pages/owner/MyProperties";
 import AddProperty from "./pages/owner/AddProperty";
+import Tenants from "./pages/owner/Tenants";
+import RentPayments from "./pages/owner/RentPayments";
 
 function App() {
   return (
@@ -60,6 +62,8 @@ function App() {
         <Route path="dashboard" element={<OwnerOverview />} />
         <Route path="properties" element={<MyProperties />} />
         <Route path="add-property" element={<AddProperty />} />
+        <Route path="tenants" element={<Tenants />} />
+        <Route path="payments" element={<RentPayments />} />
       </Route>
     </Routes>
   );
