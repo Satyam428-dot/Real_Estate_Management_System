@@ -64,6 +64,12 @@ export default function DashboardOverview() {
 
   useEffect(() => {
     fetchStats();
+
+    const interval = setInterval(() => {
+      fetchStats();
+    }, 5000); // refresh every 5 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
   const roleData = [
