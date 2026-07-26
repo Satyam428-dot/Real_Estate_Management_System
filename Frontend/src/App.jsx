@@ -18,7 +18,7 @@ import BuyerDashboard from "./pages/buyer/BuyerDashboard";
 import BuyerOverview from "./pages/buyer/BuyerOverview"; // 👈 ADD THIS IMPORT LINE HERE
 import BrowseProperties from "./pages/buyer/BrowseProperties";
 import SavedProperties from "./pages/buyer/SavedProperties";
-// import ScheduledVisits from "./pages/buyer/ScheduledVisits";
+import ScheduledVisits from "./pages/buyer/ScheduledVisits";
 
 // Owner Imports
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
@@ -51,7 +51,7 @@ function App() {
         <Route path="dashboard" element={<BuyerOverview />} />
         <Route path="browse" element={<BrowseProperties />} />
         <Route path="saved" element={<SavedProperties />} />
-        {/* <Route path="visits" element={<ScheduledVisits />} /> */}
+        <Route path="visits" element={<ScheduledVisits />} />
       </Route>
 
       {/* Owner Routes */}
