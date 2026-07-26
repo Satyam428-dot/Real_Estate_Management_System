@@ -12,10 +12,14 @@ import Agents from "./pages/Agents";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import DashboardOverview from "./pages/admin/DashboardOverview";
 import ViewAllUsers from "./pages/admin/ViewAllUsers";
+import ApproveOwners from "./pages/admin/ApproveOwner";
+import ApproveProperties from "./pages/admin/ApproveProperties";
+import ManageListings from "./pages/admin/ManageListing";
+import ViewReports from "./pages/admin/ViewReport";
 
 // Buyer Imports
 import BuyerDashboard from "./pages/buyer/BuyerDashboard";
-import BuyerOverview from "./pages/buyer/BuyerOverview"; // 👈 ADD THIS IMPORT LINE HERE
+import BuyerOverview from "./pages/buyer/BuyerOverview";
 import BrowseProperties from "./pages/buyer/BrowseProperties";
 import SavedProperties from "./pages/buyer/SavedProperties";
 import ScheduledVisits from "./pages/buyer/ScheduledVisits";
@@ -47,6 +51,10 @@ function App() {
         <Route index element={<DashboardOverview />} />
         <Route path="dashboard" element={<DashboardOverview />} />
         <Route path="users" element={<ViewAllUsers />} />
+        <Route path="owners" element={<ApproveOwners />} />
+        <Route path="properties" element={<ApproveProperties />} />
+        <Route path="listings" element={<ManageListings />} />
+        <Route path="reports" element={<ViewReports />} />
       </Route>
 
       {/* Buyer Routes */}
