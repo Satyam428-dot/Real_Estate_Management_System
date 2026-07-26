@@ -23,6 +23,8 @@ import SavedProperties from "./pages/buyer/SavedProperties";
 // Owner Imports
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerOverview from "./pages/owner/OwnerOverview";
+import MyProperties from "./pages/owner/MyProperties";
+import AddProperty from "./pages/owner/AddProperty";
 
 function App() {
   return (
@@ -56,6 +58,8 @@ function App() {
       <Route path="/owner" element={<OwnerDashboard />}>
         <Route index element={<OwnerOverview />} />
         <Route path="dashboard" element={<OwnerOverview />} />
+        <Route path="properties" element={<MyProperties />} />
+        <Route path="add-property" element={<AddProperty />} />
       </Route>
     </Routes>
   );
