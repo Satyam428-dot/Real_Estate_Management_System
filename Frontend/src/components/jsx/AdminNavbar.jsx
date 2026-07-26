@@ -7,10 +7,6 @@ export default function AdminNavbar() {
     <header className="admin-navbar">
       <div className="admin-navbar-left">
         <div className="logo-container">
-          {/* <span className="logo-icon">🏠</span>
-          <h2 className="logo-text">
-            Property<span className="logo-blue">HQ</span>
-          </h2> */}
           <a className="navbar-brand d-flex align-items-center" href="/">
             <img
               src={home_icon}

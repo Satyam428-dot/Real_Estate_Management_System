@@ -19,6 +19,7 @@ const LoginPage = () => {
         password,
       });
 
+      console.log("Login successful:", response.data);
       const user = response.data;
       alert(`🎉 Welcome ${user.firstName}!`);
 
@@ -26,12 +27,12 @@ const LoginPage = () => {
       localStorage.setItem("loggedInUser", JSON.stringify(user));
 
       // Role-based navigation
-      if (user.userRoles === "ADMIN") {
+      if (user.userRole === "ADMIN") {
         navigate("/admin/dashboard");
-      } else if (user.userRoles === "OWNER") {
+      } else if (user.userRole === "OWNER") {
         navigate("/owner/dashboard");
       } else {
-        navigate("/customer/dashboard");
+        navigate("/buyer/dashboard");
       }
     } catch (error) {
       console.log("Error logging in");

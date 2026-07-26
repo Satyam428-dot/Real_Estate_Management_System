@@ -1,10 +1,10 @@
 package com.estate.service;
 
-import com.estate.dtos.LoginDto;
-import com.estate.entities.User;
+import com.estate.dtos.LoginRequestDto;
+import com.estate.dtos.LoginResponseDto;
 
 public interface LoginService {
 
-	User loginUser(LoginDto loginDto);
+	LoginResponseDto loginUser(LoginRequestDto loginDto);
 
 }
