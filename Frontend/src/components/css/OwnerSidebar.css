@@ -1,0 +1,102 @@
+/* ===== SIDEBAR CONTAINER ===== */
+.owner-sidebar {
+  width: 250px;
+  height: 100vh;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  background-color: #0b173c;   /* Dark Navy Blue matching reference image */
+  display: flex;
+  flex-direction: column;
+
+  overflow-y: auto;
+  z-index: 100;
+  padding: 16px 12px;
+}
+
+/* ===== LOGO SECTION ===== */
+.owner-sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 14px 24px 14px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.owner-sidebar-logo .logo-icon {
+  font-size: 24px;
+  color: #3b82f6;
+}
+
+/* ===== NAV MENU ===== */
+.owner-sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.owner-nav-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ===== MENU ITEMS ===== */
+.owner-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 12px 16px;
+  color: #94a3b8;     /* Muted blue-grey */
+  font-size: 14.5px;
+  font-weight: 500;
+  border-radius: 8px; /* Rounded pill shape */
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.owner-sidebar-item:hover {
+  background-color: #15244f;
+  color: #ffffff;
+}
+
+/* Active Link Pill - Exactly like screenshot */
+.owner-nav-link.active .owner-sidebar-item {
+  background-color: #1d4ed8; /* Vibrant Blue fill */
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.owner-sidebar-icon {
+  font-size: 18px;
+}
+
+/* ===== LOGOUT AT BOTTOM ===== */
+.owner-sidebar-logout {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 12px 16px;
+  color: #ef4444;    /* Red logout text */
+  font-size: 14.5px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: auto;
+  transition: all 0.2s ease;
+}
+
+.owner-sidebar-logout:hover {
+  background-color: #2b1720;
+}
