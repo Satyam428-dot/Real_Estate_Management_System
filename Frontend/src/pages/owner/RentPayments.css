@@ -1,0 +1,260 @@
+.payments-page {
+  max-width: 1200px;
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* ===== STAT CARDS GRID ===== */
+.payments-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.payment-stat-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.stat-icon-box {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.bg-blue {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.bg-green {
+  background-color: #f0fdf4;
+  color: #22c55e;
+}
+
+.bg-yellow {
+  background-color: #fffbeb;
+  color: #f59e0b;
+}
+
+.bg-red {
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+.stat-label {
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 0 0 2px 0;
+  font-weight: 500;
+}
+
+.stat-number {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* ===== SEARCH & FILTER ===== */
+.filter-bar {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.search-box:focus-within {
+  border-color: #3b82f6;
+}
+
+.search-icon {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #1e293b;
+  width: 100%;
+  background: transparent;
+}
+
+.filter-select {
+  padding: 10px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #475569;
+  background-color: #ffffff;
+  cursor: pointer;
+  outline: none;
+  min-width: 160px;
+}
+
+/* ===== PAYMENTS TABLE CARD ===== */
+.payments-table-card {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.payments-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13.5px;
+}
+
+.payments-table th {
+  background-color: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.payments-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.payments-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.payments-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.txn-id {
+  font-family: monospace;
+  font-weight: 600;
+  color: #475569;
+}
+
+.tenant-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.tenant-name {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.property-sub {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.amount-cell {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Status Pills */
+.status-pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+
+.pill-paid {
+  background-color: #f0fdf4;
+  color: #22c55e;
+}
+
+.pill-pending {
+  background-color: #fffbeb;
+  color: #f59e0b;
+}
+
+.pill-overdue {
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+/* Action Buttons */
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.download-btn {
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  color: #3b82f6;
+}
+
+.download-btn:hover {
+  background-color: #eff6ff;
+  border-color: #3b82f6;
+}
+
+.remind-btn {
+  border: 1px solid #fde68a;
+  background-color: #fffbeb;
+  color: #d97706;
+}
+
+.remind-btn:hover {
+  background-color: #fef3c7;
+}
+
+.empty-payments {
+  padding: 40px;
+  text-align: center;
+  color: #94a3b8;
+}
