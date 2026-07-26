@@ -24,7 +24,7 @@ export default function AdminNavbar() {
 
       <div className="admin-navbar-right">
         <FaUserCircle className="admin-profile-icon" />
-        <span className="admin-name">Admin User</span>
+        <span className="admin-name">Profile</span>
         <span className="dropdown-arrow">▼</span>
       </div>
     </header>
