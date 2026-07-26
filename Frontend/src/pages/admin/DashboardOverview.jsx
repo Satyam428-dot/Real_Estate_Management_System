@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getLoggedInUser } from "../../utils/auth";
 import axios from "axios";
 import {
   PieChart,
@@ -15,6 +16,8 @@ import {
 import "./DashboardOverview.css";
 
 export default function DashboardOverview() {
+  const loggedInUser = getLoggedInUser();
+
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalOwners: 0,
@@ -130,7 +133,9 @@ export default function DashboardOverview() {
 
   return (
     <div className="dashboard-page">
-      <h2 className="page-title">Welcome, Admin</h2>
+      <h2 className="page-title">
+        Welcome, {loggedInUser?.firstName} {loggedInUser?.lastName} 👋
+      </h2>
       <p className="page-subtitle">
         Here's what's happening across PropertyHQ today.
       </p>

@@ -1,5 +1,4 @@
 import { useNavigate, Link } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import React, { useState } from "react";
 import buildingImage from "../assets/d1.png";
 import "./css/Login.css";
@@ -28,11 +27,6 @@ const LoginPage = () => {
 
       // Store complete user object
       localStorage.setItem("loggedInUser", JSON.stringify(user));
-
-      const decoded = jwtDecode(user.token);
-
-      // Welcome message
-      alert(`🎉 Welcome ${decoded.firstName || decoded.email}!`);
 
       // Role-based navigation
       if (user.userRole === "ADMIN") {
