@@ -1,4 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import React, { useState } from "react";
 import buildingImage from "../assets/d1.png";
 import "./css/Login.css";
@@ -21,10 +22,17 @@ const LoginPage = () => {
 
       console.log("Login successful:", response.data);
       const user = response.data;
-      alert(`🎉 Welcome ${user.firstName}!`);
 
-      // Store currently logged-in user
+      // Store token separately
+      localStorage.setItem("token", user.token);
+
+      // Store complete user object
       localStorage.setItem("loggedInUser", JSON.stringify(user));
+
+      const decoded = jwtDecode(user.token);
+
+      // Welcome message
+      alert(`🎉 Welcome ${decoded.firstName || decoded.email}!`);
 
       // Role-based navigation
       if (user.userRole === "ADMIN") {
