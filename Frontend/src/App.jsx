@@ -26,6 +26,7 @@ import ScheduledVisits from "./pages/buyer/ScheduledVisits";
 import MyBookings from "./pages/buyer/MyBookings";
 import Notifications from "./pages/buyer/Notifications";
 import ReviewsAndRatings from "./pages/buyer/ReviewsAndRatings";
+import MyProfile from "./pages/buyer/MyProfile";
 
 // Owner Imports
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
@@ -70,6 +71,7 @@ function App() {
         <Route path="inquiries" element={<MyInquiries />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="reviews" element={<ReviewsAndRatings />} />
+        <Route path="profile" element={<MyProfile />} />
       </Route>
 
       {/* Owner Routes */}
