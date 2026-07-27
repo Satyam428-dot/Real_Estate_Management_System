@@ -128,7 +128,11 @@ export default function PropertyDetails() {
               className={`action-btn-outline ${isSaved ? "saved" : ""}`}
               onClick={() => setIsSaved(!isSaved)}
             >
-              <Heart size={16} fill={isSaved ? "#ef4444" : "none"} color={isSaved ? "#ef4444" : "#475569"} />
+              <Heart
+                size={16}
+                fill={isSaved ? "#ef4444" : "none"}
+                color={isSaved ? "#ef4444" : "#475569"}
+              />
               <span>{isSaved ? "Saved" : "Save"}</span>
             </button>
             <button className="action-btn-outline">
@@ -166,35 +170,45 @@ export default function PropertyDetails() {
           {/* Quick Info Spec Bar */}
           <div className="quick-specs-bar">
             <div className="spec-item">
-              <div className="spec-icon"><Bed size={20} /></div>
+              <div className="spec-icon">
+                <Bed size={20} />
+              </div>
               <div>
                 <span className="spec-value">{propertyData.beds}</span>
                 <span className="spec-label">Bedrooms</span>
               </div>
             </div>
             <div className="spec-item">
-              <div className="spec-icon"><Bath size={20} /></div>
+              <div className="spec-icon">
+                <Bath size={20} />
+              </div>
               <div>
                 <span className="spec-value">{propertyData.baths}</span>
                 <span className="spec-label">Bathrooms</span>
               </div>
             </div>
             <div className="spec-item">
-              <div className="spec-icon"><Maximize2 size={20} /></div>
+              <div className="spec-icon">
+                <Maximize2 size={20} />
+              </div>
               <div>
                 <span className="spec-value">{propertyData.sqft}</span>
                 <span className="spec-label">Built-up Area</span>
               </div>
             </div>
             <div className="spec-item">
-              <div className="spec-icon"><Car size={20} /></div>
+              <div className="spec-icon">
+                <Car size={20} />
+              </div>
               <div>
                 <span className="spec-value">{propertyData.parking}</span>
                 <span className="spec-label">Parking</span>
               </div>
             </div>
             <div className="spec-item">
-              <div className="spec-icon"><Building size={20} /></div>
+              <div className="spec-icon">
+                <Building size={20} />
+              </div>
               <div>
                 <span className="spec-value">{propertyData.propertyType}</span>
                 <span className="spec-label">Property Type</span>
@@ -204,15 +218,19 @@ export default function PropertyDetails() {
 
           {/* Navigation Tabs */}
           <div className="pdetails-tabs">
-            {["Overview", "Amenities", "Location", "Floor Plan", "Reviews (28)"].map((tab) => (
-              <button
-                key={tab}
-                className={`tab-link ${activeTab === tab.split(" ")[0] ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.split(" ")[0])}
-              >
-                {tab}
-              </button>
-            ))}
+            {["Overview", "Amenities", "Location", "Floor Plan", "Reviews (28)"].map(
+              (tab) => (
+                <button
+                  key={tab}
+                  className={`tab-link ${
+                    activeTab === tab.split(" ")[0] ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab(tab.split(" ")[0])}
+                >
+                  {tab}
+                </button>
+              )
+            )}
           </div>
 
           {/* Tab 1: Overview & About Property */}
@@ -251,7 +269,8 @@ export default function PropertyDetails() {
                 <div className="meta-row">
                   <span className="meta-key">RERA ID</span>
                   <span className="meta-val rera-val">
-                    {propertyData.reraId} <ShieldCheck size={14} className="rera-icon" />
+                    {propertyData.reraId}{" "}
+                    <ShieldCheck size={14} className="rera-icon" />
                   </span>
                 </div>
               </div>
@@ -299,9 +318,15 @@ export default function PropertyDetails() {
               <button className="btn-primary-blue">
                 <Calendar size={16} /> Schedule a Visit
               </button>
-              <button className="btn-primary-green">
+              
+              {/* Added onClick Handler for Navigation */}
+              <button
+                className="btn-primary-green"
+                onClick={() => navigate("/buyer/book-property")}
+              >
                 <Building size={16} /> Book Property
               </button>
+              
               <button className="btn-outline-blue">
                 <Phone size={16} /> Contact Owner
               </button>
@@ -314,14 +339,19 @@ export default function PropertyDetails() {
           {/* Owner Profile Card */}
           <div className="widget-card owner-widget">
             <div className="owner-profile">
-              <img src={propertyData.owner.avatar} alt={propertyData.owner.name} />
+              <img
+                src={propertyData.owner.avatar}
+                alt={propertyData.owner.name}
+              />
               <div className="owner-info">
                 <h4>{propertyData.owner.name}</h4>
                 <p>{propertyData.owner.role}</p>
                 <div className="owner-rating">
                   <Star size={13} fill="#f59e0b" color="#f59e0b" />
                   <span>{propertyData.owner.rating}</span>
-                  <span className="reviews-sub">({propertyData.owner.reviewsCount} Reviews)</span>
+                  <span className="reviews-sub">
+                    ({propertyData.owner.reviewsCount} Reviews)
+                  </span>
                 </div>
               </div>
             </div>
@@ -356,7 +386,9 @@ export default function PropertyDetails() {
                 );
               })}
             </div>
-            <button className="btn-view-all-amenities">View All Amenities &rarr;</button>
+            <button className="btn-view-all-amenities">
+              View All Amenities &rarr;
+            </button>
           </div>
         </div>
       </div>
