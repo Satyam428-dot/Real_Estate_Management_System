@@ -15,6 +15,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { favouritesApi } from "../../utils/buyerApi";
 import "./BrowseProperties.css";
 
 const API_URL = "http://localhost:8080";
@@ -182,18 +183,7 @@ export default function BrowseProperties() {
   const [selectedBhks, setSelectedBhks] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
 
-  // Persistent Saved / Favorite State via localStorage
-  const [savedProperties, setSavedProperties] = useState(() => {
-    const saved = localStorage.getItem("saved_properties");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return [];
-      }
-    }
-    return [];
-  });
+  const [savedProperties, setSavedProperties] = useState([]);
 
   // Close IntelliSense suggestions on click outside
   useEffect(() => {
@@ -204,6 +194,10 @@ export default function BrowseProperties() {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    favouritesApi.ids().then(({ data }) => setSavedProperties(data)).catch(() => setSavedProperties([]));
   }, []);
 
   // Fetch properties from backend API
@@ -258,16 +252,13 @@ export default function BrowseProperties() {
     );
   }, [locationInput, allProperties]);
 
-  // Toggle favorite saved property & persist + emit custom event
-  const toggleSaveProperty = (id) => {
-    setSavedProperties((prev) => {
-      const nextSaved = prev.includes(id)
-        ? prev.filter((item) => item !== id)
-        : [...prev, id];
-      localStorage.setItem("saved_properties", JSON.stringify(nextSaved));
+  const toggleSaveProperty = async (id) => {
+    const isSaved = savedProperties.includes(id);
+    try {
+      await (isSaved ? favouritesApi.remove(id) : favouritesApi.save(id));
+      setSavedProperties((prev) => isSaved ? prev.filter((item) => item !== id) : [...prev, id]);
       window.dispatchEvent(new Event("savedPropertiesUpdated"));
-      return nextSaved;
-    });
+    } catch { window.alert("We could not update this favourite. Please sign in again and retry."); }
   };
 
   // Toggle BHK Pill

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.estate.customExceptions.ResourceNotFoundException;
 import com.estate.dtos.ChangePasswordRequest;
 import com.estate.dtos.UserStatusRequest;
+import com.estate.dtos.ProfileUpdateRequest;
 import com.estate.entities.User;
 import com.estate.entities.UserRole;
 import com.estate.repository.UserRepository;
@@ -95,6 +96,21 @@ public class UserServiceImpl implements UserService {
 		User user = userRepo.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("The user not found"));
 		user.setStatus(request.getStatus());
+		return userRepo.save(user);
+	}
+
+	@Override
+	public User getUserByEmail(String email) {
+		return userRepo.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+	}
+
+	@Override
+	@Transactional
+	public User updateMyProfile(String email, ProfileUpdateRequest request) {
+		User user = getUserByEmail(email);
+		user.setFirstName(request.getFirstName().trim());
+		user.setLastName(request.getLastName().trim());
+		user.setPhone(request.getPhone() == null ? null : request.getPhone().trim());
 		return userRepo.save(user);
 	}
 
