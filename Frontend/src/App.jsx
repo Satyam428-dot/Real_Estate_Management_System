@@ -25,6 +25,7 @@ import SavedProperties from "./pages/buyer/SavedProperties";
 import ScheduledVisits from "./pages/buyer/ScheduledVisits";
 import MyBookings from "./pages/buyer/MyBookings";
 import Notifications from "./pages/buyer/Notifications";
+import ReviewsAndRatings from "./pages/buyer/ReviewsAndRatings";
 
 // Owner Imports
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
@@ -68,6 +69,7 @@ function App() {
         <Route path="bookings" element={<MyBookings />} />
         <Route path="inquiries" element={<MyInquiries />} />
         <Route path="notifications" element={<Notifications />} />
+        <Route path="reviews" element={<ReviewsAndRatings />} />
       </Route>
 
       {/* Owner Routes */}
