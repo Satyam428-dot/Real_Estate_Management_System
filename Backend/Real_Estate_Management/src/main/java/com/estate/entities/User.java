@@ -33,6 +33,9 @@ public class User extends BaseClass {
 	private String phone;
 	private String password;
 
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+	private boolean status = true;
+
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private UserRole userRoles;

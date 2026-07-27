@@ -16,6 +16,9 @@ import ApproveOwners from "./pages/admin/ApproveOwner";
 import ApproveProperties from "./pages/admin/ApproveProperties";
 import ManageListings from "./pages/admin/ManageListing";
 import ViewReports from "./pages/admin/ViewReport";
+import MyProfile from "./pages/admin/MyProfile";
+import ChangePassword from "./pages/admin/ChangePassword";
+import ProtectedRoute from "./components/jsx/ProtectedRoute";
 
 // Buyer Imports
 import BuyerDashboard from "./pages/buyer/BuyerDashboard";
@@ -58,7 +61,7 @@ function App() {
       <Route path="/agents" element={<Agents />} />
 
       {/* Admin Routes */}
-      <Route path="/admin" element={<AdminDashboard />}>
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={["ADMIN"]}><AdminDashboard /></ProtectedRoute>}>
         <Route index element={<DashboardOverview />} />
         <Route path="dashboard" element={<DashboardOverview />} />
         <Route path="users" element={<ViewAllUsers />} />
@@ -66,10 +69,12 @@ function App() {
         <Route path="properties" element={<ApproveProperties />} />
         <Route path="listings" element={<ManageListings />} />
         <Route path="reports" element={<ViewReports />} />
+        <Route path="profile" element={<MyProfile />} />
+        <Route path="change-password" element={<ChangePassword />} />
       </Route>
 
       {/* Buyer Routes */}
-      <Route path="/buyer" element={<BuyerDashboard />}>
+      <Route path="/buyer" element={<ProtectedRoute allowedRoles={["CUSTOMER"]}><BuyerDashboard /></ProtectedRoute>}>
         <Route index element={<BuyerOverview />} />
         <Route path="dashboard" element={<BuyerOverview />} />
         <Route path="browse" element={<BrowseProperties />} />
@@ -88,7 +93,7 @@ function App() {
       </Route>
 
       {/* Owner Routes */}
-      <Route path="/owner" element={<OwnerDashboard />}>
+      <Route path="/owner" element={<ProtectedRoute allowedRoles={["OWNER"]}><OwnerDashboard /></ProtectedRoute>}>
         <Route index element={<OwnerOverview />} />
         <Route path="dashboard" element={<OwnerOverview />} />
         <Route path="properties" element={<MyProperties />} />

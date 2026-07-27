@@ -8,11 +8,9 @@ import {
   FaUnlock,
   FaSearch,
   FaEye,
-  FaEdit,
-  FaTrash,
   FaTimes,
   FaCheck,
-  FaExclamationTriangle
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import "./ViewAllUsers.css";
 
@@ -29,8 +27,6 @@ export default function ViewAllUsers() {
 
   // Modal States
   const [selectedUser, setSelectedUser] = useState(null);
-  const [editUser, setEditUser] = useState(null);
-  const [deleteConfirmUser, setDeleteConfirmUser] = useState(null);
 
   // Toast Notification State
   const [toast, setToast] = useState(null);
@@ -74,44 +70,32 @@ export default function ViewAllUsers() {
     showToast("Filters reset successfully", "info");
   };
 
-  const handleToggleStatus = (user) => {
-    const updatedStatus = !user.disabled;
+  const handleToggleStatus = async (user) => {
+    const updatedStatus = user.status === false;
 
-    // In-memory update
-    if (user.role === "Owner") {
-      setOwners(prev => prev.map(u => u.id === user.id ? { ...u, disabled: updatedStatus } : u));
-    } else {
-      setCustomers(prev => prev.map(u => u.id === user.id ? { ...u, disabled: updatedStatus } : u));
+    try {
+      const response = await axios.put(
+        `http://localhost:8080/users/${user.id}/status`,
+        { status: updatedStatus },
+      );
+
+      const updateUsers = (users) =>
+        users.map((u) => (u.id === user.id ? response.data : u));
+
+      if (user.role === "Owner") {
+        setOwners(updateUsers);
+      } else {
+        setCustomers(updateUsers);
+      }
+
+      showToast(
+        `Account of ${user.firstName} is now ${updatedStatus ? "Active" : "Disabled"}`,
+        updatedStatus ? "success" : "info",
+      );
+    } catch (error) {
+      console.error(error);
+      showToast("Unable to update account status. Please try again.", "error");
     }
-
-    showToast(
-      `Account of ${user.firstName} is now ${updatedStatus ? "Disabled" : "Active"}`,
-      updatedStatus ? "info" : "success"
-    );
-  };
-
-  const handleDeleteUser = (user) => {
-    // In-memory delete
-    if (user.role === "Owner") {
-      setOwners(prev => prev.filter(u => u.id !== user.id));
-    } else {
-      setCustomers(prev => prev.filter(u => u.id !== user.id));
-    }
-
-    setDeleteConfirmUser(null);
-    showToast(`Account of ${user.firstName} ${user.lastName} deleted`, "error");
-  };
-
-  const handleUpdateUser = (updatedUser) => {
-    // In-memory update
-    if (updatedUser.role === "Owner") {
-      setOwners(prev => prev.map(u => u.id === updatedUser.id ? { ...u, ...updatedUser } : u));
-    } else {
-      setCustomers(prev => prev.map(u => u.id === updatedUser.id ? { ...u, ...updatedUser } : u));
-    }
-
-    setEditUser(null);
-    showToast("User profile updated successfully", "success");
   };
 
   const getInitials = (firstName, lastName) => {
@@ -159,7 +143,7 @@ export default function ViewAllUsers() {
     ...customers.map((c) => ({ ...c, role: "Customer" })),
   ];
 
-  const disabledCount = allUsers.filter((u) => u.disabled).length;
+  const disabledCount = allUsers.filter((u) => u.status === false).length;
 
   const filteredUsers = allUsers.filter((user) => {
     const matchesSearch =
@@ -177,8 +161,8 @@ export default function ViewAllUsers() {
 
     const matchesStatus =
       statusFilter === "all" ||
-      (statusFilter === "active" && !user.disabled) ||
-      (statusFilter === "disabled" && user.disabled);
+      (statusFilter === "active" && user.status !== false) ||
+      (statusFilter === "disabled" && user.status === false);
 
     return matchesSearch && matchesRole && matchesStatus;
   });
@@ -213,7 +197,7 @@ export default function ViewAllUsers() {
               </thead>
               <tbody>
                 {users.map((u) => {
-                  const isUserDisabled = u.disabled === true;
+                  const isUserDisabled = u.status === false;
                   const initials = getInitials(u.firstName, u.lastName);
                   const avatarColor = getAvatarColor(u.firstName, u.lastName);
 
@@ -255,10 +239,11 @@ export default function ViewAllUsers() {
                       </td>
                       <td>
                         <span
-                          className={`status-badge ${isUserDisabled ? "disabled" : "active"
-                            }`}
+                          className={`user-status-badge ${
+                            isUserDisabled ? "disabled" : "active"
+                          }`}
                         >
-                          <span className="status-dot"></span>
+                          <span className="user-status-dot"></span>
                           {isUserDisabled ? "Disabled" : "Active"}
                         </span>
                       </td>
@@ -277,15 +262,9 @@ export default function ViewAllUsers() {
                             <FaEye />
                           </button>
                           <button
-                            className="btn-action-icon btn-edit"
-                            title="Edit Profile"
-                            onClick={() => setEditUser(u)}
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            className={`btn-action-icon ${isUserDisabled ? "btn-enable" : "btn-disable"
-                              }`}
+                            className={`btn-action-icon ${
+                              isUserDisabled ? "btn-enable" : "btn-disable"
+                            }`}
                             title={
                               isUserDisabled
                                 ? "Enable Account"
@@ -294,13 +273,6 @@ export default function ViewAllUsers() {
                             onClick={() => handleToggleStatus(u)}
                           >
                             {isUserDisabled ? <FaUnlock /> : <FaLock />}
-                          </button>
-                          <button
-                            className="btn-action-icon btn-delete"
-                            title="Delete User"
-                            onClick={() => setDeleteConfirmUser(u)}
-                          >
-                            <FaTrash />
                           </button>
                         </div>
                       </td>
@@ -321,7 +293,8 @@ export default function ViewAllUsers() {
         <div>
           <h2 className="page-title">Users Directory</h2>
           <p className="page-subtitle">
-            Manage, verify and monitor the registered system users, roles and statuses.
+            Manage, verify and monitor the registered system users, roles and
+            statuses.
           </p>
         </div>
       </div>
@@ -367,7 +340,7 @@ export default function ViewAllUsers() {
       </div>
 
       {/* Filter Options */}
-      <div className="card filter-card border-0 shadow-sm mb-4">
+      <div className="card users-filter-card border-0 shadow-sm mb-4">
         <div className="card-body p-3 d-flex gap-3 flex-wrap align-items-center justify-content-between">
           <div className="search-wrapper">
             <FaSearch className="search-icon" />
@@ -498,10 +471,11 @@ export default function ViewAllUsers() {
                 <div className="detail-item">
                   <span className="detail-label">Account Status</span>
                   <span
-                    className={`status-badge-inline ${selectedUser.disabled ? "disabled" : "active"
-                      }`}
+                    className={`user-status-badge-inline ${
+                      selectedUser.status === false ? "disabled" : "active"
+                    }`}
                   >
-                    {selectedUser.disabled ? "Disabled" : "Active"}
+                    {selectedUser.status === false ? "Disabled" : "Active"}
                   </span>
                 </div>
                 <div className="detail-item">
@@ -525,8 +499,11 @@ export default function ViewAllUsers() {
       )}
 
       {/* Edit User Modal */}
-      {editUser && (
-        <div className="custom-modal-backdrop" onClick={() => setEditUser(null)}>
+      {false && (
+        <div
+          className="custom-modal-backdrop"
+          onClick={() => setEditUser(null)}
+        >
           <div
             className="custom-modal-content edit-modal"
             onClick={(e) => e.stopPropagation()}
@@ -619,7 +596,7 @@ export default function ViewAllUsers() {
       )}
 
       {/* Delete Confirmation Modal */}
-      {deleteConfirmUser && (
+      {false && (
         <div
           className="custom-modal-backdrop"
           onClick={() => setDeleteConfirmUser(null)}
