@@ -42,6 +42,7 @@ import Settings from "./pages/owner/Settings";
 import MyInquiries from "./pages/buyer/MyInquiries";
 import Maintenance from "./pages/owner/Maintenance";
 import Sales from "./pages/owner/Sales";
+import Reports from "./pages/owner/Reports";
 
 function App() {
   return (
@@ -96,6 +97,7 @@ function App() {
         <Route path="settings" element={<Settings />} />
         <Route path="maintenance" element={<Maintenance />} />
         <Route path="sales" element={<Sales />} />
+        <Route path="reports" element={<Reports />} />
       </Route>
     </Routes>
   );
