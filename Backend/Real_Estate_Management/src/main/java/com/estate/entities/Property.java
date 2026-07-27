@@ -40,6 +40,7 @@ import lombok.Setter;
 public class Property extends BaseClass {
 
 	@OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<PropertyImage> images = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.LAZY)

@@ -2,6 +2,7 @@ package com.estate.dtos;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.estate.entities.enums.ListingType;
 import com.estate.entities.enums.PropertyStatus;
@@ -53,6 +54,8 @@ public class PropertyResponseDTO {
     private PropertyStatus status;
 
     private Boolean blacklist;
+
+    private List<PropertyImageDTO> images;
 
     private LocalDateTime createdAt;
 

@@ -21,9 +21,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PropertyRequestDTO {
 
-    @NotNull(message = "Owner Id is required")
-    private Long ownerId;
-
     @NotBlank(message = "Title is required")
     private String title;
 

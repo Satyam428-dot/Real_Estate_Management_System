@@ -29,6 +29,9 @@ public class PropertyImage extends BaseClass {
 	@Column(name = "image_url", nullable = false)
 	private String imageUrl;
 
+	@Column(name = "public_id", nullable = false, unique = true)
+	private String publicId;
+
 	@Column(name = "is_main")
 	private Boolean isMain = false;
 
@@ -37,7 +40,7 @@ public class PropertyImage extends BaseClass {
 	private LocalDateTime createdAt;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "property_id")
+	@JoinColumn(name = "property_id", nullable = false)
 	private Property property;
 
 }
