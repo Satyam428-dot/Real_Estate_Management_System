@@ -5,12 +5,12 @@ import java.util.List;
 import com.estate.dtos.PropertyRequestDTO;
 import com.estate.dtos.PropertyResponseDTO;
 import com.estate.dtos.PropertyUpdateDTO;
-import com.estate.entities.Property;
+import org.springframework.web.multipart.MultipartFile;
 
 
 public interface PropertyService {
 
-    Property addProperty(PropertyRequestDTO dto);
+    PropertyResponseDTO addProperty(PropertyRequestDTO dto, String ownerEmail);
 
     List<PropertyResponseDTO> listAllProperty();
 
@@ -19,5 +19,9 @@ public interface PropertyService {
 	PropertyResponseDTO updateProperty(Long id, PropertyUpdateDTO dto);
 
 	void deleteProperty(Long id);
+
+	PropertyResponseDTO uploadImages(Long id, java.util.List<MultipartFile> images, String ownerEmail);
+
+	List<PropertyResponseDTO> listAvailableProperties();
 
 }
