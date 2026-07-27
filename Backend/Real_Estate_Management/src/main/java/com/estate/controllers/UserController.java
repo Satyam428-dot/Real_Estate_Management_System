@@ -6,9 +6,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
+import com.estate.dtos.ChangePasswordRequest;
+import com.estate.dtos.UserStatusRequest;
 import com.estate.entities.User;
 import com.estate.service.UserService;
 
@@ -63,6 +68,39 @@ public class UserController {
 		try {
 			User user = userService.getUserById(id);
 			return ResponseEntity.ok(user);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		}
+	}
+
+	// ------------------------Update Admin-------------------------------------
+//	@PreAuthorize("hasAuthority('ADMIN')")
+	@PutMapping("/admin/{id}")
+	public ResponseEntity<?> updateAdmin(@PathVariable long id, @RequestBody User user) {
+		try {
+			User updatedAdmin = userService.updateAdmin(id, user);
+			return ResponseEntity.ok(updatedAdmin);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		}
+	}
+
+	// ------------------------Change password-------------------------------------
+	// @PreAuthorize("hasAuthority('ADMIN')")
+
+	@PutMapping("/change-password")
+	public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+
+		userService.changePassword(request);
+
+		return ResponseEntity.ok("Password changed successfully");
+	}
+
+	@PutMapping("/{id}/status")
+	public ResponseEntity<?> updateUserStatus(@PathVariable long id,
+			@Valid @RequestBody UserStatusRequest request) {
+		try {
+			return ResponseEntity.ok(userService.updateUserStatus(id, request));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 		}
