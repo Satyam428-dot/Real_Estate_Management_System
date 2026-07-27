@@ -37,13 +37,17 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -2px rgba(0, 0, 0, 0.05);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
   border-color: #cbd5e1;
 }
 
@@ -97,7 +101,9 @@
 }
 
 /* ---------------- Filter and Search Bar ---------------- */
-.filter-card {
+.users-filter-card {
+  position: static !important;
+  top: auto !important;
   border-radius: 16px !important;
   border: 1px solid #e2e8f0 !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
@@ -171,15 +177,23 @@
 .tabs-container {
   display: flex;
   gap: 8px;
-  border-bottom: 2px solid #e2e8f0;
-  padding-bottom: 2px;
+  align-items: center;
+  min-height: 54px;
+  padding: 6px;
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.03);
 }
 
 .tab-btn {
-  background: none;
-  border: none;
+  flex: 0 0 auto;
+  background: transparent;
+  border: 1px solid transparent;
   outline: none;
-  padding: 12px 20px;
+  padding: 9px 14px;
+  border-radius: 9px;
   font-size: 15px;
   font-weight: 600;
   color: #64748b;
@@ -192,22 +206,18 @@
 }
 
 .tab-btn:hover {
-  color: #0f172a;
+  color: #1d4ed8;
+  background: #eff6ff;
 }
 
 .tab-btn.active {
-  color: #2563eb;
+  color: #ffffff;
+  background: #2563eb;
+  box-shadow: 0 3px 6px rgba(37, 99, 235, 0.2);
 }
 
 .tab-btn.active::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: #2563eb;
-  border-radius: 3px 3px 0 0;
+  display: none;
 }
 
 .tab-count {
@@ -221,8 +231,8 @@
 }
 
 .tab-btn.active .tab-count {
-  background: #dbeafe;
-  color: #1e40af;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
 }
 
 /* ---------------- User Table ---------------- */
@@ -346,7 +356,7 @@
   padding: 6px 14px;
 }
 
-.status-badge {
+.user-status-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -356,26 +366,26 @@
   font-weight: 600;
 }
 
-.status-badge.active {
+.user-status-badge.active {
   background: #d1fae5;
   color: #065f46;
 }
 
-.status-badge.active .status-dot {
+.user-status-badge.active .user-status-dot {
   background: #10b981;
   box-shadow: 0 0 8px #10b981;
 }
 
-.status-badge.disabled {
+.user-status-badge.disabled {
   background: #fee2e2;
   color: #991b1b;
 }
 
-.status-badge.disabled .status-dot {
+.user-status-badge.disabled .user-status-dot {
   background: #ef4444;
 }
 
-.status-dot {
+.user-status-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -456,6 +466,8 @@
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid #e2e8f0;
+  min-height: 320px;
+  padding: 48px 24px !important;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -463,8 +475,11 @@
 }
 
 .empty-icon {
-  font-size: 56px;
-  color: #94a3b8 !important;
+  padding: 16px;
+  color: #2563eb !important;
+  background: #eff6ff;
+  border-radius: 14px;
+  font-size: 42px;
 }
 
 .empty-table-state h4 {
@@ -506,7 +521,9 @@
 .custom-modal-content {
   background: #ffffff;
   border-radius: 20px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   width: 100%;
   max-width: 480px;
   overflow: hidden;
@@ -618,7 +635,7 @@
   color: #1e293b;
 }
 
-.status-badge-inline {
+.user-status-badge-inline {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 6px;
@@ -626,12 +643,12 @@
   font-weight: 700;
 }
 
-.status-badge-inline.active {
+.user-status-badge-inline.active {
   background: #d1fae5;
   color: #065f46;
 }
 
-.status-badge-inline.disabled {
+.user-status-badge-inline.disabled {
   background: #fee2e2;
   color: #991b1b;
 }
@@ -685,7 +702,9 @@
   gap: 12px;
   padding: 14px 20px;
   border-radius: 12px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
   color: #ffffff;
   font-weight: 600;
   font-size: 14px;
