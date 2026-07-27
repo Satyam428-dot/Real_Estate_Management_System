@@ -670,3 +670,140 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Sidebar Action Buttons Base Styles & Layout */
+.action-btns-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.action-btns-group button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* 4 buttons */
+.btn-primary-blue {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.btn-primary-blue:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary-blue:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+}
+
+
+.btn-primary-green {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.btn-primary-green:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+}
+
+.btn-primary-green:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+
+
+
+.btn-outline-blue {
+  background-color: #ffffff;
+  color: #2563eb;
+  border: 1.5px solid #2563eb !important;
+}
+
+.btn-outline-blue:hover {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border-color: #1d4ed8 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.btn-outline-blue:active {
+  transform: translateY(0);
+  background-color: #dbeafe;
+}
+
+
+
+.btn-whatsapp {
+  background-color: #ffffff;
+  color: #16a34a;
+  border: 1.5px solid #16a34a !important;
+}
+
+.btn-whatsapp:hover {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border-color: #15803d !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+}
+
+.btn-whatsapp:active {
+  transform: translateY(0);
+  background-color: #dcfce7;
+}
+
+
+/*whatsapp*/
+/* WhatsApp Button matching Contact Owner layout */
+.btn-whatsapp {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background-color: #ffffff;
+  color: #16a34a;
+  border: 1.5px solid #16a34a;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover Effect: Elevation + Subtle Green Tint Shadow */
+.btn-whatsapp:hover {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border-color: #15803d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.18);
+}
+
+/* Click Press Animation */
+.btn-whatsapp:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
