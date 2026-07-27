@@ -149,6 +149,13 @@
   color: #94a3b8;
 }
 
+.prop-card-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
 /* Status badge on thumbnail */
 .prop-card-badge {
   position: absolute;
