@@ -29,7 +29,7 @@ import ScheduledVisits from "./pages/buyer/ScheduledVisits";
 import MyBookings from "./pages/buyer/MyBookings";
 import Notifications from "./pages/buyer/Notifications";
 import ReviewsAndRatings from "./pages/buyer/ReviewsAndRatings";
-import MyProfile from "./pages/buyer/MyProfile";
+import BuyerMyProfile from "./pages/buyer/MyProfile";
 
 import PropertyDetails from "./pages/buyer/PropertyDetails"; 
 import BookProperty from "./pages/buyer/BookProperty";
@@ -84,7 +84,7 @@ function App() {
         <Route path="inquiries" element={<MyInquiries />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="reviews" element={<ReviewsAndRatings />} />
-        <Route path="profile" element={<MyProfile />} />
+        <Route path="profile" element={<BuyerMyProfile />} />
 
         <Route path="property-details" element={<PropertyDetails />} />
         <Route path="book-property" element={<BookProperty />} />
