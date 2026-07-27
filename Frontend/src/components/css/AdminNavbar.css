@@ -1,63 +1,123 @@
 .admin-navbar {
-  height: 70px;
-  width: 100%;
-  background-color: white;
-  border-bottom: 1px solid #e5e7eb;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  padding: 0 30px;
   position: fixed;
   top: 0;
   z-index: 1000;
+  display: flex;
+  width: 100%;
+  height: 70px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
-.admin-navbar-left {
+.admin-navbar-left,
+.admin-navbar-right,
+.logo-container {
   display: flex;
   align-items: center;
 }
 
 .logo-container {
-  display: flex;
-  align-items: center;
   gap: 10px;
-}
-
-.logo-icon {
-  font-size: 32px;
 }
 
 .logo-text {
+  color: #1f2937;
   font-size: 28px;
   font-weight: 700;
-  color: #1f2937;
 }
 
-.logo-blue {
-  color: #1e88e5;
+.logo-blue,
+.logo-hq {
+  color: #2563eb;
 }
 
-.admin-navbar-right {
+.profile-wrapper {
+  position: relative;
+}
+
+.admin-profile-trigger {
   display: flex;
+  min-height: 48px;
   align-items: center;
   gap: 10px;
+  padding: 6px 10px 6px 6px;
+  color: #0f172a;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
   cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
-.admin-profile-icon {
-  font-size: 35px;
-  color: #1e88e5;
+.admin-profile-trigger:hover,
+.admin-profile-trigger:focus-visible {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  outline: none;
+}
+
+.admin-profile-avatar {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  color: #2563eb;
+  background: #eff6ff;
+  border-radius: 10px;
+  font-size: 25px;
+}
+
+.admin-profile-details {
+  display: flex;
+  min-width: 78px;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.25;
 }
 
 .admin-name {
-  font-size: 16px;
+  max-width: 130px;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-role {
+  color: #64748b;
+  font-size: 12px;
   font-weight: 500;
-  color: #333;
 }
 
 .dropdown-arrow {
-  font-size: 12px;
-  color: #555;
+  color: #64748b;
+  font-size: 15px;
+  transition: transform 0.2s ease;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 576px) {
+  .admin-navbar {
+    padding: 0 16px;
+  }
+
+  .admin-profile-details,
+  .dropdown-arrow {
+    display: none;
+  }
+
+  .admin-profile-trigger {
+    padding: 4px;
+  }
 }
