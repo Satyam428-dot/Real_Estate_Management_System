@@ -35,6 +35,7 @@ import AddProperty from "./pages/owner/AddProperty";
 import Tenants from "./pages/owner/Tenants";
 import RentPayments from "./pages/owner/RentPayments";
 import MyInquiries from "./pages/buyer/MyInquiries";
+import Maintenance from "./pages/owner/Maintenance";
 
 function App() {
   return (
@@ -80,6 +81,7 @@ function App() {
         <Route path="add-property" element={<AddProperty />} />
         <Route path="tenants" element={<Tenants />} />
         <Route path="payments" element={<RentPayments />} />
+        <Route path="maintenance" element={<Maintenance />} />
       </Route>
     </Routes>
   );
