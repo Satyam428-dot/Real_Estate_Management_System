@@ -193,7 +193,6 @@ export default function BuyerOverview() {
         </div>
       </section>
 
-<<<<<<< HEAD
       {/* Search Properties Card matching image UI */}
       <section className="dash-search-card">
         <h3 className="dash-search-title">Search Properties</h3>
@@ -300,58 +299,6 @@ export default function BuyerOverview() {
                 {chip}
               </button>
             ))}
-=======
-      <section className="search-section">
-        <h3>Search Properties</h3>
-        <div className="filter-grid">
-          <div className="filter-group">
-            <label>Location</label>
-            <select>
-              <option value="">All locations</option>
-              <option value="pune">Pune</option>
-              <option value="mumbai">Mumbai</option>
-              <option value="bangalore">Bangalore</option>
-              <option value="delhi">Delhi</option>
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label>Property Type</label>
-            <select>
-              <option value="">All Types</option>
-              <option value="apartment">Apartment</option>
-              <option value="villa">Villa</option>
-              <option value="house">Independent House</option>
-              <option value="plot">Plot</option>
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label>Purpose</label>
-            <select>
-              <option value="">All Purpose</option>
-              <option value="RENT">For Rent</option>
-              <option value="SALE">For Sale</option>
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label>Price Range</label>
-            <select>
-              <option value="">Any Price</option>
-              <option value="0-50">Under ₹ 50 Lakhs</option>
-              <option value="50-100">₹ 50 Lakhs - ₹ 1 Crore</option>
-              <option value="100+">Above ₹ 1 Crore</option>
-            </select>
-          </div>
-
-          <div className="filter-group filter-btn-group">
-            <label className="btn-label-placeholder">&nbsp;</label>
-            <button className="search-submit-btn">
-              <Search size={18} />
-              <span>Search</span>
-            </button>
->>>>>>> 5461211 (fixed bugs)
           </div>
         </div>
       </section>
