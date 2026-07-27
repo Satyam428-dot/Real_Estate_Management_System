@@ -37,6 +37,7 @@ import RentPayments from "./pages/owner/RentPayments";
 import MyInquiries from "./pages/buyer/MyInquiries";
 import Maintenance from "./pages/owner/Maintenance";
 import Sales from "./pages/owner/Sales";
+import Reports from "./pages/owner/Reports";
 
 function App() {
   return (
@@ -84,6 +85,7 @@ function App() {
         <Route path="payments" element={<RentPayments />} />
         <Route path="maintenance" element={<Maintenance />} />
         <Route path="sales" element={<Sales />} />
+        <Route path="reports" element={<Reports />} />
       </Route>
     </Routes>
   );
