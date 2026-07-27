@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaUser,
   FaEnvelope,
@@ -31,6 +31,24 @@ export default function Profile() {
     state: "Maharashtra",
     pinCode: "400050",
   });
+
+  // Load logged-in user from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      if (savedUser && (savedUser.firstName || savedUser.email)) {
+        setProfile((prev) => ({
+          ...prev,
+          firstName: savedUser.firstName || prev.firstName,
+          lastName: savedUser.lastName || prev.lastName,
+          email: savedUser.email || prev.email,
+          phone: savedUser.phone || prev.phone,
+        }));
+      }
+    } catch (e) {
+      console.warn("Could not parse user from localStorage", e);
+    }
+  }, []);
 
   // Verification State (Matches OwnerVerification backend entity)
   const [verification, setVerification] = useState({
@@ -78,6 +96,9 @@ export default function Profile() {
   const handleSave = (e) => {
     e.preventDefault();
     setSavedSuccess(true);
+    // Update local storage user
+    const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    localStorage.setItem("user", JSON.stringify({ ...savedUser, ...profile }));
     setTimeout(() => setSavedSuccess(false), 3000);
   };
 
@@ -127,7 +148,7 @@ export default function Profile() {
 
           <div className="verification-badge">
             <FaShieldAlt className="shield-icon" />
-            <span>Verified Owner (ID Proof Approved)</span>
+            <span>Verified Owner</span>
           </div>
 
           <div className="sidebar-info-list">
@@ -141,7 +162,7 @@ export default function Profile() {
             </div>
             <div className="info-item">
               <FaBuilding className="info-icon" />
-              <span>12 Managed Properties</span>
+              <span>Managed Properties</span>
             </div>
           </div>
         </div>
