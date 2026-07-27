@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.estate.dtos.ChangePasswordRequest;
 import com.estate.dtos.UserStatusRequest;
+import com.estate.dtos.ProfileUpdateRequest;
 import com.estate.entities.User;
 
 public interface UserService {
@@ -21,5 +22,9 @@ public interface UserService {
 	void changePassword(ChangePasswordRequest request);
 
 	User updateUserStatus(long id, UserStatusRequest request);
+
+	User getUserByEmail(String email);
+
+	User updateMyProfile(String email, ProfileUpdateRequest request);
 
 }

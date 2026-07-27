@@ -87,6 +87,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/properties", "/properties/*/images").authenticated()
 						.requestMatchers(HttpMethod.PUT, "/properties/**").authenticated()
 						.requestMatchers(HttpMethod.DELETE, "/properties/**").authenticated()
+						.requestMatchers("/favourites/**", "/users/me", "/users/change-password").authenticated()
 						.anyRequest().permitAll());
 
 		return http.build();
