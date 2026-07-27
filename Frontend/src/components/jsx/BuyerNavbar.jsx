@@ -1,8 +1,18 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Search, Bell, MessageSquare, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { getLoggedInUser } from "../../utils/auth";
 import "../css/BuyerNavbar.css";
 
 export default function BuyerNavbar() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(() => ({ ...getLoggedInUser(), ...JSON.parse(localStorage.getItem("buyer_profile") || "{}") }));
+  useEffect(() => {
+    const refresh = () => setUser({ ...getLoggedInUser(), ...JSON.parse(localStorage.getItem("buyer_profile") || "{}") });
+    window.addEventListener("profileUpdated", refresh);
+    return () => window.removeEventListener("profileUpdated", refresh);
+  }, []);
+  const name = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "My Profile";
   return (
     <header className="top-header">
       {/* Search Input Bar */}
@@ -23,18 +33,14 @@ export default function BuyerNavbar() {
           <span className="dot-badge red">3</span>
         </div>
 
-        <div className="user-profile">
-          <img
-            src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80"
-            alt="Abhishek Dhoran"
-            className="avatar"
-          />
+        <button className="user-profile" onClick={() => navigate("/buyer/profile")} aria-label="Open my profile">
+          <span className="avatar avatar-initials">{name.charAt(0).toUpperCase()}</span>
           <div className="user-info">
-            <h4>Abhishek Dhoran</h4>
+            <h4>{name}</h4>
             <span>Customer</span>
           </div>
           <ChevronDown size={16} />
-        </div>
+        </button>
       </div>
     </header>
   );

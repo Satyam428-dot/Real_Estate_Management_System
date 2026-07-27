@@ -10,10 +10,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
 import jakarta.validation.Valid;
 
 import com.estate.dtos.ChangePasswordRequest;
 import com.estate.dtos.UserStatusRequest;
+import com.estate.dtos.ProfileUpdateRequest;
+import com.estate.dtos.UserProfileResponse;
 import com.estate.entities.User;
 import com.estate.service.UserService;
 
@@ -104,5 +107,23 @@ public class UserController {
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 		}
+	}
+
+	@GetMapping("/me")
+	public ResponseEntity<?> getMyProfile(Authentication authentication) {
+		try {
+			return ResponseEntity.ok(toProfileResponse(userService.getUserByEmail(authentication.getName())));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		}
+	}
+
+	@PutMapping("/me")
+	public ResponseEntity<?> updateMyProfile(Authentication authentication, @Valid @RequestBody ProfileUpdateRequest request) {
+		return ResponseEntity.ok(toProfileResponse(userService.updateMyProfile(authentication.getName(), request)));
+	}
+
+	private UserProfileResponse toProfileResponse(User user) {
+		return new UserProfileResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPhone(), user.getCreatedOn());
 	}
 }

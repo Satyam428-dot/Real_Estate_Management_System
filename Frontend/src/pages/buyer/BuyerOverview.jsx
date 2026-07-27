@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
+import { favouritesApi } from "../../utils/buyerApi";
 import {
   Building,
   Heart,
@@ -48,20 +49,7 @@ export default function BuyerOverview() {
       )
       .finally(() => setLoading(false));
 
-    // Function to calculate live saved properties count from localStorage
-    const updateSavedCount = () => {
-      const saved = localStorage.getItem("saved_properties");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setSavedCount(Array.isArray(parsed) ? parsed.length : 0);
-        } catch (e) {
-          setSavedCount(0);
-        }
-      } else {
-        setSavedCount(0);
-      }
-    };
+    const updateSavedCount = () => favouritesApi.ids().then(({ data }) => setSavedCount(data.length)).catch(() => setSavedCount(0));
 
     updateSavedCount();
     window.addEventListener("savedPropertiesUpdated", updateSavedCount);
@@ -116,13 +104,7 @@ export default function BuyerOverview() {
   const filteredProperties = useMemo(() => {
     return properties.filter((prop) => {
       // Location filter
-      if (
-        activeSearch.location !== "ALL" &&
-        !prop.city?.toLowerCase().includes("pune") &&
-        !prop.address?.toLowerCase().includes(activeSearch.location.toLowerCase())
-      ) {
-        // match city / address
-      }
+      if (activeSearch.location !== "ALL" && !`${prop.city || ""} ${prop.address || ""}`.toLowerCase().includes(activeSearch.location.toLowerCase().split(",")[0])) return false;
 
       // Property Type filter
       if (
