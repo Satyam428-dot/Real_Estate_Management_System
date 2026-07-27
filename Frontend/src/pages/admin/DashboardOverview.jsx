@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getLoggedInUser } from "../../utils/auth";
 import axios from "axios";
 import {
@@ -28,19 +28,36 @@ export default function DashboardOverview() {
     activeListings: 0,
     disabledUsers: 0,
   });
+
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Tracks whether the component is still mounted, so we don't set state
+  // after unmount when the 60s polling interval resolves late.
+  const isMounted = useRef(true);
+
+  // TODO: property-approval endpoint isn't implemented on the backend yet.
+  // Hardcoded for now — replace with a real fetched value once
+  // GET /properties/pending (or whatever route you build) exists.
+  const HARDCODED_PENDING_PROPERTIES = 0;
 
   const fetchStats = async () => {
     try {
+      setError(null);
       setLoading(true);
-      const [owners, customers, properties, pendingOwners, pendingProps] =
-        await Promise.all([
-          axios.get("http://localhost:8080/users/role/owners"),
-          axios.get("http://localhost:8080/users/role/customers"),
-          axios.get("http://localhost:8080/properties"),
-          axios.get("http://localhost:8080/owners/pending"),
-          axios.get("http://localhost:8080/properties/pending"),
-        ]);
+
+      const [owners, customers, properties, pendingOwners] = await Promise.all([
+        // BACKEND ROUTE: GET all users with role = OWNER
+        axios.get("http://localhost:8080/users/role/owners"),
+        // BACKEND ROUTE: GET all users with role = CUSTOMER
+        axios.get("http://localhost:8080/users/role/customers"),
+        // BACKEND ROUTE: GET all properties
+        axios.get("http://localhost:8080/properties"),
+        // BACKEND ROUTE: GET owners awaiting approval
+        axios.get("http://localhost:8080/verify/owners"),
+      ]);
+
+      if (!isMounted.current) return;
 
       setStats({
         totalUsers: owners.data.length + customers.data.length,
@@ -48,28 +65,37 @@ export default function DashboardOverview() {
         totalCustomers: customers.data.length,
         totalProperties: properties.data.length,
         pendingOwners: pendingOwners.data.length,
-        pendingProperties: pendingProps.data.length,
+        pendingProperties: HARDCODED_PENDING_PROPERTIES,
         activeListings: properties.data.filter((p) => p.status === "ACTIVE")
           .length,
         disabledUsers: [...owners.data, ...customers.data].filter(
-          (u) => u.disabled,
+          (u) => u.status === false,
         ).length,
       });
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.error(err);
+      if (isMounted.current) {
+        setError(
+          "Couldn't load dashboard data. Check that the backend is running and try again.",
+        );
+      }
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
 
   useEffect(() => {
+    isMounted.current = true;
     fetchStats();
 
     const interval = setInterval(() => {
       fetchStats();
-    }, 5000); // refresh every 5 seconds
+    }, 60000); // refresh every 60 seconds
 
-    return () => clearInterval(interval);
+    return () => {
+      isMounted.current = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const roleData = [
@@ -83,6 +109,12 @@ export default function DashboardOverview() {
     { name: "Pending Properties", value: stats.pendingProperties },
     { name: "Active Listings", value: stats.activeListings },
   ];
+
+  const hasRoleData = stats.totalOwners > 0 || stats.totalCustomers > 0;
+  const hasApprovalData =
+    stats.pendingOwners > 0 ||
+    stats.pendingProperties > 0 ||
+    stats.activeListings > 0;
 
   const cards = [
     {
@@ -139,18 +171,43 @@ export default function DashboardOverview() {
 
   return (
     <div className="dashboard-page">
-      <h2 className="page-title">
-        Welcome, {loggedInUser?.firstName} {loggedInUser?.lastName} 👋
-      </h2>
-      <p className="page-subtitle">
-        Here's what's happening across PropertyHQ today.
-      </p>
+      <div className="page-header">
+        <div>
+          <h2 className="page-title">
+            Welcome, {loggedInUser?.firstName} {loggedInUser?.lastName} 👋
+          </h2>
+          <p className="page-subtitle">
+            Here's what's happening across PropertyHQ today.
+          </p>
+        </div>
+        <button
+          className="refresh-btn"
+          onClick={fetchStats}
+          disabled={loading}
+          aria-label="Refresh dashboard data"
+        >
+          <span className={loading ? "refresh-icon spinning" : "refresh-icon"}>
+            ⟳
+          </span>
+          {loading ? "Refreshing…" : "Refresh"}
+        </button>
+      </div>
+
+      {error && (
+        <div className="error-banner" role="alert">
+          <span>⚠️</span>
+          <span>{error}</span>
+          <button className="error-retry" onClick={fetchStats}>
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Stat cards */}
       <div className="stats-grid">
         {cards.map((c) => (
           <div
-            className="stat-card glass-card"
+            className={`stat-card glass-card${loading ? " is-loading" : ""}`}
             key={c.label}
             style={{ borderTopColor: c.accent }}
           >
@@ -161,10 +218,16 @@ export default function DashboardOverview() {
               {c.icon}
             </div>
             <div className="stat-info">
-              <span className="stat-value">{loading ? "…" : c.value}</span>
+              {loading ? (
+                <span className="stat-skeleton" />
+              ) : (
+                <span className="stat-value">{c.value}</span>
+              )}
               <span className="stat-label">{c.label}</span>
             </div>
-            {c.warn && <span className="stat-badge">Needs Action</span>}
+            {!loading && c.warn && (
+              <span className="stat-badge">Needs Action</span>
+            )}
           </div>
         ))}
       </div>
@@ -173,59 +236,70 @@ export default function DashboardOverview() {
       <div className="charts-row">
         <div className="glass-card chart-card">
           <h3 className="card-title">User Base Breakdown</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie
-                data={roleData}
-                dataKey="value"
-                nameKey="name"
-                innerRadius={60}
-                outerRadius={90}
-                paddingAngle={4}
-              >
-                {roleData.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+          {loading ? (
+            <div className="chart-placeholder">Loading chart…</div>
+          ) : hasRoleData ? (
+            <>
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie
+                    data={roleData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={4}
+                  >
+                    {roleData.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="legend-row">
+                {roleData.map((r, i) => (
+                  <span key={r.name} className="legend-item">
+                    <span className="dot" style={{ background: COLORS[i] }} />
+                    {r.name}: {r.value}
+                  </span>
                 ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="legend-row">
-            {roleData.map((r, i) => (
-              <span key={r.name} className="legend-item">
-                <span className="dot" style={{ background: COLORS[i] }} />
-                {r.name}: {r.value}
-              </span>
-            ))}
-          </div>
+              </div>
+            </>
+          ) : (
+            <div className="chart-placeholder">No user data yet.</div>
+          )}
         </div>
 
         <div className="glass-card chart-card">
-          <h3 className="card-title">Approvals & Listings Snapshot</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={approvalData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="value" fill="#2d6cdf" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <h3 className="card-title">Approvals &amp; Listings Snapshot</h3>
+          {loading ? (
+            <div className="chart-placeholder">Loading chart…</div>
+          ) : hasApprovalData ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={approvalData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#2d6cdf" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="chart-placeholder">Nothing to show yet.</div>
+          )}
         </div>
       </div>
 
       {/* Quick actions */}
       <div className="glass-card quick-actions">
         <h3 className="card-title">Quick Actions</h3>
-        <div className="action-buttons">
-          <button className="qa-btn qa-primary">
-            👤 Review Pending Owners
-          </button>
-          <button className="qa-btn qa-primary">
-            🏢 Review Pending Properties
-          </button>
-          <button className="qa-btn qa-secondary">📊 View Full Reports</button>
-          <button className="qa-btn qa-secondary">👥 Manage All Users</button>
+        <div className="quick-action-buttons">
+          {/* BACKEND / ROUTING: wire these up to your router / pending-approvals views */}
+          <button className="qa-btn">👤 Review Pending Owners</button>
+          <button className="qa-btn">🏢 Review Pending Properties</button>
+          <button className="qa-btn">📊 View Full Reports</button>
+          <button className="qa-btn">👥 Manage All Users</button>
         </div>
       </div>
     </div>
