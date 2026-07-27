@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { Link } from "react-router-dom";
 import { Search, Bell, MessageSquare, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getLoggedInUser } from "../../utils/auth";
@@ -27,21 +28,25 @@ export default function BuyerNavbar() {
           <Bell size={20} />
           <span className="dot-badge red">5</span>
         </div>
-        
+
         <div className="icon-badge">
           <MessageSquare size={20} />
           <span className="dot-badge red">3</span>
         </div>
 
-        <button className="user-profile" onClick={() => navigate("/buyer/profile")} aria-label="Open my profile">
-          <span className="avatar avatar-initials">{name.charAt(0).toUpperCase()}</span>
+        <Link to="/buyer/profile" className="user-profile" style={{ textDecoration: "none", cursor: "pointer" }}>
+          <img
+            src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80"
+            alt="Abhishek Dhoran"
+            className="avatar"
+          />
           <div className="user-info">
             <h4>{name}</h4>
             <span>Customer</span>
           </div>
           <ChevronDown size={16} />
-        </button>
-      </div>
-    </header>
+        </Link>
+      </div >
+    </header >
   );
 }

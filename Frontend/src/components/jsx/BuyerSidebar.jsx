@@ -26,7 +26,7 @@ export default function BuyerSidebar() {
     { name: "My Inquiries", path: "/buyer/inquiries", icon: <MessageSquare size={18} /> },
     { name: "Notifications", path: "/buyer/notifications", icon: <Bell size={18} />, badge: 5 },
     { name: "Reviews & Ratings", path: "/buyer/reviews", icon: <Star size={18} /> },
-    
+    { name: "My Profile", path: "/buyer/profile", icon: <User size={18} /> },
   ];
 
   return (
