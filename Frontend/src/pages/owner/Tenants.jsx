@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FaSearch,
   FaUser,
@@ -15,8 +15,12 @@ import {
 import "./Tenants.css";
 
 export default function Tenants() {
+  const [tenants, setTenants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
 
-  // Mock Tenant Data
+  // Fallback Mock Data
   const mockTenants = [
     {
       id: 1,
@@ -24,13 +28,12 @@ export default function Tenants() {
       email: "rahul.sharma@example.com",
       phone: "+91 98765 43210",
       property: "Modern Apartment in Downtown (2BHK)",
-      location: "Mumbai",
       rent: "₹25,000 / mo",
       deposit: "₹75,000",
-      leaseStart: "01 Jan 2025",
-      leaseEnd: "31 Dec 2025",
+      leaseStart: "2025-01-01",
+      leaseEnd: "2025-12-31",
       paymentStatus: "Paid",
-      tenantStatus: "Active",
+      tenantStatus: "ACTIVE",
     },
     {
       id: 2,
@@ -38,13 +41,12 @@ export default function Tenants() {
       email: "priya.mehta@example.com",
       phone: "+91 98123 45678",
       property: "Studio Apartment (1RK)",
-      location: "Bangalore",
       rent: "₹12,000 / mo",
       deposit: "₹36,000",
-      leaseStart: "15 Mar 2024",
-      leaseEnd: "14 Mar 2025",
+      leaseStart: "2024-03-15",
+      leaseEnd: "2025-03-14",
       paymentStatus: "Pending",
-      tenantStatus: "Lease Expiring Soon",
+      tenantStatus: "ACTIVE",
     },
     {
       id: 3,
@@ -52,35 +54,62 @@ export default function Tenants() {
       email: "amit.verma@example.com",
       phone: "+91 97654 32109",
       property: "Cozy 3BHK House in Suburbs",
-      location: "Pune",
       rent: "₹18,000 / mo",
       deposit: "₹54,000",
-      leaseStart: "01 Jun 2024",
-      leaseEnd: "31 May 2025",
+      leaseStart: "2024-06-01",
+      leaseEnd: "2025-05-31",
       paymentStatus: "Overdue",
-      tenantStatus: "Active",
-    },
-    {
-      id: 4,
-      name: "Sneha Patel",
-      email: "sneha.patel@example.com",
-      phone: "+91 99887 76655",
-      property: "Luxury Villa in Green City",
-      location: "Bangalore",
-      rent: "₹45,000 / mo",
-      deposit: "₹1,35,000",
-      leaseStart: "01 Aug 2024",
-      leaseEnd: "31 Jul 2025",
-      paymentStatus: "Paid",
-      tenantStatus: "Active",
+      tenantStatus: "ACTIVE",
     },
   ];
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
+  // Fetch real leases from Backend API
+  useEffect(() => {
+    fetchTenants();
+  }, []);
+
+  const fetchTenants = async () => {
+    setLoading(true);
+    try {
+      // Get logged-in user from localStorage, fallback to ownerId = 1
+      const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const ownerId = savedUser.id || savedUser.user_id || 1;
+
+      const response = await fetch(`http://localhost:8080/leases/owner/${ownerId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          // Transform backend DTO to match component format
+          const formattedData = data.map((lease) => ({
+            id: lease.leaseId,
+            name: lease.tenantName || "Unknown Tenant",
+            email: lease.tenantEmail || "N/A",
+            phone: lease.tenantPhone || "N/A",
+            property: lease.propertyTitle || "Property #" + lease.propertyId,
+            rent: lease.rentAmount ? `₹${lease.rentAmount.toLocaleString()} / mo` : "N/A",
+            deposit: lease.depositAmount ? `₹${lease.depositAmount.toLocaleString()}` : "N/A",
+            leaseStart: lease.leaseStartDate || "N/A",
+            leaseEnd: lease.leaseEndDate || "N/A",
+            paymentStatus: "Paid",
+            tenantStatus: lease.leaseStatus || "ACTIVE",
+          }));
+          setTenants(formattedData);
+        } else {
+          setTenants(mockTenants);
+        }
+      } else {
+        setTenants(mockTenants);
+      }
+    } catch (error) {
+      console.warn("Backend server offline, using fallback mock data:", error);
+      setTenants(mockTenants);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter Logic
-  const filteredTenants = mockTenants.filter((tenant) => {
+  const filteredTenants = tenants.filter((tenant) => {
     const matchesSearch =
       tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tenant.property.toLowerCase().includes(searchTerm.toLowerCase());
@@ -106,7 +135,6 @@ export default function Tenants() {
 
   return (
     <div className="tenants-page">
-
       {/* ===== HEADER ===== */}
       <div className="page-header">
         <div>
@@ -123,7 +151,7 @@ export default function Tenants() {
           </div>
           <div>
             <p className="stat-label">Total Tenants</p>
-            <h3 className="stat-number">4</h3>
+            <h3 className="stat-number">{tenants.length}</h3>
           </div>
         </div>
 
@@ -132,8 +160,10 @@ export default function Tenants() {
             <FaMoneyBillWave />
           </div>
           <div>
-            <p className="stat-label">Paid This Month</p>
-            <h3 className="stat-number">2</h3>
+            <p className="stat-label">Active Leases</p>
+            <h3 className="stat-number">
+              {tenants.filter((t) => t.tenantStatus === "ACTIVE").length}
+            </h3>
           </div>
         </div>
 
@@ -153,7 +183,7 @@ export default function Tenants() {
           </div>
           <div>
             <p className="stat-label">Overdue Payments</p>
-            <h3 className="stat-number">1</h3>
+            <h3 className="stat-number">0</h3>
           </div>
         </div>
       </div>
@@ -176,75 +206,77 @@ export default function Tenants() {
           onChange={(e) => setStatusFilter(e.target.value)}
         >
           <option value="All">All Statuses</option>
-          <option value="Active">Active</option>
-          <option value="Lease Expiring Soon">Lease Expiring Soon</option>
+          <option value="ACTIVE">Active</option>
+          <option value="EXPIRED">Expired</option>
+          <option value="TERMINATED">Terminated</option>
         </select>
       </div>
 
       {/* ===== TENANTS GRID ===== */}
-      <div className="tenants-grid">
-        {filteredTenants.map((tenant) => (
-          <div className="tenant-card" key={tenant.id}>
-            
-            {/* Card Header */}
-            <div className="tenant-card-header">
-              <div className="tenant-avatar">
-                <FaUser />
-              </div>
-              <div className="tenant-main-info">
-                <h3 className="tenant-name">{tenant.name}</h3>
-                <span className="tenant-status-pill">{tenant.tenantStatus}</span>
-              </div>
-              {getPaymentBadge(tenant.paymentStatus)}
-            </div>
-
-            {/* Card Body */}
-            <div className="tenant-card-body">
-              
-              <div className="tenant-detail-row">
-                <FaBuilding className="detail-icon" />
-                <span>{tenant.property}</span>
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
+          Loading tenants...
+        </div>
+      ) : (
+        <div className="tenants-grid">
+          {filteredTenants.map((tenant) => (
+            <div className="tenant-card" key={tenant.id}>
+              {/* Card Header */}
+              <div className="tenant-card-header">
+                <div className="tenant-avatar">
+                  <FaUser />
+                </div>
+                <div className="tenant-main-info">
+                  <h3 className="tenant-name">{tenant.name}</h3>
+                  <span className="tenant-status-pill">{tenant.tenantStatus}</span>
+                </div>
+                {getPaymentBadge(tenant.paymentStatus)}
               </div>
 
-              <div className="tenant-detail-row">
-                <FaPhone className="detail-icon" />
-                <span>{tenant.phone}</span>
-              </div>
-
-              <div className="tenant-detail-row">
-                <FaEnvelope className="detail-icon" />
-                <span>{tenant.email}</span>
-              </div>
-
-              <div className="tenant-meta-grid">
-                <div className="meta-box">
-                  <span className="meta-label">Monthly Rent</span>
-                  <span className="meta-value text-blue">{tenant.rent}</span>
+              {/* Card Body */}
+              <div className="tenant-card-body">
+                <div className="tenant-detail-row">
+                  <FaBuilding className="detail-icon" />
+                  <span>{tenant.property}</span>
                 </div>
 
-                <div className="meta-box">
-                  <span className="meta-label">Deposit</span>
-                  <span className="meta-value">{tenant.deposit}</span>
+                <div className="tenant-detail-row">
+                  <FaPhone className="detail-icon" />
+                  <span>{tenant.phone}</span>
+                </div>
+
+                <div className="tenant-detail-row">
+                  <FaEnvelope className="detail-icon" />
+                  <span>{tenant.email}</span>
+                </div>
+
+                <div className="tenant-meta-grid">
+                  <div className="meta-box">
+                    <span className="meta-label">Monthly Rent</span>
+                    <span className="meta-value text-blue">{tenant.rent}</span>
+                  </div>
+
+                  <div className="meta-box">
+                    <span className="meta-label">Deposit</span>
+                    <span className="meta-value">{tenant.deposit}</span>
+                  </div>
+                </div>
+
+                <div className="lease-dates">
+                  <FaCalendarAlt className="detail-icon" />
+                  <span>Lease: {tenant.leaseStart} — {tenant.leaseEnd}</span>
                 </div>
               </div>
 
-              <div className="lease-dates">
-                <FaCalendarAlt className="detail-icon" />
-                <span>Lease: {tenant.leaseStart} — {tenant.leaseEnd}</span>
+              {/* Card Footer Actions */}
+              <div className="tenant-card-footer">
+                <button className="btn-secondary">Message</button>
+                <button className="btn-primary">View Agreement</button>
               </div>
-
             </div>
-
-            {/* Card Footer Actions */}
-            <div className="tenant-card-footer">
-              <button className="btn-secondary">Message</button>
-              <button className="btn-primary">View Agreement</button>
-            </div>
-
-          </div>
-        ))}
-      </div>
-
+          ))}
+        </div>
+      )}
     </div>
   );
 }

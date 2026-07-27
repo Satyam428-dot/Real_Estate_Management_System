@@ -24,6 +24,7 @@ import com.estate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PropertyServiceImpl implements PropertyService {
