@@ -659,3 +659,133 @@ body {
 .rv-price { font-size: 12px; font-weight: 700; color: #2563eb; }
 .rv-specs { font-size: 10px; color: #94a3b8; }
 
+/* Dashboard Search Properties Card Matching Image */
+.dash-search-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 22px 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.dash-search-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 20px;
+}
+
+.dash-search-form {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) auto;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.dash-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dash-field-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.dash-select-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dash-select-box select {
+  width: 100%;
+  height: 42px;
+  padding: 0 32px 0 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  outline: none;
+  background-color: #ffffff;
+  font-size: 13.5px;
+  color: #1e293b;
+  font-weight: 500;
+  appearance: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dash-select-box select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.dash-select-arrow {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: #64748b;
+}
+
+.dash-search-btn {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  height: 42px;
+  padding: 0 24px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.dash-search-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.dash-popular-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.dash-popular-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.dash-pills-list {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dash-pill-tag {
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dash-pill-tag:hover {
+  background-color: #e2e8f0;
+  color: #2563eb;
+  border-color: #cbd5e1;
+}
+
