@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.estate.dtos.PropertyRequestDTO;
 import com.estate.dtos.PropertyResponseDTO;
@@ -17,6 +18,7 @@ import com.estate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class PropertyServiceImpl implements PropertyService {
 	private final PropertyRepository propertyRepo;
@@ -24,28 +26,41 @@ public class PropertyServiceImpl implements PropertyService {
 	private final ModelMapper mapper;
 	
 	
-	@Override
-    public Property addProperty(PropertyRequestDTO dto) {
+	private PropertyResponseDTO convertToDTO(Property property) {
+		PropertyResponseDTO dto = mapper.map(property, PropertyResponseDTO.class);
 		
+		// Map IDs and fields that ModelMapper STRICT strategy cannot match automatically
+		dto.setPropertyId(property.getId());
+		
+		if (property.getCreatedOn() != null) {
+			dto.setCreatedAt(property.getCreatedOn().atStartOfDay());
+		}
+		
+		if (property.getOwner() != null) {
+			dto.setOwnerId(property.getOwner().getId());
+			dto.setOwnerName(property.getOwner().getFirstName() + " " + property.getOwner().getLastName());
+		}
+		
+		return dto;
+	}
+
+	@Override
+    public PropertyResponseDTO addProperty(PropertyRequestDTO dto) {
 		User owner = userRepo.findById(dto.getOwnerId())
 	            .orElseThrow(() -> new RuntimeException("Owner not found"));
-		
 		
 		Property propertyEntity = mapper.map(dto, Property.class);
 		propertyEntity.setOwner(owner);
 		
 		Property newPropertyEntity = propertyRepo.save(propertyEntity);
-		return newPropertyEntity;
+		return convertToDTO(newPropertyEntity);
     }
-
 
 	@Override
 	public List<PropertyResponseDTO> listAllProperty() {
-
 	    List<Property> properties = propertyRepo.findAll();
-
 	    return properties.stream()
-	            .map(property -> mapper.map(property, PropertyResponseDTO.class))
+	            .map(this::convertToDTO)
 	            .toList();
 	}
 	
@@ -53,26 +68,24 @@ public class PropertyServiceImpl implements PropertyService {
 	public PropertyResponseDTO getProperty(Long id) {
 		Property property = propertyRepo.findById(id)
 				 .orElseThrow(() -> new RuntimeException("Property not found"));
-		return mapper.map(property, PropertyResponseDTO.class);
-		
+		return convertToDTO(property);
 	}
-
 
 	@Override
 	public PropertyResponseDTO updateProperty(Long id, PropertyUpdateDTO dto) {
-		Property Updatedproperty = propertyRepo.findById(id)
-				.orElseThrow(()-> new RuntimeException("Property not found"));
+		Property property = propertyRepo.findById(id)
+		        .orElseThrow(()-> new RuntimeException("Property not found"));
 		
-		return mapper.map(Updatedproperty , PropertyResponseDTO.class);
+		mapper.map(dto, property);
+		Property savedProperty = propertyRepo.save(property);
+		
+		return convertToDTO(savedProperty);
 	}
-
 
 	@Override
 	public void deleteProperty(Long id) {
 		Property property = propertyRepo.findById(id)
 				.orElseThrow(()-> new RuntimeException("Property not found"));
 		propertyRepo.delete(property);
-		
 	}
-
 }

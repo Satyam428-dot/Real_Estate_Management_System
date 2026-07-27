@@ -10,7 +10,7 @@ import com.estate.entities.Property;
 
 public interface PropertyService {
 
-    Property addProperty(PropertyRequestDTO dto);
+    PropertyResponseDTO addProperty(PropertyRequestDTO dto);
 
     List<PropertyResponseDTO> listAllProperty();
 
