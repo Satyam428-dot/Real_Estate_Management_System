@@ -13,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
 
 import lombok.RequiredArgsConstructor;
 
@@ -66,6 +68,7 @@ public class SecurityConfig {
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		http.csrf(csrf -> csrf.disable())
+				.cors(Customizer.withDefaults())
 
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
@@ -76,7 +79,15 @@ public class SecurityConfig {
 				.exceptionHandling(exception -> exception.authenticationEntryPoint((request, response,
 						authException) -> response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized")))
 
-				.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+						.requestMatchers("/register", "/login", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+						.permitAll()
+						.requestMatchers(HttpMethod.GET, "/properties/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/properties", "/properties/*/images").authenticated()
+						.requestMatchers(HttpMethod.PUT, "/properties/**").authenticated()
+						.requestMatchers(HttpMethod.DELETE, "/properties/**").authenticated()
+						.anyRequest().permitAll());
 
 		return http.build();
 	}

@@ -2,16 +2,31 @@ package com.estate.entities;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.estate.entities.enums.PropertyType;
 import com.estate.entities.enums.ListingType;
 import com.estate.entities.enums.PropertyStatus;
+import com.estate.entities.enums.PropertyType;
 
-import jakarta.persistence.*;
-import lombok.*;
-
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "properties")
@@ -22,64 +37,65 @@ import lombok.*;
 @Builder
 @AttributeOverride(name = "id", column = @Column(name = "property_id"))
 
-public class Property extends BaseClass{
-	
+public class Property extends BaseClass {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User owner;
+	@OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<PropertyImage> images = new ArrayList<>();
 
-    @Column(nullable = false)
-    private String title;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User owner;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+	@Column(nullable = false)
+	private String title;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal price;
+	@Column(columnDefinition = "TEXT")
+	private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "property_type", nullable = false)
-    private PropertyType propertyType;
+	@Column(nullable = false, precision = 12, scale = 2)
+	private BigDecimal price;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "listing_type", nullable = false)
-    private ListingType listingType;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "property_type", nullable = false)
+	private PropertyType propertyType;
 
-    @Column(nullable = false)
-    private String address;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "listing_type", nullable = false)
+	private ListingType listingType;
 
-    @Column(nullable = false)
-    private String city;
+	@Column(nullable = false)
+	private String address;
 
-    @Column(nullable = false)
-    private String state;
+	@Column(nullable = false)
+	private String city;
 
-    @Column(name = "pin_code", nullable = false)
-    private String pinCode;
+	@Column(nullable = false)
+	private String state;
 
-    private Integer bedrooms;
+	@Column(name = "pin_code", nullable = false)
+	private String pinCode;
 
-    private Integer bathrooms;
+	private Integer bedrooms;
 
-    private Integer halls;
+	private Integer bathrooms;
 
-    @Column(name = "area_sqft")
-    private Integer areaSqft;
+	private Integer halls;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PropertyStatus status = PropertyStatus.AVAILABLE;
+	@Column(name = "area_sqft")
+	private Integer areaSqft;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Boolean blacklist = false;
+	@Builder.Default
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private PropertyStatus status = PropertyStatus.AVAILABLE;
 
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+	@Builder.Default
+	@Column(nullable = false)
+	private Boolean blacklist = false;
 
+	@Column(name = "updated_at")
+	@UpdateTimestamp
+	private LocalDateTime updatedAt;
 
 }
-

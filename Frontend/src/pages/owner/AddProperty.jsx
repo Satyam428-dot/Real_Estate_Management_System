@@ -17,7 +17,6 @@ export default function AddProperty() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    ownerId: 1,
     title: "",
     description: "",
     price: "",
@@ -32,6 +31,7 @@ export default function AddProperty() {
     halls: 0,
     areaSqft: "",
   });
+  const [images, setImages] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,7 +41,18 @@ export default function AddProperty() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8080/properties", formData);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in as an owner before adding a property.");
+        return;
+      }
+      const requestConfig = { headers: { Authorization: `Bearer ${token}` } };
+      const propertyResponse = await axios.post("http://localhost:8080/properties", formData, requestConfig);
+      if (images.length > 0) {
+        const imageData = new FormData();
+        images.forEach((image) => imageData.append("images", image));
+        await axios.post(`http://localhost:8080/properties/${propertyResponse.data.propertyId}/images`, imageData, requestConfig);
+      }
       alert("Property added successfully!");
       navigate("/owner/properties");
     } catch (error) {
@@ -222,6 +233,14 @@ export default function AddProperty() {
                 required
               />
             </div>
+          </div>
+        </div>
+
+        <div className="form-section">
+          <h4 className="form-section-title">Property Images</h4>
+          <div className="form-group">
+            <label>Upload up to 10 images</label>
+            <input type="file" accept="image/*" multiple onChange={(event) => setImages(Array.from(event.target.files).slice(0, 10))} />
           </div>
         </div>
 

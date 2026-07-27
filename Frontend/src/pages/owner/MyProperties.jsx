@@ -196,7 +196,15 @@ export default function MyProperties() {
 
               {/* Top: Thumbnail area */}
               <div className="prop-card-thumb">
-                <FaBuilding className="prop-card-thumb-icon" />
+                {property.images?.[0]?.imageUrl ? (
+                  <img
+                    className="prop-card-image"
+                    src={property.images[0].imageUrl}
+                    alt={property.title}
+                  />
+                ) : (
+                  <FaBuilding className="prop-card-thumb-icon" />
+                )}
                 <span
                   className="prop-card-badge"
                   style={{
