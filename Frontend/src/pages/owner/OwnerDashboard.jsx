@@ -12,7 +12,7 @@ export default function OwnerDashboard() {
       {/* Right area: Top Navbar + Page Content */}
       <div className="owner-main-wrapper">
         <OwnerNavbar />
-        
+
         <main className="owner-content">
           <Outlet />
         </main>
