@@ -75,7 +75,7 @@ function App() {
       </Route>
 
       {/* Buyer Routes */}
-      <Route path="/buyer" element={<ProtectedRoute allowedRoles={["CUSTOMER"]}><BuyerDashboard /></ProtectedRoute>}>
+      <Route path="/buyer" element={<ProtectedRoute allowedRoles={["CUSTOMER", "BUYER"]}><BuyerDashboard /></ProtectedRoute>}>
         <Route index element={<BuyerOverview />} />
         <Route path="dashboard" element={<BuyerOverview />} />
         <Route path="browse" element={<BrowseProperties />} />
