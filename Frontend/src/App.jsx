@@ -28,6 +28,8 @@ import Notifications from "./pages/buyer/Notifications";
 import ReviewsAndRatings from "./pages/buyer/ReviewsAndRatings";
 import MyProfile from "./pages/buyer/MyProfile";
 
+import PropertyDetails from "./pages/buyer/PropertyDetails"; 
+
 // Owner Imports
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerOverview from "./pages/owner/OwnerOverview";
@@ -76,6 +78,10 @@ function App() {
         <Route path="notifications" element={<Notifications />} />
         <Route path="reviews" element={<ReviewsAndRatings />} />
         <Route path="profile" element={<MyProfile />} />
+
+        <Route path="property-details" element={<PropertyDetails />} />
+
+        
       </Route>
 
       {/* Owner Routes */}

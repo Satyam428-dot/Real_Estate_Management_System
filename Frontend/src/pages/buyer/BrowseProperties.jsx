@@ -13,9 +13,11 @@ import {
   ExternalLink,
   ChevronDown,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // 1. Import useNavigate
 import "./BrowseProperties.css";
 
 export default function BrowseProperties() {
+  const navigate = useNavigate(); // 2. Initialize navigate function
   const [viewMode, setViewMode] = useState("grid");
   const [locationInput, setLocationInput] = useState("");
   const [propertyType, setPropertyType] = useState("");
@@ -259,7 +261,13 @@ export default function BrowseProperties() {
             {properties.map((property) => {
               const isSaved = savedProperties.includes(property.id);
               return (
-                <div key={property.id} className="property-card">
+                <div
+                  key={property.id}
+                  className="property-card"
+                  style={{ cursor: "pointer" }}
+                  /* 3. Click handler on card to navigate to details */
+                  onClick={() => navigate("/buyer/property-details")}
+                >
                   <div className="card-image-wrapper">
                     <img src={property.image} alt={property.title} />
                     <span className={`tag-badge ${property.tagClass}`}>
@@ -267,7 +275,11 @@ export default function BrowseProperties() {
                     </span>
                     <button
                       className={`heart-btn ${isSaved ? "saved" : ""}`}
-                      onClick={() => toggleSaveProperty(property.id)}
+                      /* 4. stopPropagation prevents navigating to details when clicking save */
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSaveProperty(property.id);
+                      }}
                     >
                       <Heart
                         size={16}
