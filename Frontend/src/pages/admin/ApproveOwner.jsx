@@ -1,17 +1,31 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import { FaCheck, FaFileAlt, FaIdCard, FaTimes, FaUserShield } from "react-icons/fa";
 import "./ApproveOwner.css";
+
+function ProofPreview({ label, source, type }) {
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="proof-preview-group">
+      <div className="proof-label"><span>{type === "selfie" ? <FaUserShield /> : <FaIdCard />}</span>{label}</div>
+      <div className="proof-frame">
+        {source && !hasError ? (
+          <img src={source} alt={label} onError={() => setHasError(true)} />
+        ) : (
+          <div className="proof-placeholder"><FaFileAlt /><span>Document preview unavailable</span></div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function ApproveOwners() {
   const [selectedOwner, setSelectedOwner] = useState(null);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Fetch pending verifications from backend on component mount
-  useEffect(() => {
-    fetchPendingRequests();
-  }, []);
+  const [updating, setUpdating] = useState(false);
 
   const fetchPendingRequests = async () => {
     try {
@@ -27,192 +41,59 @@ export default function ApproveOwners() {
     }
   };
 
-  // Handle Status Update API Call
+  useEffect(() => { fetchPendingRequests(); }, []);
+
   const handleStatusUpdate = async (id, status) => {
     try {
-      console.log(`Setting verification ID ${id} to status: ${status}`);
-
-      // Update backend status state
-      await axios.put(`http://localhost:8080/verify/owners/status/${id}`, {
-        status: status,
-      });
-
-      // Optimistically remove from active UI view list after successful API response
-      setPendingRequests((prev) => prev.filter((req) => req.id !== id));
+      setUpdating(true);
+      await axios.put(`http://localhost:8080/verify/owners/status/${id}`, { status });
+      setPendingRequests((prev) => prev.filter((request) => request.id !== id));
       setSelectedOwner(null);
     } catch (err) {
       console.error("Error updating status:", err);
       alert(`Failed to update status to ${status}. Please try again.`);
+    } finally {
+      setUpdating(false);
     }
   };
 
-  // Helper function to format ISO Date string from backend into standard display format
-  const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString) return "N/A";
-    const date = new Date(dateTimeString);
-    return date.toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
+  const formatDateTime = (value) => value ? new Date(value).toLocaleString("en-US", {
+    month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true,
+  }) : "N/A";
 
   return (
     <div className="approve-owners-container">
-      <div className="header-inline-group">
-        <h1>Approve Owners</h1>
+      <div className="owners-page-heading">
+        <div><p className="owners-eyebrow">Owner verification</p><h1>Review Owner Requests</h1><p className="subtitle">Review identity documents before approving a property owner account.</p></div>
         <span className="badge-counter">{pendingRequests.length} Pending</span>
       </div>
-      <p className="subtitle">
-        Review and verify registration documents submitted by new owners.
-      </p>
 
-      {/* Loading & Error States */}
-      {loading && (
-        <div className="empty-state">Loading pending verification items...</div>
-      )}
-      {error && (
-        <div
-          className="empty-state"
-          style={{ color: "#dc2626", borderColor: "#fca5a5" }}
-        >
-          {error}
-        </div>
-      )}
+      {loading && <div className="empty-state">Loading pending verification items...</div>}
+      {error && <div className="empty-state error-state">{error}</div>}
 
-      {/* Main Grid List View */}
       {!loading && !error && (
         <div className="requests-list">
-          {pendingRequests.length === 0 ? (
-            <div className="empty-state">
-              No pending verification requests remaining.
-            </div>
-          ) : (
-            pendingRequests.map((request) => {
-              // Safely pull and construct the full name from the nested object
-              const ownerFirstName = request.owner?.firstName || "";
-              const ownerLastName = request.owner?.lastName || "";
-              const fullOwnerName =
-                `${ownerFirstName} ${ownerLastName}`.trim() || "Unknown Owner";
-
-              return (
-                <div key={request.id} className="request-card">
-                  <div className="owner-profile-summary">
-                    <div className="avatar-placeholder">
-                      {ownerFirstName
-                        ? ownerFirstName.charAt(0).toUpperCase()
-                        : "O"}
-                    </div>
-                    <div className="owner-text-details">
-                      <h3>{fullOwnerName}</h3>
-                      <p className="owner-email">
-                        {request.owner?.email || "No Email Provided"}
-                      </p>
-                      <p className="submission-time">
-                        Submitted:{" "}
-                        {formatDateTime(request.verificationDatetime)}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    className="review-btn"
-                    onClick={() => setSelectedOwner(request)}
-                  >
-                    Review Request
-                  </button>
-                </div>
-              );
-            })
-          )}
+          {pendingRequests.length === 0 ? <div className="empty-state">No pending verification requests remaining.</div> : pendingRequests.map((request) => {
+            const firstName = request.owner?.firstName || "";
+            const lastName = request.owner?.lastName || "";
+            const fullName = `${firstName} ${lastName}`.trim() || "Unknown Owner";
+            return <article key={request.id} className="request-card">
+              <div className="owner-profile-summary"><div className="avatar-placeholder">{firstName ? firstName.charAt(0).toUpperCase() : "O"}</div><div className="owner-text-details"><h3>{fullName}</h3><p className="owner-email">{request.owner?.email || "No email provided"}</p><p className="submission-time">Submitted {formatDateTime(request.verificationDatetime)}</p></div></div>
+              <button className="review-btn" onClick={() => setSelectedOwner(request)}>Review request</button>
+            </article>;
+          })}
         </div>
       )}
 
-      {/* Identity Review Modal Layer */}
-      {selectedOwner && (
-        <div className="modal-backdrop">
-          <div className="modal-box">
-            <div className="modal-header">
-              <div>
-                <h2>Verify Identity</h2>
-                <p>
-                  Applicant Record:{" "}
-                  {`${selectedOwner.owner?.firstName || ""} ${selectedOwner.owner?.lastName || ""}`.trim()}
-                </p>
-              </div>
-              <button
-                className="close-modal-btn"
-                onClick={() => setSelectedOwner(null)}
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="modal-body">
-              {/* Media Proof Gallery Column */}
-              <div className="proofs-column">
-                <div className="image-preview-group">
-                  <label>Selfie Image</label>
-                  <div className="img-frame">
-                    <img src={selectedOwner.selfieImage} alt="Selfie upload" />
-                  </div>
-                </div>
-
-                <div className="image-preview-group">
-                  <label>Government Issued ID Proof</label>
-                  <div className="img-frame">
-                    <img
-                      src={selectedOwner.governmentIdProof}
-                      alt="Government Document upload"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Operations Column */}
-              <div className="actions-column">
-                <div className="checklist-box">
-                  <h4>Verification Checklist</h4>
-                  <ul>
-                    <li>
-                      💡 Does the face match the photo printed on the ID card?
-                    </li>
-                    <li>
-                      💡 Is the text on the government record crisp and fully
-                      readable?
-                    </li>
-                    <li>
-                      💡 Does the legal record match their registered system
-                      profile name?
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="modal-actions-footer">
-                  <button
-                    className="action-btn reject-btn"
-                    onClick={() =>
-                      handleStatusUpdate(selectedOwner.id, "REJECTED")
-                    }
-                  >
-                    Reject Request
-                  </button>
-                  <button
-                    className="action-btn approve-btn"
-                    onClick={() =>
-                      handleStatusUpdate(selectedOwner.id, "APPROVED")
-                    }
-                  >
-                    Approve Owner
-                  </button>
-                </div>
-              </div>
-            </div>
+      {selectedOwner && <div className="owner-modal-backdrop" onClick={() => !updating && setSelectedOwner(null)}>
+        <section className="owner-review-modal" role="dialog" aria-modal="true" aria-labelledby="verify-owner-title" onClick={(event) => event.stopPropagation()}>
+          <header className="owner-modal-header"><div><p className="owners-eyebrow">Identity verification</p><h2 id="verify-owner-title">Verify {`${selectedOwner.owner?.firstName || ""} ${selectedOwner.owner?.lastName || ""}`.trim()}</h2><p>Confirm the submitted documents before updating this request.</p></div><button className="close-modal-btn" onClick={() => setSelectedOwner(null)} disabled={updating} aria-label="Close verification dialog"><FaTimes /></button></header>
+          <div className="owner-modal-body">
+            <div className="proofs-column"><ProofPreview label="Selfie image" source={selectedOwner.selfieImage} type="selfie" /><ProofPreview label="Government-issued ID" source={selectedOwner.governmentIdProof} type="id" /></div>
+            <aside className="verification-panel"><h3>Verification checklist</h3><ul><li><FaCheck /> Face matches the photo on the ID.</li><li><FaCheck /> Document text is clear and readable.</li><li><FaCheck /> Legal name matches the registered profile.</li></ul><div className="modal-actions-footer"><button className="action-btn reject-btn" onClick={() => handleStatusUpdate(selectedOwner.id, "REJECTED")} disabled={updating}>Reject request</button><button className="action-btn approve-btn" onClick={() => handleStatusUpdate(selectedOwner.id, "APPROVED")} disabled={updating}>{updating ? "Updating..." : "Approve owner"}</button></div></aside>
           </div>
-        </div>
-      )}
+        </section>
+      </div>}
     </div>
   );
 }
