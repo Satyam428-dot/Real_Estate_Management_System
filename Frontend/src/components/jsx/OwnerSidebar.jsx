@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaHome,
   FaBuilding,
@@ -15,13 +15,23 @@ import {
 import "../css/OwnerSidebar.css";
 
 export default function OwnerSidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear user session from localStorage
+    localStorage.removeItem("user");
+    localStorage.clear();
+    // Redirect user to Login page
+    navigate("/Login");
+  };
+
   return (
     <aside className="owner-sidebar">
 
       {/* SECTION 1: Logo area at the top */}
       <div className="owner-sidebar-logo">
         <FaBuilding className="logo-icon" />
-        <span>RealEstate</span>
+        <span>PROPERTY<span className="logo-highlight">HQ</span></span>
       </div>
 
       {/* SECTION 2: Navigation menu in the middle */}
@@ -93,7 +103,7 @@ export default function OwnerSidebar() {
       </ul>
 
       {/* SECTION 3: Logout pinned at the bottom */}
-      <div className="owner-sidebar-logout">
+      <div className="owner-sidebar-logout" onClick={handleLogout}>
         <FaSignOutAlt className="owner-sidebar-icon" />
         <span>Logout</span>
       </div>
