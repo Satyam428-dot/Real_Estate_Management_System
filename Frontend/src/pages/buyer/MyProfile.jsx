@@ -57,7 +57,7 @@ export default function MyProfile() {
         {/* Main Content (Left Column) */}
         <div className="profile-main-content">
           {/* Top Banner & Profile Overview Card */}
-          <div className="profile-card hero-card">
+          <div className="buyer-profile-card hero-card">
             <div className="hero-banner-bg"></div>
             <div className="hero-profile-info">
               <div className="avatar-wrapper">
@@ -136,7 +136,7 @@ export default function MyProfile() {
           </div>
 
           {/* Personal Information Card */}
-          <div className="profile-card details-card">
+          <div className="buyer-profile-card details-card">
             <div className="card-header-row">
               <h3>Personal Information</h3>
               <button className="btn-small-edit">
@@ -190,7 +190,7 @@ export default function MyProfile() {
           </div>
 
           {/* Preferences Card */}
-          <div className="profile-card preferences-card">
+          <div className="buyer-profile-card preferences-card">
             <div className="card-header-row">
               <h3>Preferences</h3>
               <button className="btn-small-edit">Edit Preferences</button>
