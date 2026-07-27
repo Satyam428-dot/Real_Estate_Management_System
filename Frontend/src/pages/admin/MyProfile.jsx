@@ -303,8 +303,8 @@ export default function MyProfile() {
   const values = isEditing ? draft : user;
 
   return (
-    <div className="profile-page">
-      <div className="profile-card">
+    <div className="admin-profile-page">
+      <div className="admin-profile-card">
         <div className="profile-header">
           <div className="avatar">
             {values.firstName.charAt(0)}
