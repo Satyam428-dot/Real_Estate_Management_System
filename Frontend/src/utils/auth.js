@@ -11,3 +11,12 @@ export function getLoggedInUser() {
     return null;
   }
 }
+
+export function isAuthenticated() {
+  const user = getLoggedInUser();
+  return Boolean(user && (!user.exp || user.exp * 1000 > Date.now()));
+}
+
+export function getUserRole() {
+  return getLoggedInUser()?.role;
+}
