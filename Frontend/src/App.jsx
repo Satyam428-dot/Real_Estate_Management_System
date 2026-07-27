@@ -29,6 +29,7 @@ import ReviewsAndRatings from "./pages/buyer/ReviewsAndRatings";
 import MyProfile from "./pages/buyer/MyProfile";
 
 import PropertyDetails from "./pages/buyer/PropertyDetails"; 
+import BookProperty from "./pages/buyer/BookProperty";
 
 // Owner Imports
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
@@ -81,6 +82,7 @@ function App() {
         <Route path="profile" element={<MyProfile />} />
 
         <Route path="property-details" element={<PropertyDetails />} />
+        <Route path="book-property" element={<BookProperty />} />
 
         
       </Route>
