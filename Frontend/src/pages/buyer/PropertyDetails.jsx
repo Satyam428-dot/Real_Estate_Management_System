@@ -55,8 +55,9 @@ export default function PropertyDetails() {
       "24x7 security with CCTV surveillance",
     ],
     owner: {
-      name: "Rahul Sharma",
+      name: "Atharv Dadhe",
       role: "Property Owner",
+      phone: "7747926022", // Country code +91 included without spaces or special characters
       rating: 4.8,
       reviewsCount: 32,
       avatar:
@@ -85,6 +86,23 @@ export default function PropertyDetails() {
       { name: "Reserved Parking", icon: Car },
       { name: "CCTV Surveillance", icon: ShieldCheck },
     ],
+  };
+
+  // WhatsApp Integration Handler
+  const handleWhatsAppClick = () => {
+    const phoneNumber = propertyData.owner.phone;
+
+    // Custom pre-filled message
+    const customMessage = `Hello ${propertyData.owner.name}, I am interested in your property "${propertyData.title}" (ID: ${propertyData.id}) located at ${propertyData.location} listed for ${propertyData.price}. Please provide more details!`;
+
+    // Encode message string for safe URL construction
+    const encodedMessage = encodeURIComponent(customMessage);
+
+    // Build WhatsApp Universal API Link
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+
+    // Redirect to WhatsApp direct chat
+    window.open(whatsappUrl, "_blank");
   };
 
   return (
@@ -315,22 +333,25 @@ export default function PropertyDetails() {
             </div>
 
             <div className="action-btns-group">
-              <button className="btn-primary-blue">
+              <button
+                className="btn-primary-blue"
+                onClick={() => navigate("/buyer/schedule-visit")}
+              >
                 <Calendar size={16} /> Schedule a Visit
               </button>
-              
-              {/* Added onClick Handler for Navigation */}
+
               <button
                 className="btn-primary-green"
                 onClick={() => navigate("/buyer/book-property")}
               >
                 <Building size={16} /> Book Property
               </button>
-              
+
               <button className="btn-outline-blue">
                 <Phone size={16} /> Contact Owner
               </button>
-              <button className="btn-whatsapp">
+
+              <button className="btn-whatsapp" onClick={handleWhatsAppClick}>
                 <MessageCircle size={16} /> WhatsApp
               </button>
             </div>

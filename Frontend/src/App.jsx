@@ -30,6 +30,7 @@ import MyProfile from "./pages/buyer/MyProfile";
 
 import PropertyDetails from "./pages/buyer/PropertyDetails"; 
 import BookProperty from "./pages/buyer/BookProperty";
+import ScheduleAVisit from "./pages/buyer/ScheduleAVisit";
 
 // Owner Imports
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
@@ -83,6 +84,7 @@ function App() {
 
         <Route path="property-details" element={<PropertyDetails />} />
         <Route path="book-property" element={<BookProperty />} />
+        <Route path="schedule-visit" element={<ScheduleAVisit />} />
 
         
       </Route>
