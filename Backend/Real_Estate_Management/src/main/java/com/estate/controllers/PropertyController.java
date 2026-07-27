@@ -31,7 +31,7 @@ public class PropertyController {
 	
 	//----------------------------Create Property--------------------------------------------//
 	@PostMapping
-	public ResponseEntity<Property> addProperty(@RequestBody PropertyRequestDTO dto){
+	public ResponseEntity<PropertyResponseDTO> addProperty(@RequestBody PropertyRequestDTO dto){
 		return new ResponseEntity<>(propertyService.addProperty(dto),HttpStatus.CREATED);
 	}
 	
