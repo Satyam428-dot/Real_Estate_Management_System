@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaUser,
   FaEnvelope,
@@ -32,8 +32,26 @@ export default function Profile() {
     pinCode: "400050",
   });
 
+  // Load logged-in user from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      if (savedUser && (savedUser.firstName || savedUser.email)) {
+        setProfile((prev) => ({
+          ...prev,
+          firstName: savedUser.firstName || prev.firstName,
+          lastName: savedUser.lastName || prev.lastName,
+          email: savedUser.email || prev.email,
+          phone: savedUser.phone || prev.phone,
+        }));
+      }
+    } catch (e) {
+      console.warn("Could not parse user from localStorage", e);
+    }
+  }, []);
+
   // Verification State (Matches OwnerVerification backend entity)
-  const [verification, setVerification] = useState({
+  const [verification] = useState({
     idType: "Aadhaar Card",
     idNumber: "XXXX-XXXX-8921",
     verificationStatus: "APPROVED",
@@ -78,6 +96,9 @@ export default function Profile() {
   const handleSave = (e) => {
     e.preventDefault();
     setSavedSuccess(true);
+    // Update local storage user
+    const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    localStorage.setItem("user", JSON.stringify({ ...savedUser, ...profile }));
     setTimeout(() => setSavedSuccess(false), 3000);
   };
 
@@ -92,84 +113,84 @@ export default function Profile() {
   };
 
   return (
-    <div className="profile-page">
+    <div className="owner-profile-container">
       {/* ===== PAGE HEADER ===== */}
-      <div className="page-header">
+      <div className="owner-profile-header">
         <div>
-          <h1 className="page-title">Account & Profile</h1>
-          <p className="page-subtitle">
+          <h1 className="owner-profile-title">Account & Profile</h1>
+          <p className="owner-profile-subtitle">
             Manage your personal info, verification documents, payout bank account, and security
           </p>
         </div>
       </div>
 
       {savedSuccess && (
-        <div className="alert-success">
+        <div className="owner-profile-alert-success">
           <FaCheckCircle /> Profile information updated successfully!
         </div>
       )}
 
-      <div className="profile-grid">
+      <div className="owner-profile-grid">
         {/* ===== LEFT COLUMN: AVATAR CARD ===== */}
-        <div className="profile-card avatar-card">
-          <div className="avatar-wrapper">
+        <div className="owner-profile-card owner-avatar-card">
+          <div className="owner-avatar-wrapper">
             <img
               src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
               alt="John Owner"
-              className="profile-avatar-img"
+              className="owner-avatar-img"
             />
           </div>
 
-          <h2 className="user-fullname">
+          <h2 className="owner-user-fullname">
             {profile.firstName} {profile.lastName}
           </h2>
-          <span className="role-pill">Property Owner</span>
+          <span className="owner-role-pill">Property Owner</span>
 
-          <div className="verification-badge">
-            <FaShieldAlt className="shield-icon" />
-            <span>Verified Owner (ID Proof Approved)</span>
+          <div className="owner-verification-badge">
+            <FaShieldAlt className="owner-shield-icon" />
+            <span>Verified Owner</span>
           </div>
 
-          <div className="sidebar-info-list">
-            <div className="info-item">
-              <FaEnvelope className="info-icon" />
+          <div className="owner-sidebar-info-list">
+            <div className="owner-info-item">
+              <FaEnvelope className="owner-info-icon" />
               <span>{profile.email}</span>
             </div>
-            <div className="info-item">
-              <FaPhone className="info-icon" />
+            <div className="owner-info-item">
+              <FaPhone className="owner-info-icon" />
               <span>{profile.phone}</span>
             </div>
-            <div className="info-item">
-              <FaBuilding className="info-icon" />
-              <span>12 Managed Properties</span>
+            <div className="owner-info-item">
+              <FaBuilding className="owner-info-icon" />
+              <span>Managed Properties</span>
             </div>
           </div>
         </div>
 
         {/* ===== RIGHT COLUMN: TABBED SECTIONS ===== */}
-        <div className="profile-forms-column">
+        <div className="owner-forms-column">
           {/* TAB NAVIGATION BUTTONS */}
-          <div className="profile-tabs">
+          <div className="owner-profile-tabs">
             <button
-              className={`tab-btn ${activeTab === "personal" ? "active" : ""}`}
+              className={`owner-tab-btn ${activeTab === "personal" ? "active" : ""}`}
               onClick={() => setActiveTab("personal")}
             >
               <FaUser /> Personal Info
             </button>
             <button
-              className={`tab-btn ${activeTab === "verification" ? "active" : ""}`}
+              className={`owner-tab-btn ${activeTab === "verification" ? "active" : ""}`}
               onClick={() => setActiveTab("verification")}
             >
               <FaIdCard /> Verification & IDs
             </button>
             <button
-              className={`tab-btn ${activeTab === "bank" ? "active" : ""}`}
+              className={`owner-tab-btn ${activeTab === "bank" ? "active" : ""}`}
               onClick={() => setActiveTab("bank")}
             >
               <FaUniversity /> Bank & Payouts
             </button>
             <button
-              className={`tab-btn ${activeTab === "security" ? "active" : ""}`}
+              className={`owner-tab-btn ${activeTab === "security" ? "active" : ""}`}
               onClick={() => setActiveTab("security")}
             >
               <FaLock /> Security
@@ -178,14 +199,14 @@ export default function Profile() {
 
           {/* TAB 1: PERSONAL INFORMATION */}
           {activeTab === "personal" && (
-            <div className="profile-card">
-              <h3 className="card-title">
-                <FaUser className="section-title-icon" /> Personal Details
+            <div className="owner-profile-card">
+              <h3 className="owner-card-title">
+                <FaUser className="owner-section-title-icon" /> Personal Details
               </h3>
 
-              <form onSubmit={handleSave} className="profile-form">
-                <div className="form-row cols-2">
-                  <div className="form-group">
+              <form onSubmit={handleSave} className="owner-profile-form">
+                <div className="owner-form-row cols-2">
+                  <div className="owner-form-group">
                     <label>First Name</label>
                     <input
                       type="text"
@@ -196,7 +217,7 @@ export default function Profile() {
                     />
                   </div>
 
-                  <div className="form-group">
+                  <div className="owner-form-group">
                     <label>Last Name</label>
                     <input
                       type="text"
@@ -208,8 +229,8 @@ export default function Profile() {
                   </div>
                 </div>
 
-                <div className="form-row cols-2">
-                  <div className="form-group">
+                <div className="owner-form-row cols-2">
+                  <div className="owner-form-group">
                     <label>Email Address</label>
                     <input
                       type="email"
@@ -220,7 +241,7 @@ export default function Profile() {
                     />
                   </div>
 
-                  <div className="form-group">
+                  <div className="owner-form-group">
                     <label>Phone Number</label>
                     <input
                       type="text"
@@ -232,8 +253,8 @@ export default function Profile() {
                   </div>
                 </div>
 
-                <div className="form-row">
-                  <div className="form-group">
+                <div className="owner-form-row">
+                  <div className="owner-form-group">
                     <label>Street Address</label>
                     <input
                       type="text"
@@ -244,8 +265,8 @@ export default function Profile() {
                   </div>
                 </div>
 
-                <div className="form-row cols-3">
-                  <div className="form-group">
+                <div className="owner-form-row cols-3">
+                  <div className="owner-form-group">
                     <label>City</label>
                     <input
                       type="text"
@@ -255,7 +276,7 @@ export default function Profile() {
                     />
                   </div>
 
-                  <div className="form-group">
+                  <div className="owner-form-group">
                     <label>State</label>
                     <input
                       type="text"
@@ -265,7 +286,7 @@ export default function Profile() {
                     />
                   </div>
 
-                  <div className="form-group">
+                  <div className="owner-form-group">
                     <label>Pin Code</label>
                     <input
                       type="text"
@@ -276,8 +297,8 @@ export default function Profile() {
                   </div>
                 </div>
 
-                <div className="form-submit-row">
-                  <button type="submit" className="save-btn">
+                <div className="owner-form-submit-row">
+                  <button type="submit" className="owner-save-btn">
                     <FaSave /> Save Personal Info
                   </button>
                 </div>
@@ -287,53 +308,53 @@ export default function Profile() {
 
           {/* TAB 2: VERIFICATION & GOVT ID PROOFS */}
           {activeTab === "verification" && (
-            <div className="profile-card">
-              <h3 className="card-title">
-                <FaShieldAlt className="section-title-icon" /> Identity & Property Verification
+            <div className="owner-profile-card">
+              <h3 className="owner-card-title">
+                <FaShieldAlt className="owner-section-title-icon" /> Identity & Property Verification
               </h3>
 
-              <div className="verification-status-box">
-                <div className="status-indicator approved">
-                  <FaCheckCircle className="status-icon" />
+              <div className="owner-verif-status-box">
+                <div className="owner-status-indicator">
+                  <FaCheckCircle className="owner-status-icon" />
                   <div>
-                    <h4 className="status-title">Owner Account Verified</h4>
-                    <p className="status-desc">
+                    <h4 className="owner-status-title">Owner Account Verified</h4>
+                    <p className="owner-status-desc">
                       Your government ID and property documents have been approved by the admin.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="doc-section-list">
-                <div className="doc-item">
-                  <div className="doc-info">
-                    <FaFileAlt className="doc-icon" />
+              <div className="owner-doc-section-list">
+                <div className="owner-doc-item">
+                  <div className="owner-doc-info">
+                    <FaFileAlt className="owner-doc-icon" />
                     <div>
-                      <span className="doc-name">Government ID Proof (Aadhaar Card)</span>
-                      <span className="doc-filename">{verification.governmentIdProofName}</span>
+                      <span className="owner-doc-name">Government ID Proof (Aadhaar Card)</span>
+                      <span className="owner-doc-filename">{verification.governmentIdProofName}</span>
                     </div>
                   </div>
-                  <span className="doc-status-tag">Verified</span>
+                  <span className="owner-doc-status-tag">Verified</span>
                 </div>
 
-                <div className="doc-item">
-                  <div className="doc-info">
-                    <FaFileAlt className="doc-icon" />
+                <div className="owner-doc-item">
+                  <div className="owner-doc-info">
+                    <FaFileAlt className="owner-doc-icon" />
                     <div>
-                      <span className="doc-name">Property Sale Deed / Title Proof</span>
-                      <span className="doc-filename">{verification.ownershipProofName}</span>
+                      <span className="owner-doc-name">Property Sale Deed / Title Proof</span>
+                      <span className="owner-doc-filename">{verification.ownershipProofName}</span>
                     </div>
                   </div>
-                  <span className="doc-status-tag">Verified</span>
+                  <span className="owner-doc-status-tag">Verified</span>
                 </div>
               </div>
 
-              <div className="upload-box-wrapper">
-                <h4 className="upload-label">Update Verification Document</h4>
-                <div className="upload-dropzone">
-                  <FaFileUpload className="dropzone-icon" />
+              <div className="owner-upload-box-wrapper">
+                <h4 className="owner-upload-label">Update Verification Document</h4>
+                <div className="owner-upload-dropzone">
+                  <FaFileUpload className="owner-dropzone-icon" />
                   <p>Click to upload or drag & drop updated document (PDF, PNG, JPG)</p>
-                  <span className="file-size-limit">Maximum file size: 5MB</span>
+                  <span className="owner-file-size-limit">Maximum file size: 5MB</span>
                 </div>
               </div>
             </div>
@@ -341,17 +362,17 @@ export default function Profile() {
 
           {/* TAB 3: BANK ACCOUNT & PAYOUTS */}
           {activeTab === "bank" && (
-            <div className="profile-card">
-              <h3 className="card-title">
-                <FaUniversity className="section-title-icon" /> Bank Account & Rent Payout Details
+            <div className="owner-profile-card">
+              <h3 className="owner-card-title">
+                <FaUniversity className="owner-section-title-icon" /> Bank Account & Rent Payout Details
               </h3>
-              <p className="section-intro-text">
+              <p className="owner-section-intro-text">
                 Monthly rent payments collected from tenants will be credited directly to this account.
               </p>
 
-              <form onSubmit={handleSave} className="profile-form">
-                <div className="form-row cols-2">
-                  <div className="form-group">
+              <form onSubmit={handleSave} className="owner-profile-form">
+                <div className="owner-form-row cols-2">
+                  <div className="owner-form-group">
                     <label>Account Holder Name</label>
                     <input
                       type="text"
@@ -362,7 +383,7 @@ export default function Profile() {
                     />
                   </div>
 
-                  <div className="form-group">
+                  <div className="owner-form-group">
                     <label>Bank Name</label>
                     <input
                       type="text"
@@ -374,8 +395,8 @@ export default function Profile() {
                   </div>
                 </div>
 
-                <div className="form-row cols-2">
-                  <div className="form-group">
+                <div className="owner-form-row cols-2">
+                  <div className="owner-form-group">
                     <label>Account Number</label>
                     <input
                       type="text"
@@ -386,7 +407,7 @@ export default function Profile() {
                     />
                   </div>
 
-                  <div className="form-group">
+                  <div className="owner-form-group">
                     <label>IFSC Code</label>
                     <input
                       type="text"
@@ -398,8 +419,8 @@ export default function Profile() {
                   </div>
                 </div>
 
-                <div className="form-row cols-2">
-                  <div className="form-group">
+                <div className="owner-form-row cols-2">
+                  <div className="owner-form-group">
                     <label>Branch Name</label>
                     <input
                       type="text"
@@ -409,7 +430,7 @@ export default function Profile() {
                     />
                   </div>
 
-                  <div className="form-group">
+                  <div className="owner-form-group">
                     <label>UPI ID (Optional)</label>
                     <input
                       type="text"
@@ -420,8 +441,8 @@ export default function Profile() {
                   </div>
                 </div>
 
-                <div className="form-submit-row">
-                  <button type="submit" className="save-btn">
+                <div className="owner-form-submit-row">
+                  <button type="submit" className="owner-save-btn">
                     <FaSave /> Save Bank Details
                   </button>
                 </div>
@@ -431,14 +452,14 @@ export default function Profile() {
 
           {/* TAB 4: SECURITY & PASSWORD */}
           {activeTab === "security" && (
-            <div className="profile-card">
-              <h3 className="card-title">
-                <FaKey className="section-title-icon" /> Security & Password
+            <div className="owner-profile-card">
+              <h3 className="owner-card-title">
+                <FaKey className="owner-section-title-icon" /> Security & Password
               </h3>
 
-              <form onSubmit={handleUpdatePassword} className="profile-form">
-                <div className="form-row">
-                  <div className="form-group">
+              <form onSubmit={handleUpdatePassword} className="owner-profile-form">
+                <div className="owner-form-row">
+                  <div className="owner-form-group">
                     <label>Current Password</label>
                     <input
                       type="password"
@@ -451,8 +472,8 @@ export default function Profile() {
                   </div>
                 </div>
 
-                <div className="form-row cols-2">
-                  <div className="form-group">
+                <div className="owner-form-row cols-2">
+                  <div className="owner-form-group">
                     <label>New Password</label>
                     <input
                       type="password"
@@ -464,7 +485,7 @@ export default function Profile() {
                     />
                   </div>
 
-                  <div className="form-group">
+                  <div className="owner-form-group">
                     <label>Confirm New Password</label>
                     <input
                       type="password"
@@ -477,8 +498,8 @@ export default function Profile() {
                   </div>
                 </div>
 
-                <div className="form-submit-row">
-                  <button type="submit" className="save-btn btn-dark">
+                <div className="owner-form-submit-row">
+                  <button type="submit" className="owner-save-btn owner-btn-dark">
                     Update Password
                   </button>
                 </div>

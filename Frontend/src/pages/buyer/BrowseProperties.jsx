@@ -15,6 +15,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { favouritesApi } from "../../utils/buyerApi";
 import "./BrowseProperties.css";
 
 const API_URL = "http://localhost:8080";
@@ -182,8 +183,7 @@ export default function BrowseProperties() {
   const [selectedBhks, setSelectedBhks] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
 
-  // Persistent Saved / Favorite State via localStorage
-    // Saved property IDs from backend
+  // Saved property IDs from backend
   const [savedProperties, setSavedProperties] = useState([]);
 
   // Fetch saved property IDs from backend on mount
@@ -211,6 +211,10 @@ export default function BrowseProperties() {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    favouritesApi.ids().then(({ data }) => setSavedProperties(data)).catch(() => setSavedProperties([]));
   }, []);
 
   // Fetch properties from backend API
@@ -265,7 +269,7 @@ export default function BrowseProperties() {
     );
   }, [locationInput, allProperties]);
 
-    // Toggle favorite: save/unsave property via backend API
+  // Toggle favorite: save/unsave property via backend API
   const toggleSaveProperty = async (id) => {
     const token = localStorage.getItem("token");
     if (!token) {

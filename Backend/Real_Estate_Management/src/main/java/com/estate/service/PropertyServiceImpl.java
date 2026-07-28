@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 
+
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PropertyServiceImpl implements PropertyService {

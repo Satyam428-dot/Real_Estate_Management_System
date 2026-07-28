@@ -383,45 +383,82 @@ body {
 
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr) auto;
+  grid-template-columns: repeat(4, 1fr) minmax(130px, auto);
   gap: 14px;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .filter-group label {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: #475569;
+  height: 16px;
+  line-height: 16px;
+  margin: 0;
+}
+
+.btn-label-placeholder {
+  visibility: hidden;
+  user-select: none;
 }
 
 .filter-group select {
-  padding: 10px 12px;
-  border: 1px solid #e2e8f0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1.5px solid #e2e8f0;
   border-radius: 8px;
   outline: none;
   background-color: #f8fafc;
-  font-size: 13px;
-  color: #334155;
+  font-size: 13.5px;
+  color: #1e293b;
+  cursor: pointer;
+  margin: 0;
+  transition: all 0.2s ease;
+}
+
+.filter-group select:focus {
+  border-color: #2563eb;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.filter-btn-group {
+  justify-content: flex-start;
 }
 
 .search-submit-btn {
+  box-sizing: border-box;
+  width: 100%;
+  height: 42px;
   background-color: #2563eb;
   color: white;
-  border: none;
-  padding: 10px 24px;
+  border: 1.5px solid #2563eb;
+  padding: 0 24px;
   border-radius: 8px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  height: 40px;
+  white-space: nowrap;
+  margin: 0;
+  transition: background-color 0.2s ease;
+}
+
+.search-submit-btn:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
 }
 
 .popular-searches {

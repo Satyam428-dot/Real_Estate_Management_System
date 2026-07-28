@@ -1,4 +1,4 @@
-.profile-page {
+.admin-profile-page {
   min-height: calc(100vh - 70px);
   display: flex;
   justify-content: center;
@@ -7,7 +7,7 @@
   background: #f8fafc;
 }
 
-.profile-card {
+.admin-profile-card {
   width: 100%;
   max-width: 460px;
   background: white;
