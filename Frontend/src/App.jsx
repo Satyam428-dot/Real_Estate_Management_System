@@ -39,6 +39,7 @@ import ScheduleAVisit from "./pages/buyer/ScheduleAVisit";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerOverview from "./pages/owner/OwnerOverview";
 import MyProperties from "./pages/owner/MyProperties";
+import OwnerPropertyDetails from "./pages/owner/OwnerPropertyDetails";
 import AddProperty from "./pages/owner/AddProperty";
 import Tenants from "./pages/owner/Tenants";
 import RentPayments from "./pages/owner/RentPayments";
@@ -99,6 +100,7 @@ function App() {
         <Route index element={<OwnerOverview />} />
         <Route path="dashboard" element={<OwnerOverview />} />
         <Route path="properties" element={<MyProperties />} />
+        <Route path="properties/:id" element={<OwnerPropertyDetails />} />
         <Route path="add-property" element={<AddProperty />} />
         <Route path="tenants" element={<Tenants />} />
         <Route path="payments" element={<RentPayments />} />

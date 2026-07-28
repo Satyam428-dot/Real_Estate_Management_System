@@ -164,10 +164,19 @@ export default function MyProperties() {
       return;
     }
     try {
-      await axios.delete(`http://localhost:8080/properties/${propertyId}`);
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:8080/properties/${propertyId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert("Property deleted successfully.");
       fetchProperties(); // refresh list
     } catch (error) {
       console.error("Failed to delete property:", error);
+      const errMsg =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Failed to delete property.";
+      alert(errMsg);
     }
   };
 
@@ -290,17 +299,18 @@ export default function MyProperties() {
                 </div>
               </div>
 
-              {/* Bottom: Action buttons */}
+              {/* Bottom: Action buttons (View & Delete only) */}
               <div className="prop-card-actions">
-                <button className="action-btn view-btn" title="View">
-                  <FaEye />
-                </button>
-                <button className="action-btn edit-btn" title="Edit">
-                  <FaEdit />
+                <button
+                  className="action-btn view-btn"
+                  title="View Details"
+                  onClick={() => navigate(`/owner/properties/${property.propertyId}`)}
+                >
+                  <FaEye /> View Details
                 </button>
                 <button
                   className="action-btn delete-btn"
-                  title="Delete"
+                  title="Delete Property"
                   onClick={() => handleDelete(property.propertyId)}
                 >
                   <FaTrash />
