@@ -49,7 +49,20 @@ export default function BuyerOverview() {
       )
       .finally(() => setLoading(false));
 
-    const updateSavedCount = () => favouritesApi.ids().then(({ data }) => setSavedCount(data.length)).catch(() => setSavedCount(0));
+    // Fetch saved properties count from backend API
+    const updateSavedCount = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        axios
+          .get(`${API_URL}/saved-properties/count`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((res) => setSavedCount(res.data))
+          .catch(() => setSavedCount(0));
+      } else {
+        setSavedCount(0);
+      }
+    };
 
     updateSavedCount();
     window.addEventListener("savedPropertiesUpdated", updateSavedCount);

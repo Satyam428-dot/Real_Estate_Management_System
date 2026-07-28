@@ -183,7 +183,24 @@ export default function BrowseProperties() {
   const [selectedBhks, setSelectedBhks] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
 
+  // Saved property IDs from backend
   const [savedProperties, setSavedProperties] = useState([]);
+
+  // Fetch saved property IDs from backend on mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      axios
+        .get(`${API_URL}/saved-properties`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          const savedIds = res.data.map((item) => item.property.propertyId);
+          setSavedProperties(savedIds);
+        })
+        .catch(() => setSavedProperties([]));
+    }
+  }, []);
 
   // Close IntelliSense suggestions on click outside
   useEffect(() => {
@@ -252,13 +269,35 @@ export default function BrowseProperties() {
     );
   }, [locationInput, allProperties]);
 
+  // Toggle favorite: save/unsave property via backend API
   const toggleSaveProperty = async (id) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login to save properties");
+      return;
+    }
+
     const isSaved = savedProperties.includes(id);
+
     try {
-      await (isSaved ? favouritesApi.remove(id) : favouritesApi.save(id));
-      setSavedProperties((prev) => isSaved ? prev.filter((item) => item !== id) : [...prev, id]);
+      if (isSaved) {
+        // Unsave - DELETE request
+        await axios.delete(`${API_URL}/saved-properties/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSavedProperties((prev) => prev.filter((item) => item !== id));
+      } else {
+        // Save - POST request
+        await axios.post(`${API_URL}/saved-properties/${id}`, null, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSavedProperties((prev) => [...prev, id]);
+      }
       window.dispatchEvent(new Event("savedPropertiesUpdated"));
-    } catch { window.alert("We could not update this favourite. Please sign in again and retry."); }
+    } catch (err) {
+      console.error("Failed to save/unsave property:", err);
+      alert("Failed to update saved property. Please try again.");
+    }
   };
 
   // Toggle BHK Pill
