@@ -24,4 +24,6 @@ public interface PropertyService {
 
 	List<PropertyResponseDTO> listAvailableProperties();
 
+	List<PropertyResponseDTO> getPropertiesByOwnerId(Long ownerId);
+
 }

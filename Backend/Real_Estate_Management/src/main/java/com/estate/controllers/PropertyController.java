@@ -50,6 +50,11 @@ public class PropertyController {
 	public ResponseEntity<List<PropertyResponseDTO>> getAvailableProperties() {
 		return ResponseEntity.ok(propertyService.listAvailableProperties());
 	}
+
+	@GetMapping({"/owner/{ownerId}", "/user/{ownerId}"})
+	public ResponseEntity<List<PropertyResponseDTO>> getPropertiesByOwnerId(@PathVariable Long ownerId) {
+		return ResponseEntity.ok(propertyService.getPropertiesByOwnerId(ownerId));
+	}
 	
 	@GetMapping("/{id}")
 	public ResponseEntity<PropertyResponseDTO> getPropertyById(@PathVariable Long id){

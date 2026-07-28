@@ -18,4 +18,7 @@ public interface PropertyRepository extends JpaRepository<Property,Long> {
 
 	@EntityGraph(attributePaths = { "owner", "images" })
 	Optional<Property> findById(Long id);
+
+	@EntityGraph(attributePaths = { "owner", "images" })
+	List<Property> findByOwnerId(Long ownerId);
 }
