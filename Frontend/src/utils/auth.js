@@ -1,5 +1,48 @@
 import { jwtDecode } from "jwt-decode";
 
+export function getUserProfileDetails() {
+  const token = localStorage.getItem("token");
+  const loggedInUserStr = localStorage.getItem("loggedInUser") || localStorage.getItem("user");
+
+  let decoded = {};
+  if (token) {
+    try {
+      decoded = jwtDecode(token);
+    } catch (err) {}
+  }
+
+  let storedUser = {};
+  if (loggedInUserStr) {
+    try {
+      storedUser = JSON.parse(loggedInUserStr);
+    } catch (e) {}
+  }
+
+  const firstName =
+    storedUser.firstName ||
+    decoded.firstName ||
+    (storedUser.email
+      ? storedUser.email.split("@")[0]
+      : decoded.sub
+      ? decoded.sub.split("@")[0]
+      : "Owner");
+
+  const lastName = storedUser.lastName || decoded.lastName || "";
+  const fullName = `${firstName} ${lastName}`.trim();
+  const email = storedUser.email || decoded.sub || decoded.email || "";
+  const role = storedUser.userRole || decoded.role || "OWNER";
+  const userId = storedUser.userId || decoded.userId || storedUser.id;
+
+  return {
+    userId,
+    firstName,
+    lastName,
+    fullName: fullName || "Property Owner",
+    email,
+    role,
+  };
+}
+
 export function getLoggedInUser() {
   const token = localStorage.getItem("token");
   const loggedInUserStr = localStorage.getItem("loggedInUser");

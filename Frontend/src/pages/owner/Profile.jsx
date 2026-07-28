@@ -22,6 +22,8 @@ import {
 
 import "./Profile.css";
 
+import { getUserProfileDetails } from "../../utils/auth";
+
 export default function Profile() {
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
@@ -35,14 +37,10 @@ export default function Profile() {
 
   // User Profile Form State
   const [profile, setProfile] = useState({
-    firstName: "John",
-    lastName: "Owner",
-    email: "john.owner@example.com",
-    phone: "+91 98765 43210",
-    address: "42, Palm Beach Road, Bandra West",
-    city: "Mumbai",
-    state: "Maharashtra",
-    pinCode: "400050",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
   });
 
   // Verification Dynamic States
@@ -52,26 +50,45 @@ export default function Profile() {
   const [selfieFile, setSelfieFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Load logged-in user from localStorage on mount
+  // Load logged-in user profile details on mount
   useEffect(() => {
-    try {
-      const savedUser = JSON.parse(
-        localStorage.getItem("loggedInUser") ||
-          localStorage.getItem("user") ||
-          "{}"
-      );
-      if (savedUser && (savedUser.firstName || savedUser.email)) {
-        setProfile((prev) => ({
-          ...prev,
-          firstName: savedUser.firstName || prev.firstName,
-          lastName: savedUser.lastName || prev.lastName,
-          email: savedUser.email || prev.email,
-          phone: savedUser.phone || prev.phone,
-        }));
-      }
-    } catch (e) {
-      console.warn("Could not parse user from localStorage", e);
+    const details = getUserProfileDetails();
+    if (details) {
+      setProfile((prev) => ({
+        ...prev,
+        firstName: details.firstName || prev.firstName,
+        lastName: details.lastName || prev.lastName,
+        email: details.email || prev.email,
+        phone: details.phone || prev.phone,
+      }));
     }
+
+    const fetchFullProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        let userId = localStorage.getItem("userId");
+        if (!userId && details) userId = details.userId;
+
+        if (userId && token) {
+          const res = await axios.get(`http://localhost:8080/users/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.data) {
+            setProfile((prev) => ({
+              ...prev,
+              firstName: res.data.firstName || prev.firstName,
+              lastName: res.data.lastName || prev.lastName,
+              email: res.data.email || prev.email,
+              phone: res.data.phone || prev.phone,
+            }));
+          }
+        }
+      } catch (e) {
+        console.warn("Could not fetch full user profile from backend:", e);
+      }
+    };
+
+    fetchFullProfile();
   }, []);
 
   // Fetch Owner Verification Details from Backend
@@ -199,13 +216,44 @@ export default function Profile() {
     setPasswordData({ ...passwordData, [name]: value });
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setSavedSuccess(true);
-    // Update local storage user
-    const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
-    localStorage.setItem("user", JSON.stringify({ ...savedUser, ...profile }));
-    setTimeout(() => setSavedSuccess(false), 3000);
+    try {
+      const details = getUserProfileDetails();
+      const token = localStorage.getItem("token");
+      let userId = localStorage.getItem("userId");
+      if (!userId && details) userId = details.userId;
+
+      const payload = {
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        phone: profile.phone,
+      };
+
+      if (userId && token) {
+        await axios.put(`http://localhost:8080/users/${userId}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      setSavedSuccess(true);
+      const savedUser = JSON.parse(
+        localStorage.getItem("loggedInUser") ||
+          localStorage.getItem("user") ||
+          "{}"
+      );
+      const updated = { ...savedUser, ...profile };
+      localStorage.setItem("user", JSON.stringify(updated));
+      localStorage.setItem("loggedInUser", JSON.stringify(updated));
+      setTimeout(() => setSavedSuccess(false), 3000);
+    } catch (error) {
+      console.error("Error updating profile in backend:", error);
+      const errMsg =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Failed to update profile in database.";
+      alert(errMsg);
+    }
   };
 
   const handleUpdatePassword = (e) => {
@@ -377,50 +425,6 @@ export default function Profile() {
                       value={profile.phone}
                       onChange={handleProfileChange}
                       required
-                    />
-                  </div>
-                </div>
-
-                <div className="owner-form-row">
-                  <div className="owner-form-group">
-                    <label>Street Address</label>
-                    <input
-                      type="text"
-                      name="address"
-                      value={profile.address}
-                      onChange={handleProfileChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="owner-form-row cols-3">
-                  <div className="owner-form-group">
-                    <label>City</label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={profile.city}
-                      onChange={handleProfileChange}
-                    />
-                  </div>
-
-                  <div className="owner-form-group">
-                    <label>State</label>
-                    <input
-                      type="text"
-                      name="state"
-                      value={profile.state}
-                      onChange={handleProfileChange}
-                    />
-                  </div>
-
-                  <div className="owner-form-group">
-                    <label>Pin Code</label>
-                    <input
-                      type="text"
-                      name="pinCode"
-                      value={profile.pinCode}
-                      onChange={handleProfileChange}
                     />
                   </div>
                 </div>
