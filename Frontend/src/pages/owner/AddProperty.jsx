@@ -13,7 +13,6 @@ import {
 import "./AddProperty.css";
 
 export default function AddProperty() {
-
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -47,11 +46,54 @@ export default function AddProperty() {
         return;
       }
       const requestConfig = { headers: { Authorization: `Bearer ${token}` } };
-      const propertyResponse = await axios.post("http://localhost:8080/properties", formData, requestConfig);
+      let userId = localStorage.getItem("userId");
+      if (!userId) {
+        try {
+          const loggedInUserStr = localStorage.getItem("loggedInUser") || localStorage.getItem("user");
+          if (loggedInUserStr) {
+            const parsed = JSON.parse(loggedInUserStr);
+            userId = parsed.userId || parsed.id;
+          }
+        } catch (e) {
+          console.error("Error reading userId from localStorage:", e);
+        }
+      }
+
+      if (!userId) {
+        alert("User ID not found. Please log in again.");
+        return;
+      }
+
+      // Check owner verification status from backend table owner_verification
+      const verificationResponse = await axios.get(
+        `http://localhost:8080/verify/owner/${userId}/status`,
+        requestConfig
+      );
+
+      const status =
+        verificationResponse.data?.verification_status ||
+        verificationResponse.data?.verificationStatus;
+
+      // Check if the owner's verification status is APPROVED
+      if (status !== "APPROVED") {
+        alert("First verify yourself before adding a property.");
+        navigate("/owner/profile?tab=verification");
+        return;
+      }
+
+      const propertyResponse = await axios.post(
+        "http://localhost:8080/properties",
+        formData,
+        requestConfig,
+      );
       if (images.length > 0) {
         const imageData = new FormData();
         images.forEach((image) => imageData.append("images", image));
-        await axios.post(`http://localhost:8080/properties/${propertyResponse.data.propertyId}/images`, imageData, requestConfig);
+        await axios.post(
+          `http://localhost:8080/properties/${propertyResponse.data.propertyId}/images`,
+          imageData,
+          requestConfig,
+        );
       }
       alert("Property added successfully!");
       navigate("/owner/properties");
@@ -63,19 +105,22 @@ export default function AddProperty() {
 
   return (
     <div className="add-property-page">
-
       {/* Page Header with Back button */}
       <div className="add-page-header">
-        <button className="back-btn" onClick={() => navigate("/owner/properties")}>
+        <button
+          className="back-btn"
+          onClick={() => navigate("/owner/properties")}
+        >
           <FaArrowLeft /> Back to Properties
         </button>
         <h1 className="add-page-title">Add New Property</h1>
-        <p className="add-page-subtitle">Fill in the details to list your property</p>
+        <p className="add-page-subtitle">
+          Fill in the details to list your property
+        </p>
       </div>
 
       {/* Form Card */}
       <form onSubmit={handleSubmit} className="add-property-form">
-
         {/* Section 1: Property Details */}
         <div className="form-section">
           <h4 className="form-section-title">
@@ -84,7 +129,9 @@ export default function AddProperty() {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Property Title <span className="required">*</span></label>
+              <label>
+                Property Title <span className="required">*</span>
+              </label>
               <input
                 type="text"
                 name="title"
@@ -118,7 +165,9 @@ export default function AddProperty() {
 
           <div className="form-row cols-3">
             <div className="form-group">
-              <label>Price (₹) <span className="required">*</span></label>
+              <label>
+                Price (₹) <span className="required">*</span>
+              </label>
               <input
                 type="number"
                 name="price"
@@ -129,16 +178,28 @@ export default function AddProperty() {
               />
             </div>
             <div className="form-group">
-              <label>Property Type <span className="required">*</span></label>
-              <select name="propertyType" value={formData.propertyType} onChange={handleChange}>
+              <label>
+                Property Type <span className="required">*</span>
+              </label>
+              <select
+                name="propertyType"
+                value={formData.propertyType}
+                onChange={handleChange}
+              >
                 <option value="FLAT">🏢 Flat</option>
                 <option value="HOUSE">🏠 House</option>
                 <option value="VILLA">🏡 Villa</option>
               </select>
             </div>
             <div className="form-group">
-              <label>Listing Type <span className="required">*</span></label>
-              <select name="listingType" value={formData.listingType} onChange={handleChange}>
+              <label>
+                Listing Type <span className="required">*</span>
+              </label>
+              <select
+                name="listingType"
+                value={formData.listingType}
+                onChange={handleChange}
+              >
                 <option value="RENT">📋 For Rent</option>
                 <option value="SALE">💰 For Sale</option>
               </select>
@@ -154,7 +215,9 @@ export default function AddProperty() {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Street Address <span className="required">*</span></label>
+              <label>
+                Street Address <span className="required">*</span>
+              </label>
               <input
                 type="text"
                 name="address"
@@ -168,7 +231,9 @@ export default function AddProperty() {
 
           <div className="form-row cols-3">
             <div className="form-group">
-              <label>City <span className="required">*</span></label>
+              <label>
+                City <span className="required">*</span>
+              </label>
               <input
                 type="text"
                 name="city"
@@ -179,7 +244,9 @@ export default function AddProperty() {
               />
             </div>
             <div className="form-group">
-              <label>State <span className="required">*</span></label>
+              <label>
+                State <span className="required">*</span>
+              </label>
               <input
                 type="text"
                 name="state"
@@ -190,7 +257,9 @@ export default function AddProperty() {
               />
             </div>
             <div className="form-group">
-              <label>Pin Code <span className="required">*</span></label>
+              <label>
+                Pin Code <span className="required">*</span>
+              </label>
               <input
                 type="text"
                 name="pinCode"
@@ -212,18 +281,38 @@ export default function AddProperty() {
           <div className="form-row cols-4">
             <div className="form-group">
               <label>Bedrooms</label>
-              <input type="number" name="bedrooms" value={formData.bedrooms} onChange={handleChange} min="0" />
+              <input
+                type="number"
+                name="bedrooms"
+                value={formData.bedrooms}
+                onChange={handleChange}
+                min="0"
+              />
             </div>
             <div className="form-group">
               <label>Bathrooms</label>
-              <input type="number" name="bathrooms" value={formData.bathrooms} onChange={handleChange} min="0" />
+              <input
+                type="number"
+                name="bathrooms"
+                value={formData.bathrooms}
+                onChange={handleChange}
+                min="0"
+              />
             </div>
             <div className="form-group">
               <label>Halls</label>
-              <input type="number" name="halls" value={formData.halls} onChange={handleChange} min="0" />
+              <input
+                type="number"
+                name="halls"
+                value={formData.halls}
+                onChange={handleChange}
+                min="0"
+              />
             </div>
             <div className="form-group">
-              <label>Area (sqft) <span className="required">*</span></label>
+              <label>
+                Area (sqft) <span className="required">*</span>
+              </label>
               <input
                 type="number"
                 name="areaSqft"
@@ -240,20 +329,30 @@ export default function AddProperty() {
           <h4 className="form-section-title">Property Images</h4>
           <div className="form-group">
             <label>Upload up to 10 images</label>
-            <input type="file" accept="image/*" multiple onChange={(event) => setImages(Array.from(event.target.files).slice(0, 10))} />
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(event) =>
+                setImages(Array.from(event.target.files).slice(0, 10))
+              }
+            />
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="form-actions">
-          <button type="button" className="cancel-btn" onClick={() => navigate("/owner/properties")}>
+          <button
+            type="button"
+            className="cancel-btn"
+            onClick={() => navigate("/owner/properties")}
+          >
             Cancel
           </button>
           <button type="submit" className="submit-btn">
             <FaPlus /> Add Property
           </button>
         </div>
-
       </form>
     </div>
   );

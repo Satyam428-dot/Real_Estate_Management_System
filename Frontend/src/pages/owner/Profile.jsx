@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   FaUser,
   FaEnvelope,
@@ -18,7 +19,15 @@ import {
 import "./Profile.css";
 
 export default function Profile() {
-  const [activeTab, setActiveTab] = useState("personal");
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(tabParam || "personal");
+
+  useEffect(() => {
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   // User Profile Form State
   const [profile, setProfile] = useState({
