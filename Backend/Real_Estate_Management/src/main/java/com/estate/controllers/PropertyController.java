@@ -71,6 +71,11 @@ public class PropertyController {
 			@RequestParam("images") List<MultipartFile> images, Authentication authentication) {
 		return ResponseEntity.ok(propertyService.uploadImages(id, images, authentication.getName()));
 	}
+
+	@DeleteMapping("/{propertyId}/images/{imageId}")
+	public ResponseEntity<PropertyResponseDTO> deletePropertyImage(@PathVariable Long propertyId, @PathVariable Long imageId) {
+		return ResponseEntity.ok(propertyService.deletePropertyImage(propertyId, imageId));
+	}
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> deleteProperty(@PathVariable Long id){

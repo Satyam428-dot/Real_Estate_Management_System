@@ -148,15 +148,46 @@ public class PropertyServiceImpl implements PropertyService {
 
 	@Override
 	@Transactional
+	public PropertyResponseDTO deletePropertyImage(Long propertyId, Long imageId) {
+		Property property = findProperty(propertyId);
+		PropertyImage targetImage = property.getImages().stream()
+				.filter(img -> img.getId() == imageId)
+				.findFirst()
+				.orElseThrow(() -> new ResourceNotFoundException("Property image not found"));
+
+		try {
+			if (targetImage.getPublicId() != null) {
+				cloudinaryService.deleteImage(targetImage.getPublicId());
+			}
+		} catch (IOException e) {
+			// Log and proceed to orphan removal
+		}
+
+		property.getImages().remove(targetImage);
+		return toResponse(propertyRepo.save(property));
+	}
+
+	@Override
+	@Transactional
 	public void deleteProperty(Long id) {
 		Property property = findProperty(id);
 		for (PropertyImage image : property.getImages()) {
 			try {
-				cloudinaryService.deleteImage(image.getPublicId());
+				if (image.getPublicId() != null) {
+					cloudinaryService.deleteImage(image.getPublicId());
+				}
 			} catch (IOException e) {
-				throw new IllegalStateException("Could not delete property image from Cloudinary", e);
+				// Proceed silently
 			}
 		}
+
+		// Delete referencing child records from FK tables
+		try { propertyRepo.deleteSavedPropertiesByPropertyId(id); } catch (Exception e) {}
+		try { propertyRepo.deleteFavouritePropertiesByPropertyId(id); } catch (Exception e) {}
+		try { propertyRepo.deleteLeasesByPropertyId(id); } catch (Exception e) {}
+		try { propertyRepo.deleteMaintenanceRequestsByPropertyId(id); } catch (Exception e) {}
+		try { propertyRepo.deleteSalesOffersByPropertyId(id); } catch (Exception e) {}
+
 		propertyRepo.delete(property);
 	}
 

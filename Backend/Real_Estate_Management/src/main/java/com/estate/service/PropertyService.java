@@ -26,4 +26,6 @@ public interface PropertyService {
 
 	List<PropertyResponseDTO> getPropertiesByOwnerId(Long ownerId);
 
+	PropertyResponseDTO deletePropertyImage(Long propertyId, Long imageId);
+
 }
