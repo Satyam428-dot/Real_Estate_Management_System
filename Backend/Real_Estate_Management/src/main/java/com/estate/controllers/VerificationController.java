@@ -53,4 +53,20 @@ public class VerificationController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 		}
 	}
+
+	// --------------------get owner verification status by ownerId------------
+	@GetMapping({"/owner/{ownerId}/status", "/owners/{ownerId}/status"})
+	public ResponseEntity<?> getOwnerVerificationStatus(@PathVariable Long ownerId) {
+		try {
+			VerificationStatus status = verificationService.getOwnerVerificationStatus(ownerId);
+			String statusString = (status != null) ? status.name() : "NOT_SUBMITTED";
+			return ResponseEntity.ok(Map.of(
+				"ownerId", ownerId,
+				"verificationStatus", statusString,
+				"verification_status", statusString
+			));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
 }

@@ -11,4 +11,5 @@ public interface VerificationService {
 
 	String updateOwnerVerificationStatus(Long verificationId, VerificationStatus status);
 
+	VerificationStatus getOwnerVerificationStatus(Long ownerId);
 }

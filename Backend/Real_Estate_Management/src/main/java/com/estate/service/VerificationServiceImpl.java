@@ -60,4 +60,13 @@ public class VerificationServiceImpl implements VerificationService {
 		return "Verification status successfully updated to " + status;
 	}
 
+	@Override
+	public VerificationStatus getOwnerVerificationStatus(Long ownerId) {
+		OwnerVerification entity = ownerVerificationRepo.findByOwnerId(ownerId);
+		if (entity == null) {
+			return null;
+		}
+		return entity.getVerificationStatus();
+	}
+
 }
