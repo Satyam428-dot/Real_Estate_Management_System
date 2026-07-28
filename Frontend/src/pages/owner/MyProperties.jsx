@@ -16,6 +16,8 @@ import {
 
 import "./MyProperties.css";
 
+import { getUserProfileDetails } from "../../utils/auth";
+
 export default function MyProperties() {
   const navigate = useNavigate();
 
@@ -34,28 +36,54 @@ export default function MyProperties() {
   const fetchProperties = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:8080/properties");
-      setProperties(response.data);
+      const details = getUserProfileDetails();
+      const ownerId = details?.userId || localStorage.getItem("userId");
+
+      let response;
+      if (ownerId) {
+        response = await axios.get(`http://localhost:8080/properties/owner/${ownerId}`);
+      } else {
+        response = await axios.get("http://localhost:8080/properties");
+      }
+      setProperties(response.data || []);
     } catch (error) {
-      console.error("Failed to fetch properties:", error);
+      console.error("Failed to fetch owner properties:", error);
+      // Fallback: fetch all and filter in frontend
+      try {
+        const details = getUserProfileDetails();
+        const ownerId = Number(details?.userId || localStorage.getItem("userId"));
+        const res = await axios.get("http://localhost:8080/properties");
+        if (ownerId && Array.isArray(res.data)) {
+          const ownerProps = res.data.filter((p) => Number(p.ownerId) === ownerId);
+          setProperties(ownerProps);
+        } else {
+          setProperties(res.data || []);
+        }
+      } catch (err) {
+        console.error("Fallback fetch failed", err);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // ===== HELPER: Get status color =====
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "RENTED":    return "#22c55e";
-      case "AVAILABLE": return "#f59e0b";
-      case "SOLD":      return "#8b5cf6";
-      default:          return "#64748b";
+  // ===== HELPER: Get status badge styles =====
+  const getStatusBadgeStyle = (status) => {
+    switch (status?.toUpperCase()) {
+      case "RENTED":
+        return { backgroundColor: "#3b82f6", color: "#ffffff" }; // Blue
+      case "AVAILABLE":
+        return { backgroundColor: "#10b981", color: "#ffffff" }; // Emerald Green
+      case "SOLD":
+        return { backgroundColor: "#8b5cf6", color: "#ffffff" }; // Purple
+      default:
+        return { backgroundColor: "#059669", color: "#ffffff" }; // Fallback Green
     }
   };
 
   // ===== HELPER: Format price =====
   const formatPrice = (price, listingType) => {
-    const formatted = Number(price).toLocaleString("en-IN");
+    const formatted = Number(price || 0).toLocaleString("en-IN");
     return listingType === "RENT"
       ? `₹${formatted} / month`
       : `₹${formatted}`;
@@ -63,15 +91,32 @@ export default function MyProperties() {
 
   // ===== FILTER LOGIC =====
   const filteredProperties = properties.filter((property) => {
-    const matchesSearch = property.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const query = searchTerm.trim().toLowerCase();
+    const titleMatch = property.title ? property.title.toLowerCase().includes(query) : false;
+    const descMatch = property.description ? property.description.toLowerCase().includes(query) : false;
+    const cityMatch = property.city ? property.city.toLowerCase().includes(query) : false;
+    const stateMatch = property.state ? property.state.toLowerCase().includes(query) : false;
+    const addressMatch = property.address ? property.address.toLowerCase().includes(query) : false;
+    const typeMatchStr = property.propertyType ? property.propertyType.toLowerCase().includes(query) : false;
+    const listingMatchStr = property.listingType ? property.listingType.toLowerCase().includes(query) : false;
+
+    const matchesSearch =
+      !query ||
+      titleMatch ||
+      descMatch ||
+      cityMatch ||
+      stateMatch ||
+      addressMatch ||
+      typeMatchStr ||
+      listingMatchStr;
 
     const matchesStatus =
-      statusFilter === "All" || property.status === statusFilter;
+      statusFilter === "All" ||
+      (property.status && property.status.toUpperCase() === statusFilter.toUpperCase());
 
     const matchesType =
-      typeFilter === "All" || property.propertyType === typeFilter;
+      typeFilter === "All" ||
+      (property.propertyType && property.propertyType.toUpperCase() === typeFilter.toUpperCase());
 
     return matchesSearch && matchesStatus && matchesType;
   });
@@ -177,6 +222,8 @@ export default function MyProperties() {
           <option value="FLAT">Flat</option>
           <option value="HOUSE">House</option>
           <option value="VILLA">Villa</option>
+          <option value="PG">PG / Paying Guest</option>
+          <option value="COMMERCIAL">Commercial</option>
         </select>
       </div>
 
@@ -207,10 +254,7 @@ export default function MyProperties() {
                 )}
                 <span
                   className="prop-card-badge"
-                  style={{
-                    backgroundColor: getStatusColor(property.status) + "20",
-                    color: getStatusColor(property.status),
-                  }}
+                  style={getStatusBadgeStyle(property.status)}
                 >
                   {property.status}
                 </span>
