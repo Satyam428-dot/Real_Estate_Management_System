@@ -15,8 +15,8 @@ body.register-active {
   background: #f5f7fb;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: 20px;
+  align-items: center;
+  padding: 32px 20px;
 }
 
 .register-container {
@@ -28,9 +28,9 @@ body.register-active {
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
 }
 
-.form-section {
+.register-form-section {
   flex: 1;
-  padding: 40px 50px;
+  padding: 42px 50px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -39,18 +39,26 @@ body.register-active {
 .brand {
   font-size: 24px;
   font-weight: 700;
-  margin-bottom: 25px;
+  margin-bottom: 18px;
 }
 
-.form-section h1 {
+.register-form-section h1 {
   font-size: clamp(28px, 3vw, 42px);
   font-weight: 700;
 }
 
-.subtitle {
+.register-form-section .subtitle {
   color: #777;
-  margin: 10px 0 25px;
+  margin: 8px 0 22px;
 }
+
+.register-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
+}
+
+.full-width { grid-column: 1 / -1; }
 
 label {
   margin-bottom: 6px;
@@ -60,7 +68,38 @@ label {
 .form-control {
   height: 50px;
   border-radius: 12px;
+  border: 1px solid #d7dce5;
+  padding: 0 14px;
 }
+
+.form-control:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
+}
+
+.password-field { position: relative; }
+
+.password-field .form-control { padding-right: 48px; }
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  display: grid;
+  place-items: center;
+}
+
+.password-toggle:hover,
+.password-toggle:focus-visible { background: #eef2ff; color: #4338ca; }
+
+.password-toggle:focus-visible { outline: 2px solid #4f46e5; outline-offset: 1px; }
 
 .register-btn {
   background: #4f46e5 !important;
@@ -139,7 +178,7 @@ label {
 .image-section {
   flex: 1;
   position: relative;
-  min-height: 650px;
+  min-height: 670px;
 }
 
 .building-image {
@@ -183,7 +222,7 @@ label {
     flex-direction: column;
   }
 
-  .form-section {
+  .register-form-section {
     padding: 35px;
   }
 
@@ -200,9 +239,12 @@ label {
     padding: 10px;
   }
 
-  .form-section {
+  .register-form-section {
     padding: 25px 20px;
   }
+
+  .register-fields { grid-template-columns: 1fr; }
+  .full-width { grid-column: auto; }
 
   .social-buttons {
     flex-direction: column;
