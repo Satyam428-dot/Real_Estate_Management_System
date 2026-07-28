@@ -137,6 +137,7 @@ import buildingImage from "../assets/d1.png";
 import "./css/Register.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { Eye, EyeOff } from "lucide-react";
 
 const Register = () => {
   useEffect(() => {
@@ -154,6 +155,8 @@ const Register = () => {
   const [role, setRole] = useState("CUSTOMER");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -217,7 +220,7 @@ const Register = () => {
     <div className="register-wrapper">
       <div className="register-container">
         {/* Left Form Section */}
-        <div className="form-section">
+        <div className="register-form-section">
           <div className="brand">
             🏠 <span>RealEstate</span>
           </div>
@@ -229,6 +232,7 @@ const Register = () => {
           </p>
 
           <form onSubmit={handleRegister}>
+            <div className="register-fields">
             {/* first Name */}
             <div className="mb-3">
               <label>First Name</label>
@@ -256,7 +260,7 @@ const Register = () => {
             </div>
 
             {/* Email */}
-            <div className="mb-3">
+            <div className="mb-3 full-width">
               <label>Email</label>
 
               <input
@@ -302,56 +306,43 @@ const Register = () => {
             <div className="mb-3">
               <label>Password</label>
 
+              <div className="password-field">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 className="form-control"
                 placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <button type="button" className="password-toggle" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword}>
+                {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+              </button>
+              </div>
             </div>
 
             {/* Confirm Password */}
             <div className="mb-4">
               <label>Confirm Password</label>
 
+              <div className="password-field">
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 className="form-control"
                 placeholder="Confirm password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
+              <button type="button" className="password-toggle" onClick={() => setShowConfirmPassword((visible) => !visible)} aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"} aria-pressed={showConfirmPassword}>
+                {showConfirmPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+              </button>
+              </div>
+            </div>
             </div>
 
             {/* Register Button */}
             <button type="submit" className="btn register-btn w-100">
               Register
             </button>
-
-            <div className="divider">
-              <span>Or Register With</span>
-            </div>
-
-            <div className="social-buttons">
-              <button type="button" className="btn social-btn">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png"
-                  alt="Google"
-                  width="20"
-                />
-                Google
-              </button>
-
-              <button type="button" className="btn social-btn">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/512/0/747.png"
-                  alt="Apple"
-                  width="20"
-                />
-                Apple
-              </button>
-            </div>
 
             <p className="signin-text">
               Already have an account?

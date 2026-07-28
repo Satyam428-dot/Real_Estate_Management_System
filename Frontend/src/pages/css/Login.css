@@ -78,6 +78,30 @@
   border-radius: 12px;
 }
 
+.password-field { position: relative; }
+
+.password-field .custom-input { padding-right: 48px; }
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  display: grid;
+  place-items: center;
+}
+
+.password-toggle:hover,
+.password-toggle:focus-visible { background: #edf3ff; color: #2f6cff; }
+
+.password-toggle:focus-visible { outline: 2px solid #2f6cff; outline-offset: 1px; }
+
 .login-btn {
   background: #2f6cff !important;
   color: white !important;

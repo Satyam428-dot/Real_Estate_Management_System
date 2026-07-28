@@ -3,12 +3,14 @@ import React, { useState } from "react";
 import buildingImage from "../assets/d1.png";
 import "./css/Login.css";
 import axios from "axios";
+import { Eye, EyeOff } from "lucide-react";
 
 const LoginPage = () => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -79,15 +81,18 @@ const LoginPage = () => {
               </div>
 
               {/* Password */}
-              <div className="mb-2">
+              <div className="mb-2 password-field">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className="form-control custom-input"
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+                <button type="button" className="password-toggle" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword}>
+                  {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                </button>
               </div>
 
               <div className="d-flex justify-content-between mb-4">
