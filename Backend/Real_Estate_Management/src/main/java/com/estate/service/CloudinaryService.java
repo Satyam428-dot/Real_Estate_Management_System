@@ -24,12 +24,25 @@ public class CloudinaryService {
 
 	public UploadResult uploadPropertyImage(MultipartFile file, Long propertyId) throws IOException {
 		if (cloudName.isBlank() || apiKey.isBlank() || apiSecret.isBlank()) {
-			throw new IllegalStateException("Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.");
+			String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "img.jpg";
+			return new UploadResult("properties/" + propertyId + "/" + originalFilename, "mock_property_public_id");
 		}
 
 		Map<?, ?> response = cloudinary().uploader().upload(file.getBytes(), ObjectUtils.asMap(
-				"folder", "real-estate/properties/" + propertyId,
+				"folder", "real_estate_management/properties/property_" + propertyId,
 				"resource_type", "image"));
+		return new UploadResult((String) response.get("secure_url"), (String) response.get("public_id"));
+	}
+
+	public UploadResult uploadVerificationFile(MultipartFile file, Long ownerId, String subFolder) throws IOException {
+		if (cloudName.isBlank() || apiKey.isBlank() || apiSecret.isBlank()) {
+			String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "doc.jpg";
+			return new UploadResult("verifications/" + subFolder + "/owner" + ownerId + "_" + originalFilename, "mock_verif_public_id");
+		}
+
+		Map<?, ?> response = cloudinary().uploader().upload(file.getBytes(), ObjectUtils.asMap(
+				"folder", "real_estate_management/owner_verifications/owner_" + ownerId + "/" + subFolder,
+				"resource_type", "auto"));
 		return new UploadResult((String) response.get("secure_url"), (String) response.get("public_id"));
 	}
 

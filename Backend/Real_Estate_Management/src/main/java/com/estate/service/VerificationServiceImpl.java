@@ -1,17 +1,22 @@
 package com.estate.service;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.estate.customExceptions.ResourceNotFoundException;
 import com.estate.dtos.PendingOwnerVerificationDto;
 import com.estate.entities.OwnerVerification;
+import com.estate.entities.User;
 import com.estate.entities.VerificationStatus;
 import com.estate.repository.OwnerVerificationRepository;
+import com.estate.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +26,8 @@ import lombok.RequiredArgsConstructor;
 public class VerificationServiceImpl implements VerificationService {
 
 	private final OwnerVerificationRepository ownerVerificationRepo;
+	private final UserRepository userRepo;
+	private final CloudinaryService cloudinaryService;
 	private final ModelMapper mapper;
 
 	@Override
@@ -67,6 +74,35 @@ public class VerificationServiceImpl implements VerificationService {
 			return null;
 		}
 		return entity.getVerificationStatus();
+	}
+
+	@Override
+	@Transactional
+	public OwnerVerification submitOwnerVerification(Long ownerId, MultipartFile governmentIdProof, MultipartFile selfieImage) throws IOException {
+		OwnerVerification existing = ownerVerificationRepo.findByOwnerId(ownerId);
+		if (existing != null) {
+			throw new IllegalStateException("Verification documents have already been submitted (Status: " + existing.getVerificationStatus() + "). Re-submission is not permitted.");
+		}
+
+		User owner = userRepo.findById(ownerId)
+				.orElseThrow(() -> new ResourceNotFoundException("Owner user not found with ID: " + ownerId));
+
+		CloudinaryService.UploadResult govUpload = cloudinaryService.uploadVerificationFile(governmentIdProof, ownerId, "gov_ids");
+		CloudinaryService.UploadResult selfieUpload = cloudinaryService.uploadVerificationFile(selfieImage, ownerId, "selfies");
+
+		OwnerVerification verification = new OwnerVerification();
+		verification.setOwner(owner);
+		verification.setGovernmentIdProof(govUpload.secureUrl());
+		verification.setSelfieImage(selfieUpload.secureUrl());
+		verification.setVerificationStatus(VerificationStatus.PENDING);
+		verification.setVerificationDatetime(LocalDateTime.now());
+
+		return ownerVerificationRepo.save(verification);
+	}
+
+	@Override
+	public OwnerVerification getOwnerVerificationByOwnerId(Long ownerId) {
+		return ownerVerificationRepo.findByOwnerId(ownerId);
 	}
 
 }
