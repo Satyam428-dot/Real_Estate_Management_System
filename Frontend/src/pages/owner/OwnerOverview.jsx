@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   FaHome,
   FaKey,
@@ -12,18 +13,126 @@ import { NavLink } from "react-router-dom";
 // Recharts components for the two charts
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell, Legend,
+  ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
 
 import "./OwnerOverview.css";
 
 export default function OwnerOverview() {
+  const [statsData, setStatsData] = useState({
+    totalProperties: 12,
+    rentedProperties: 8,
+    totalRentCollected: 125000,
+    totalTenants: 10,
+  });
+
+  const [recentProperties, setRecentProperties] = useState([
+    {
+      name: "Modern Apartment in Downtown",
+      type: "2BHK",
+      location: "Downtown, Mumbai",
+      price: "₹25,000 / month",
+      status: "RENTED",
+      statusColor: "#22c55e",
+    },
+    {
+      name: "Luxury Villa in Green City",
+      type: "4BHK",
+      location: "Green City, Bangalore",
+      price: "₹4,50,00,000",
+      status: "FOR SALE",
+      statusColor: "#8b5cf6",
+    },
+    {
+      name: "Studio Apartment",
+      type: "1BHK",
+      location: "Suburbs, Pune",
+      price: "₹12,000 / month",
+      status: "RENTED",
+      statusColor: "#22c55e",
+    },
+    {
+      name: "Cozy 3BHK House",
+      type: "3BHK",
+      location: "Suburbs, Delhi",
+      price: "₹18,000 / month",
+      status: "VACANT",
+      statusColor: "#3b82f6",
+    },
+  ]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const ownerId = savedUser.id || savedUser.user_id || 17;
+
+      // 1. Fetch properties
+      const propsRes = await fetch("http://localhost:8080/properties");
+      if (propsRes.ok) {
+        const allProps = await propsRes.json();
+        if (allProps && allProps.length > 0) {
+          const rentedCount = allProps.filter((p) => p.status === "RENTED").length;
+          setStatsData((prev) => ({
+            ...prev,
+            totalProperties: allProps.length,
+            rentedProperties: rentedCount || prev.rentedProperties,
+          }));
+
+          const mappedRecent = allProps.slice(0, 4).map((p) => ({
+            name: p.title || "Property",
+            type: `${p.bedrooms || 2}BHK`,
+            location: `${p.city || ""}, ${p.state || ""}`,
+            price: `₹${Number(p.price || 0).toLocaleString("en-IN")}`,
+            status: p.status || "AVAILABLE",
+            statusColor: p.status === "RENTED" ? "#22c55e" : p.status === "AVAILABLE" ? "#3b82f6" : "#8b5cf6",
+          }));
+          setRecentProperties(mappedRecent);
+        }
+      }
+
+      // 2. Fetch leases
+      const leasesRes = await fetch(`http://localhost:8080/leases/owner/${ownerId}`);
+      if (leasesRes.ok) {
+        const ownerLeases = await leasesRes.json();
+        if (ownerLeases && ownerLeases.length > 0) {
+          setStatsData((prev) => ({
+            ...prev,
+            totalTenants: ownerLeases.length,
+          }));
+        }
+      }
+
+      // 3. Fetch rent payments
+      const paymentsRes = await fetch(`http://localhost:8080/payments/owner/${ownerId}`);
+      if (paymentsRes.ok) {
+        const ownerPayments = await paymentsRes.json();
+        if (ownerPayments && ownerPayments.length > 0) {
+          const totalPaid = ownerPayments
+            .filter((p) => p.paymentStatus === "PAID")
+            .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+          if (totalPaid > 0) {
+            setStatsData((prev) => ({
+              ...prev,
+              totalRentCollected: totalPaid,
+            }));
+          }
+        }
+      }
+    } catch (error) {
+      console.warn("Backend offline, original dashboard active:", error);
+    }
+  };
 
   // ===== STAT CARDS DATA =====
   const stats = [
     {
       icon: <FaHome />,
-      value: "12",
+      value: statsData.totalProperties.toString(),
       title: "Total Properties",
       subtitle: "All your properties",
       color: "#3b82f6",
@@ -31,7 +140,7 @@ export default function OwnerOverview() {
     },
     {
       icon: <FaKey />,
-      value: "8",
+      value: statsData.rentedProperties.toString(),
       title: "Rented Properties",
       subtitle: "Currently rented",
       color: "#22c55e",
@@ -39,7 +148,7 @@ export default function OwnerOverview() {
     },
     {
       icon: <FaRupeeSign />,
-      value: "₹1,25,000",
+      value: `₹${statsData.totalRentCollected.toLocaleString("en-IN")}`,
       title: "Monthly Rent",
       subtitle: "Total this month",
       color: "#f59e0b",
@@ -47,7 +156,7 @@ export default function OwnerOverview() {
     },
     {
       icon: <FaUsers />,
-      value: "10",
+      value: statsData.totalTenants.toString(),
       title: "Total Tenants",
       subtitle: "Across all properties",
       color: "#8b5cf6",
@@ -68,107 +177,71 @@ export default function OwnerOverview() {
 
   // ===== PIE/DONUT CHART DATA (Property Status) =====
   const propertyStatusData = [
-    { name: "Rented",   value: 8, color: "#22c55e" },
-    { name: "Vacant",   value: 2, color: "#3b82f6" },
+    { name: "Rented",   value: statsData.rentedProperties, color: "#22c55e" },
+    { name: "Vacant",   value: Math.max(0, statsData.totalProperties - statsData.rentedProperties - 2), color: "#3b82f6" },
     { name: "For Rent", value: 1, color: "#f59e0b" },
     { name: "For Sale", value: 1, color: "#8b5cf6" },
   ];
 
-  const totalProperties = propertyStatusData.reduce(
+  const totalPropsCount = propertyStatusData.reduce(
     (sum, item) => sum + item.value, 0
   );
-
-  // ===== RECENT PROPERTIES DATA =====
-  const recentProperties = [
-    {
-      name: "Modern Apartment in Downtown",
-      type: "2BHK",
-      location: "Downtown, Mumbai",
-      price: "₹25,000 / month",
-      status: "RENTED",
-      statusColor: "#22c55e",
-    },
-    {
-      name: "Luxury Villa in Green City",
-      type: "4BHK",
-      location: "Green City, Bangalore",
-      price: "₹4,50,00,000",
-      status: "FOR SALE",
-      statusColor: "#8b5cf6",
-    },
-    {
-      name: "Studio Apartment",
-      type: "1RK",
-      location: "Electronic City, Bangalore",
-      price: "₹12,000 / month",
-      status: "RENTED",
-      statusColor: "#22c55e",
-    },
-    {
-      name: "Commercial Shop at Main Road",
-      type: "500 sq.ft",
-      location: "Main Road, Pune",
-      price: "₹35,000 / month",
-      status: "VACANT",
-      statusColor: "#3b82f6",
-    },
-  ];
 
   // ===== RECENT ACTIVITIES DATA =====
   const recentActivities = [
     {
       icon: <FaMoneyBillWave />,
-      iconColor: "#22c55e",
       iconBg: "#f0fdf4",
-      text: "Rent received from Rahul Sharma",
-      detail: "Property: Modern Apartment in Downtown",
-      amount: "₹25,000",
+      iconColor: "#22c55e",
+      title: "Rent Received",
+      detail: "Rahul Sharma · Modern Apartment",
+      amount: "+₹25,000",
       time: "2 hours ago",
     },
     {
       icon: <FaWrench />,
+      iconBg: "#fffbe6",
       iconColor: "#f59e0b",
-      iconBg: "#fffbeb",
-      text: "New maintenance request received",
-      detail: "Property: Luxury Villa in Green City",
+      title: "Maintenance Request",
+      detail: "Priya Mehta · Studio Apartment (Plumbing)",
       amount: "",
       time: "5 hours ago",
     },
     {
-      icon: <FaMoneyBillWave />,
-      iconColor: "#22c55e",
-      iconBg: "#f0fdf4",
-      text: "Rent received from Priya Mehta",
-      detail: "Property: Studio Apartment",
-      amount: "₹12,000",
+      icon: <FaUsers />,
+      iconBg: "#eff6ff",
+      iconColor: "#3b82f6",
+      title: "New Tenant Added",
+      detail: "Amit Verma · Cozy 3BHK House",
+      amount: "",
       time: "1 day ago",
     },
     {
-      icon: <FaBuilding />,
-      iconColor: "#3b82f6",
-      iconBg: "#eff6ff",
-      text: "Property \"Commercial Shop\" marked as vacant",
-      detail: "",
-      amount: "",
-      time: "1 day ago",
+      icon: <FaMoneyBillWave />,
+      iconBg: "#f0fdf4",
+      iconColor: "#22c55e",
+      title: "Rent Received",
+      detail: "Sneha Patel · Luxury Villa",
+      amount: "+₹45,000",
+      time: "2 days ago",
     },
   ];
 
   return (
     <div className="owner-overview">
 
-      {/* ===== WELCOME HEADER ===== */}
+      {/* ===== WELCOME SECTION ===== */}
       <div className="welcome-section">
-        <h1 className="welcome-title">Welcome back, John Owner 👋</h1>
+        <h1 className="welcome-title">Dashboard Overview</h1>
         <p className="welcome-subtitle">
-          Here's what's happening with your properties today.
+          Welcome back! Here is what's happening with your properties today.
         </p>
       </div>
 
       {/* ===== STAT CARDS ROW ===== */}
       <div className="stats-row">
-        {stats.map((stat, index) => (
-          <div className="stat-card" key={index}>
+        {stats.map((stat, idx) => (
+          <div className="stat-card" key={idx}>
             <div
               className="stat-icon-box"
               style={{ backgroundColor: stat.bgColor, color: stat.color }}
@@ -176,9 +249,9 @@ export default function OwnerOverview() {
               {stat.icon}
             </div>
             <div className="stat-info">
-              <p className="stat-title">{stat.title}</p>
+              <span className="stat-title">{stat.title}</span>
               <h2 className="stat-value">{stat.value}</h2>
-              <p className="stat-subtitle">{stat.subtitle}</p>
+              <span className="stat-subtitle">{stat.subtitle}</span>
             </div>
           </div>
         ))}
@@ -187,102 +260,99 @@ export default function OwnerOverview() {
       {/* ===== CHARTS ROW ===== */}
       <div className="charts-row">
 
-        {/* LEFT: Rent Collection Line Chart */}
-        <div className="chart-card rent-chart-card">
+        {/* LINE CHART: Rent Collection Trend */}
+        <div className="chart-card">
           <div className="chart-header">
-            <h3 className="chart-title">Rent Collection Overview</h3>
+            <h3 className="chart-title">Rent Collection Trend</h3>
             <select className="chart-dropdown">
               <option>This Month</option>
               <option>Last Month</option>
-              <option>Last 3 Months</option>
+              <option>Last 6 Months</option>
             </select>
           </div>
 
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={rentData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 12, fill: "#94a3b8" }} />
-              <YAxis tick={{ fontSize: 12, fill: "#94a3b8" }} />
-              <Tooltip
-                formatter={(value) => `₹${value.toLocaleString()}`}
-                contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
-              />
-              <Line
-                type="monotone"
-                dataKey="collected"
-                stroke="#22c55e"
-                strokeWidth={2.5}
-                dot={{ r: 4, fill: "#22c55e" }}
-                name="Collected"
-              />
-              <Line
-                type="monotone"
-                dataKey="pending"
-                stroke="#3b82f6"
-                strokeWidth={2.5}
-                strokeDasharray="6 4"
-                dot={{ r: 4, fill: "#3b82f6" }}
-                name="Pending"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <div style={{ width: "100%", height: 260 }}>
+            <ResponsiveContainer>
+              <LineChart data={rentData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} />
+                <YAxis stroke="#94a3b8" fontSize={12} />
+                <Tooltip
+                  formatter={(val) => [`₹${val.toLocaleString("en-IN")}`, ""]}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="collected"
+                  stroke="#3b82f6"
+                  strokeWidth={2.5}
+                  dot={{ r: 4 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="pending"
+                  stroke="#f59e0b"
+                  strokeWidth={2.5}
+                  strokeDasharray="4 4"
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
 
-          {/* Legend below chart */}
           <div className="chart-legend">
             <span className="legend-item">
-              <span className="legend-dot" style={{ backgroundColor: "#22c55e" }}></span>
-              Collected
+              <span className="legend-dot" style={{ backgroundColor: "#3b82f6" }} />
+              Collected Rent
             </span>
             <span className="legend-item">
-              <span className="legend-dot legend-dot-dashed" style={{ backgroundColor: "#3b82f6" }}></span>
-              Pending
+              <span className="legend-dot" style={{ backgroundColor: "#f59e0b" }} />
+              Pending Rent
             </span>
           </div>
         </div>
 
-        {/* RIGHT: Property Status Donut Chart */}
+        {/* DONUT CHART: Property Status */}
         <div className="chart-card status-chart-card">
-          <h3 className="chart-title">Property Status</h3>
+          <div className="chart-header">
+            <h3 className="chart-title">Property Status</h3>
+          </div>
 
           <div className="donut-wrapper">
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie
-                  data={propertyStatusData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  {propertyStatusData.map((entry, index) => (
-                    <Cell key={index} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value, name) => [`${value}`, name]}
-                  contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <div style={{ width: "100%", height: 180 }}>
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={propertyStatusData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={75}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {propertyStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
 
-            {/* Center label inside donut hole */}
             <div className="donut-center-label">
-              <span className="donut-total">{totalProperties}</span>
+              <span className="donut-total">{totalPropsCount}</span>
               <span className="donut-total-text">Total</span>
             </div>
           </div>
 
-          {/* Status Legend */}
           <div className="status-legend">
-            {propertyStatusData.map((item, index) => (
-              <div className="status-legend-item" key={index}>
-                <span className="legend-dot" style={{ backgroundColor: item.color }}></span>
+            {propertyStatusData.map((item, idx) => (
+              <div className="status-legend-item" key={idx}>
+                <span
+                  className="legend-dot"
+                  style={{ backgroundColor: item.color }}
+                />
                 <span className="status-legend-name">{item.name}</span>
-                <span className="status-legend-value">
-                  {item.value} ({((item.value / totalProperties) * 100).toFixed(1)}%)
-                </span>
+                <span className="status-legend-value">{item.value} properties</span>
               </div>
             ))}
           </div>
@@ -290,73 +360,79 @@ export default function OwnerOverview() {
 
       </div>
 
-      {/* ===== BOTTOM ROW: Recent Properties + Recent Activities ===== */}
+      {/* ===== BOTTOM ROW ===== */}
       <div className="bottom-row">
 
-        {/* LEFT: Recent Properties */}
+        {/* RECENT PROPERTIES */}
         <div className="recent-card">
           <div className="recent-header">
             <h3 className="recent-title">Recent Properties</h3>
             <NavLink to="/owner/properties" className="view-all-link">
-              View All Properties
+              View All
             </NavLink>
           </div>
 
           <div className="recent-properties-list">
-            {recentProperties.map((property, index) => (
-              <div className="property-row" key={index}>
-                {/* Property thumbnail placeholder */}
+            {recentProperties.map((prop, idx) => (
+              <div className="property-row" key={idx}>
                 <div className="property-thumb">
                   <FaBuilding />
                 </div>
-
                 <div className="property-details">
-                  <p className="property-name">{property.name}</p>
-                  <p className="property-meta">{property.type} · {property.location}</p>
+                  <h4 className="property-name">{prop.name}</h4>
+                  <p className="property-meta">
+                    {prop.type} · {prop.location}
+                  </p>
                 </div>
-
-                <div className="property-price">{property.price}</div>
-
-                <span
-                  className="property-status-badge"
-                  style={{ backgroundColor: property.statusColor + "18", color: property.statusColor }}
-                >
-                  {property.status}
-                </span>
+                <div style={{ textAlign: "right" }}>
+                  <span className="property-price">{prop.price}</span>
+                  <div>
+                    <span
+                      className="property-status-badge"
+                      style={{
+                        backgroundColor: prop.statusColor + "20",
+                        color: prop.statusColor,
+                      }}
+                    >
+                      {prop.status}
+                    </span>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* RIGHT: Recent Activities */}
+        {/* RECENT ACTIVITIES */}
         <div className="recent-card">
           <div className="recent-header">
-            <h3 className="recent-title">Recent Activities</h3>
-            <span className="view-all-link" style={{ cursor: "pointer" }}>View All</span>
+            <h3 className="recent-title">Recent Activity</h3>
+            <span className="view-all-link" style={{ cursor: "pointer" }}>
+              View All
+            </span>
           </div>
 
           <div className="recent-activities-list">
-            {recentActivities.map((activity, index) => (
-              <div className="activity-row" key={index}>
+            {recentActivities.map((act, idx) => (
+              <div className="activity-row" key={idx}>
                 <div
                   className="activity-icon-box"
-                  style={{ backgroundColor: activity.iconBg, color: activity.iconColor }}
+                  style={{
+                    backgroundColor: act.iconBg,
+                    color: act.iconColor,
+                  }}
                 >
-                  {activity.icon}
+                  {act.icon}
                 </div>
-
                 <div className="activity-info">
-                  <p className="activity-text">{activity.text}</p>
-                  {activity.detail && (
-                    <p className="activity-detail">{activity.detail}</p>
-                  )}
+                  <h4 className="activity-text">{act.title}</h4>
+                  <p className="activity-detail">{act.detail}</p>
                 </div>
-
                 <div className="activity-right">
-                  {activity.amount && (
-                    <span className="activity-amount">{activity.amount}</span>
+                  {act.amount && (
+                    <span className="activity-amount">{act.amount}</span>
                   )}
-                  <span className="activity-time">{activity.time}</span>
+                  <span className="activity-time">{act.time}</span>
                 </div>
               </div>
             ))}
