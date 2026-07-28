@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import axios from "axios";
 import {
   FaUser,
   FaEnvelope,
@@ -13,12 +15,23 @@ import {
   FaFileAlt,
   FaLock,
   FaIdCard,
+  FaClock,
+  FaTimesCircle,
+  FaSpinner,
 } from "react-icons/fa";
 
 import "./Profile.css";
 
 export default function Profile() {
-  const [activeTab, setActiveTab] = useState("personal");
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(tabParam || "personal");
+
+  useEffect(() => {
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   // User Profile Form State
   const [profile, setProfile] = useState({
@@ -32,10 +45,21 @@ export default function Profile() {
     pinCode: "400050",
   });
 
+  // Verification Dynamic States
+  const [verifDetails, setVerifDetails] = useState(null);
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [govIdFile, setGovIdFile] = useState(null);
+  const [selfieFile, setSelfieFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   // Load logged-in user from localStorage on mount
   useEffect(() => {
     try {
-      const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const savedUser = JSON.parse(
+        localStorage.getItem("loggedInUser") ||
+          localStorage.getItem("user") ||
+          "{}"
+      );
       if (savedUser && (savedUser.firstName || savedUser.email)) {
         setProfile((prev) => ({
           ...prev,
@@ -50,14 +74,96 @@ export default function Profile() {
     }
   }, []);
 
-  // Verification State (Matches OwnerVerification backend entity)
-  const [verification] = useState({
-    idType: "Aadhaar Card",
-    idNumber: "XXXX-XXXX-8921",
-    verificationStatus: "APPROVED",
-    governmentIdProofName: "aadhaar_card_john.pdf",
-    ownershipProofName: "sale_deed_bandra.pdf",
-  });
+  // Fetch Owner Verification Details from Backend
+  const fetchVerificationDetails = async () => {
+    try {
+      setFetchLoading(true);
+      const token = localStorage.getItem("token");
+      let userId = localStorage.getItem("userId");
+      if (!userId) {
+        const userObj = JSON.parse(
+          localStorage.getItem("loggedInUser") ||
+            localStorage.getItem("user") ||
+            "{}"
+        );
+        userId = userObj.userId || userObj.id;
+      }
+      if (userId) {
+        const response = await axios.get(
+          `http://localhost:8080/verify/owner/${userId}/details`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
+        setVerifDetails(response.data);
+      }
+    } catch (e) {
+      console.error("Error fetching verification details:", e);
+    } finally {
+      setFetchLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVerificationDetails();
+  }, []);
+
+  // Handle Verification Document Submission to Cloudinary & Backend
+  const handleVerificationSubmit = async (e) => {
+    e.preventDefault();
+    if (!govIdFile || !selfieFile) {
+      alert("Please select both Government ID Proof and Selfie image before submitting.");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    let userId = localStorage.getItem("userId");
+    if (!userId) {
+      const userObj = JSON.parse(
+        localStorage.getItem("loggedInUser") ||
+          localStorage.getItem("user") ||
+          "{}"
+      );
+      userId = userObj.userId || userObj.id;
+    }
+
+    if (!userId) {
+      alert("User session not found. Please log in again.");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("governmentIdProof", govIdFile);
+      formData.append("selfieImage", selfieFile);
+
+      const response = await axios.post(
+        `http://localhost:8080/verify/owner/${userId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        }
+      );
+
+      alert("Verification documents submitted successfully! Status is set to PENDING admin review.");
+      setGovIdFile(null);
+      setSelfieFile(null);
+      fetchVerificationDetails();
+    } catch (error) {
+      console.error("Failed to submit verification documents:", error);
+      const errMsg =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Failed to submit verification documents.";
+      alert(errMsg);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   // Bank & Payout Details State
   const [bankDetails, setBankDetails] = useState({
@@ -112,6 +218,8 @@ export default function Profile() {
     setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
   };
 
+  const currentStatus = verifDetails?.verificationStatus || "NOT_SUBMITTED";
+
   return (
     <div className="owner-profile-container">
       {/* ===== PAGE HEADER ===== */}
@@ -146,10 +254,30 @@ export default function Profile() {
           </h2>
           <span className="owner-role-pill">Property Owner</span>
 
-          <div className="owner-verification-badge">
-            <FaShieldAlt className="owner-shield-icon" />
-            <span>Verified Owner</span>
-          </div>
+          {currentStatus === "APPROVED" && (
+            <div className="owner-verification-badge approved">
+              <FaShieldAlt className="owner-shield-icon" />
+              <span>Verified Owner</span>
+            </div>
+          )}
+          {currentStatus === "PENDING" && (
+            <div className="owner-verification-badge pending">
+              <FaClock className="owner-shield-icon" />
+              <span>Verification Pending</span>
+            </div>
+          )}
+          {currentStatus === "REJECTED" && (
+            <div className="owner-verification-badge rejected">
+              <FaTimesCircle className="owner-shield-icon" />
+              <span>Verification Rejected</span>
+            </div>
+          )}
+          {currentStatus === "NOT_SUBMITTED" && (
+            <div className="owner-verification-badge not-submitted">
+              <FaShieldAlt className="owner-shield-icon" />
+              <span>Unverified Account</span>
+            </div>
+          )}
 
           <div className="owner-sidebar-info-list">
             <div className="owner-info-item">
@@ -313,50 +441,168 @@ export default function Profile() {
                 <FaShieldAlt className="owner-section-title-icon" /> Identity & Property Verification
               </h3>
 
-              <div className="owner-verif-status-box">
-                <div className="owner-status-indicator">
-                  <FaCheckCircle className="owner-status-icon" />
-                  <div>
-                    <h4 className="owner-status-title">Owner Account Verified</h4>
-                    <p className="owner-status-desc">
-                      Your government ID and property documents have been approved by the admin.
-                    </p>
-                  </div>
+              {fetchLoading ? (
+                <div className="owner-verif-loading">
+                  <FaSpinner className="spinner-icon" /> Loading verification status...
                 </div>
-              </div>
-
-              <div className="owner-doc-section-list">
-                <div className="owner-doc-item">
-                  <div className="owner-doc-info">
-                    <FaFileAlt className="owner-doc-icon" />
-                    <div>
-                      <span className="owner-doc-name">Government ID Proof (Aadhaar Card)</span>
-                      <span className="owner-doc-filename">{verification.governmentIdProofName}</span>
+              ) : (
+                <>
+                  {/* STATUS BANNERS */}
+                  {currentStatus === "APPROVED" && (
+                    <div className="owner-verif-status-box approved">
+                      <div className="owner-status-indicator">
+                        <FaCheckCircle className="owner-status-icon approved" />
+                        <div>
+                          <h4 className="owner-status-title approved">Owner Account Verified</h4>
+                          <p className="owner-status-desc">
+                            Your government ID and selfie photo have been reviewed and approved by the admin.
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <span className="owner-doc-status-tag">Verified</span>
-                </div>
+                  )}
 
-                <div className="owner-doc-item">
-                  <div className="owner-doc-info">
-                    <FaFileAlt className="owner-doc-icon" />
-                    <div>
-                      <span className="owner-doc-name">Property Sale Deed / Title Proof</span>
-                      <span className="owner-doc-filename">{verification.ownershipProofName}</span>
+                  {currentStatus === "PENDING" && (
+                    <div className="owner-verif-status-box pending">
+                      <div className="owner-status-indicator">
+                        <FaClock className="owner-status-icon pending" />
+                        <div>
+                          <h4 className="owner-status-title pending">Verification Under Review</h4>
+                          <p className="owner-status-desc">
+                            Your verification documents have been submitted and are currently awaiting admin review.
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <span className="owner-doc-status-tag">Verified</span>
-                </div>
-              </div>
+                  )}
 
-              <div className="owner-upload-box-wrapper">
-                <h4 className="owner-upload-label">Update Verification Document</h4>
-                <div className="owner-upload-dropzone">
-                  <FaFileUpload className="owner-dropzone-icon" />
-                  <p>Click to upload or drag & drop updated document (PDF, PNG, JPG)</p>
-                  <span className="owner-file-size-limit">Maximum file size: 5MB</span>
-                </div>
-              </div>
+                  {currentStatus === "REJECTED" && (
+                    <div className="owner-verif-status-box rejected">
+                      <div className="owner-status-indicator">
+                        <FaTimesCircle className="owner-status-icon rejected" />
+                        <div>
+                          <h4 className="owner-status-title rejected">Verification Rejected</h4>
+                          <p className="owner-status-desc">
+                            Your verification application was rejected by the admin. Document re-submission is disabled. Please contact support.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStatus === "NOT_SUBMITTED" && (
+                    <div className="owner-verif-status-box info">
+                      <div className="owner-status-indicator">
+                        <FaShieldAlt className="owner-status-icon info" />
+                        <div>
+                          <h4 className="owner-status-title info">Verification Documents Required</h4>
+                          <p className="owner-status-desc">
+                            Upload your Government ID proof and a Selfie photo to verify your owner profile before listing properties.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* DISPLAY SUBMITTED DOCUMENTS (If APPROVED, PENDING, or REJECTED) */}
+                  {currentStatus !== "NOT_SUBMITTED" && verifDetails && (
+                    <div className="owner-doc-section-list">
+                      <div className="owner-doc-item">
+                        <div className="owner-doc-info">
+                          <FaFileAlt className="owner-doc-icon" />
+                          <div>
+                            <span className="owner-doc-name">Government ID Proof</span>
+                            {verifDetails.governmentIdProof && (
+                              <a
+                                href={verifDetails.governmentIdProof}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="owner-doc-link"
+                              >
+                                View ID Document
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        <span className={`owner-doc-status-tag ${currentStatus.toLowerCase()}`}>
+                          {currentStatus}
+                        </span>
+                      </div>
+
+                      <div className="owner-doc-item">
+                        <div className="owner-doc-info">
+                          <FaFileAlt className="owner-doc-icon" />
+                          <div>
+                            <span className="owner-doc-name">Selfie Image</span>
+                            {verifDetails.selfieImage && (
+                              <a
+                                href={verifDetails.selfieImage}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="owner-doc-link"
+                              >
+                                View Selfie Photo
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        <span className={`owner-doc-status-tag ${currentStatus.toLowerCase()}`}>
+                          {currentStatus}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* UPLOAD FORM (Only shown when NOT_SUBMITTED) */}
+                  {currentStatus === "NOT_SUBMITTED" ? (
+                    <form onSubmit={handleVerificationSubmit} className="owner-verif-upload-form">
+                      <h4 className="owner-upload-label">Upload Required Documents</h4>
+
+                      <div className="owner-form-row cols-2">
+                        <div className="owner-form-group">
+                          <label>
+                            Government ID Proof (Aadhaar / PAN / DL / Passport) <span className="required-star">*</span>
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={(e) => setGovIdFile(e.target.files[0])}
+                            required
+                          />
+                          {govIdFile && <span className="file-name-preview">Selected: {govIdFile.name}</span>}
+                        </div>
+
+                        <div className="owner-form-group">
+                          <label>
+                            Selfie Image <span className="required-star">*</span>
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setSelfieFile(e.target.files[0])}
+                            required
+                          />
+                          {selfieFile && <span className="file-name-preview">Selected: {selfieFile.name}</span>}
+                        </div>
+                      </div>
+
+                      <div className="owner-form-submit-row mt-3">
+                        <button type="submit" className="owner-save-btn" disabled={isUploading}>
+                          <FaFileUpload /> {isUploading ? "Uploading to Cloudinary..." : "Submit Verification Documents"}
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="owner-no-resubmit-card">
+                      <p>
+                        {currentStatus === "APPROVED" && "🔒 Document submission is closed because your account is already fully verified."}
+                        {currentStatus === "PENDING" && "⏳ Document re-submission is disabled while your verification is pending admin review."}
+                        {currentStatus === "REJECTED" && "❌ Document re-submission is disabled for rejected accounts. Please contact admin support."}
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 

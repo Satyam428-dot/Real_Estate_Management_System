@@ -381,55 +381,137 @@
 .owner-doc-status-tag {
   font-size: 11px;
   font-weight: 700;
-  background-color: #dcfce7;
-  color: #15803d;
   padding: 4px 12px;
   border-radius: 12px;
+  text-transform: uppercase;
 }
 
-.owner-upload-box-wrapper {
-  border-top: 1px solid #f1f5f9;
-  padding-top: 20px;
+.owner-doc-status-tag.approved {
+  background-color: #dcfce7;
+  color: #15803d;
 }
 
-.owner-upload-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 10px 0;
+.owner-doc-status-tag.pending {
+  background-color: #fef3c7;
+  color: #b45309;
 }
 
-.owner-upload-dropzone {
-  border: 2px dashed #cbd5e1;
-  border-radius: 12px;
-  padding: 28px;
-  text-align: center;
-  cursor: pointer;
-  background-color: #f8fafc;
-  transition: all 0.2s ease;
+.owner-doc-status-tag.rejected {
+  background-color: #fee2e2;
+  color: #b91c1c;
 }
 
-.owner-upload-dropzone:hover {
-  border-color: #3b82f6;
+.owner-doc-link {
+  font-size: 12px;
+  color: #2563eb;
+  text-decoration: underline;
+  margin-top: 2px;
+  display: inline-block;
+}
+
+.owner-doc-link:hover {
+  color: #1d4ed8;
+}
+
+/* Avatar Verification Badges */
+.owner-verification-badge.approved {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.owner-verification-badge.pending {
+  background-color: #fffbebf;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.owner-verification-badge.rejected {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.owner-verification-badge.not-submitted {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+/* Dynamic Status Box Themes */
+.owner-verif-status-box.approved {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+.owner-status-icon.approved { color: #16a34a; }
+.owner-status-title.approved { color: #15803d; }
+
+.owner-verif-status-box.pending {
+  background-color: #fffbebf;
+  border: 1px solid #fde68a;
+}
+.owner-status-icon.pending { color: #d97706; }
+.owner-status-title.pending { color: #b45309; }
+
+.owner-verif-status-box.rejected {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+}
+.owner-status-icon.rejected { color: #dc2626; }
+.owner-status-title.rejected { color: #991b1b; }
+
+.owner-verif-status-box.info {
   background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+.owner-status-icon.info { color: #2563eb; }
+.owner-status-title.info { color: #1e40af; }
+
+/* File upload form elements */
+.required-star {
+  color: #ef4444;
 }
 
-.owner-dropzone-icon {
-  font-size: 32px;
-  color: #3b82f6;
-  margin-bottom: 8px;
-}
-
-.owner-upload-dropzone p {
-  font-size: 13.5px;
-  color: #475569;
-  margin: 0 0 4px 0;
-  font-weight: 500;
-}
-
-.owner-file-size-limit {
+.file-name-preview {
   font-size: 11.5px;
-  color: #94a3b8;
+  color: #2563eb;
+  font-weight: 500;
+  margin-top: 4px;
+  display: block;
+}
+
+.owner-verif-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 30px;
+  color: #64748b;
+  font-size: 14px;
+  justify-content: center;
+}
+
+.spinner-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.owner-no-resubmit-card {
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  padding: 16px 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.owner-no-resubmit-card p {
+  margin: 0;
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
 }
 
 /* ===== RESPONSIVE BREAKPOINTS ===== */
