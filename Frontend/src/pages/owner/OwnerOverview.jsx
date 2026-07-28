@@ -79,24 +79,31 @@ export default function OwnerOverview() {
 
   const fetchDashboardData = async () => {
     try {
-      const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      const ownerId = savedUser.id || savedUser.user_id || 17;
+      const details = getUserProfileDetails();
+      const ownerId = details?.userId || localStorage.getItem("userId") || 46;
 
-      // 1. Fetch properties
-      const propsRes = await fetch("http://localhost:8080/properties");
+      // 1. Fetch properties for this owner
+      let propsRes = await fetch(`http://localhost:8080/properties/owner/${ownerId}`);
+      if (!propsRes.ok) {
+        propsRes = await fetch("http://localhost:8080/properties");
+      }
       if (propsRes.ok) {
-        const allProps = await propsRes.json();
-        if (allProps && allProps.length > 0) {
+        let allProps = await propsRes.json();
+        if (Array.isArray(allProps)) {
+          // If endpoint returned all, filter for this owner
+          const filtered = allProps.filter(p => !p.ownerId || Number(p.ownerId) === Number(ownerId));
+          allProps = filtered.length > 0 ? filtered : allProps;
+
           const rentedCount = allProps.filter((p) => p.status === "RENTED").length;
           setStatsData((prev) => ({
             ...prev,
             totalProperties: allProps.length,
-            rentedProperties: rentedCount || prev.rentedProperties,
+            rentedProperties: rentedCount,
           }));
 
           const mappedRecent = allProps.slice(0, 4).map((p) => ({
             name: p.title || "Property",
-            type: `${p.bedrooms || 2}BHK`,
+            type: `${p.bedrooms || 1}BHK`,
             location: `${p.city || ""}, ${p.state || ""}`,
             price: `₹${Number(p.price || 0).toLocaleString("en-IN")}`,
             status: p.status || "AVAILABLE",

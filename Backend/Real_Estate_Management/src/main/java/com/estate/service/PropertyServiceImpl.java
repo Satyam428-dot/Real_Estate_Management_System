@@ -70,6 +70,11 @@ public class PropertyServiceImpl implements PropertyService {
 	}
 
 	@Override
+	public List<PropertyResponseDTO> getPropertiesByOwnerId(Long ownerId) {
+		return propertyRepo.findByOwnerId(ownerId).stream().map(this::toResponse).toList();
+	}
+
+	@Override
 	public PropertyResponseDTO getProperty(Long id) {
 		return toResponse(findProperty(id));
 	}
