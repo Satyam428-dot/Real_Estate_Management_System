@@ -24,7 +24,7 @@ import com.estate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@Transactional
+
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PropertyServiceImpl implements PropertyService {
@@ -64,8 +64,8 @@ public class PropertyServiceImpl implements PropertyService {
 
 	@Override
 	public List<PropertyResponseDTO> listAvailableProperties() {
-		return propertyRepo.findByStatusAndBlacklistFalse(PropertyStatus.AVAILABLE).stream()
-				.map(this::toResponse).toList();
+		return propertyRepo.findByStatusAndBlacklistFalse(PropertyStatus.AVAILABLE).stream().map(this::toResponse)
+				.toList();
 	}
 
 	@Override
@@ -77,21 +77,36 @@ public class PropertyServiceImpl implements PropertyService {
 	@Transactional
 	public PropertyResponseDTO updateProperty(Long id, PropertyUpdateDTO dto) {
 		Property property = findProperty(id);
-		if (dto.getTitle() != null) property.setTitle(dto.getTitle());
-		if (dto.getDescription() != null) property.setDescription(dto.getDescription());
-		if (dto.getPrice() != null) property.setPrice(dto.getPrice());
-		if (dto.getPropertyType() != null) property.setPropertyType(dto.getPropertyType());
-		if (dto.getListingType() != null) property.setListingType(dto.getListingType());
-		if (dto.getAddress() != null) property.setAddress(dto.getAddress());
-		if (dto.getCity() != null) property.setCity(dto.getCity());
-		if (dto.getState() != null) property.setState(dto.getState());
-		if (dto.getPinCode() != null) property.setPinCode(dto.getPinCode());
-		if (dto.getBedrooms() != null) property.setBedrooms(dto.getBedrooms());
-		if (dto.getBathrooms() != null) property.setBathrooms(dto.getBathrooms());
-		if (dto.getHalls() != null) property.setHalls(dto.getHalls());
-		if (dto.getAreaSqft() != null) property.setAreaSqft(dto.getAreaSqft());
-		if (dto.getStatus() != null) property.setStatus(dto.getStatus());
-		if (dto.getBlacklist() != null) property.setBlacklist(dto.getBlacklist());
+		if (dto.getTitle() != null)
+			property.setTitle(dto.getTitle());
+		if (dto.getDescription() != null)
+			property.setDescription(dto.getDescription());
+		if (dto.getPrice() != null)
+			property.setPrice(dto.getPrice());
+		if (dto.getPropertyType() != null)
+			property.setPropertyType(dto.getPropertyType());
+		if (dto.getListingType() != null)
+			property.setListingType(dto.getListingType());
+		if (dto.getAddress() != null)
+			property.setAddress(dto.getAddress());
+		if (dto.getCity() != null)
+			property.setCity(dto.getCity());
+		if (dto.getState() != null)
+			property.setState(dto.getState());
+		if (dto.getPinCode() != null)
+			property.setPinCode(dto.getPinCode());
+		if (dto.getBedrooms() != null)
+			property.setBedrooms(dto.getBedrooms());
+		if (dto.getBathrooms() != null)
+			property.setBathrooms(dto.getBathrooms());
+		if (dto.getHalls() != null)
+			property.setHalls(dto.getHalls());
+		if (dto.getAreaSqft() != null)
+			property.setAreaSqft(dto.getAreaSqft());
+		if (dto.getStatus() != null)
+			property.setStatus(dto.getStatus());
+		if (dto.getBlacklist() != null)
+			property.setBlacklist(dto.getBlacklist());
 		return toResponse(propertyRepo.save(property));
 	}
 
@@ -100,7 +115,8 @@ public class PropertyServiceImpl implements PropertyService {
 	public PropertyResponseDTO uploadImages(Long id, List<MultipartFile> files, String ownerEmail) {
 		Property property = findProperty(id);
 		assertOwnedBy(property, ownerEmail);
-		if (files == null || files.isEmpty()) throw new IllegalArgumentException("At least one image is required");
+		if (files == null || files.isEmpty())
+			throw new IllegalArgumentException("At least one image is required");
 		if (property.getImages().size() + files.size() > MAX_IMAGES_PER_PROPERTY) {
 			throw new IllegalArgumentException("A property can have at most " + MAX_IMAGES_PER_PROPERTY + " images");
 		}
@@ -139,8 +155,7 @@ public class PropertyServiceImpl implements PropertyService {
 	}
 
 	private Property findProperty(Long id) {
-		return propertyRepo.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Property not found"));
+		return propertyRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Property not found"));
 	}
 
 	private User findOwner(String email) {
@@ -179,10 +194,12 @@ public class PropertyServiceImpl implements PropertyService {
 		response.setStatus(property.getStatus());
 		response.setBlacklist(property.getBlacklist());
 		response.setUpdatedAt(property.getUpdatedAt());
-		response.setImages(property.getImages().stream().sorted(Comparator.comparing(PropertyImage::getIsMain).reversed())
-				.map(image -> {
+		response.setImages(property.getImages().stream()
+				.sorted(Comparator.comparing(PropertyImage::getIsMain).reversed()).map(image -> {
 					PropertyImageDTO dto = new PropertyImageDTO();
-					dto.setId(image.getId()); dto.setImageUrl(image.getImageUrl()); dto.setIsMain(image.getIsMain());
+					dto.setId(image.getId());
+					dto.setImageUrl(image.getImageUrl());
+					dto.setIsMain(image.getIsMain());
 					return dto;
 				}).toList());
 		return response;

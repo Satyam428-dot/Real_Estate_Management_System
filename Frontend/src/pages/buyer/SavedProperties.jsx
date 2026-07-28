@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
-  Search,
   Grid,
   List,
   Heart,
@@ -12,141 +12,107 @@ import {
   ChevronDown,
   Building2,
   Home,
-  SlidersHorizontal,
+  Loader,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "./SavedProperties.css";
 
+const API_URL = "http://localhost:8080";
+
 export default function SavedProperties() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
   const [sortOption, setSortOption] = useState("recently-saved");
   const [viewMode, setViewMode] = useState("grid");
+  const [savedProperties, setSavedProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [savedProperties, setSavedProperties] = useState([
-    {
-      id: 1,
-      title: "Modern 3BHK Apartment",
-      location: "Hinjewadi, Pune",
-      price: "₹ 72,00,000",
-      status: "For Sale",
-      tagClass: "tag-sale",
-      type: "sale",
-      beds: "3 Beds",
-      baths: "3 Baths",
-      sqft: "1450 sq.ft",
-      savedDate: "20 May 2024",
-      image:
-        "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 2,
-      title: "Luxury 2BHK Apartment",
-      location: "Baner, Pune",
-      price: "₹ 28,000 /month",
-      status: "For Rent",
-      tagClass: "tag-rent",
-      type: "rent",
-      beds: "2 Beds",
-      baths: "2 Baths",
-      sqft: "1100 sq.ft",
-      savedDate: "18 May 2024",
-      image:
-        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 3,
-      title: "Elegant Villa",
-      location: "Kothrud, Pune",
-      price: "₹ 1,35,00,000",
-      status: "For Sale",
-      tagClass: "tag-sale",
-      type: "sale",
-      beds: "4 Beds",
-      baths: "4 Baths",
-      sqft: "2800 sq.ft",
-      savedDate: "15 May 2024",
-      image:
-        "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 4,
-      title: "Spacious 1BHK Apartment",
-      location: "Wakad, Pune",
-      price: "₹ 16,000 /month",
-      status: "For Rent",
-      tagClass: "tag-rent",
-      type: "rent",
-      beds: "1 Bed",
-      baths: "1 Bath",
-      sqft: "650 sq.ft",
-      savedDate: "12 May 2024",
-      image:
-        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 5,
-      title: "Premium 2BHK Apartment",
-      location: "Kharadi, Pune",
-      price: "₹ 65,00,000",
-      status: "For Sale",
-      tagClass: "tag-sale",
-      type: "sale",
-      beds: "2 Beds",
-      baths: "2 Baths",
-      sqft: "1200 sq.ft",
-      savedDate: "10 May 2024",
-      image:
-        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 6,
-      title: "Furnished 3BHK Apartment",
-      location: "Viman Nagar, Pune",
-      price: "₹ 35,000 /month",
-      status: "For Rent",
-      tagClass: "tag-rent",
-      type: "rent",
-      beds: "3 Beds",
-      baths: "3 Baths",
-      sqft: "1600 sq.ft",
-      savedDate: "8 May 2024",
-      image:
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 7,
-      title: "Independent House",
-      location: "Aundh, Pune",
-      price: "₹ 2,10,00,000",
-      status: "For Sale",
-      tagClass: "tag-sale",
-      type: "sale",
-      beds: "4 Beds",
-      baths: "4 Baths",
-      sqft: "3200 sq.ft",
-      savedDate: "5 May 2024",
-      image:
-        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 8,
-      title: "2BHK Apartment",
-      location: "Kharadi, Pune",
-      price: "₹ 27,000 /month",
-      status: "For Rent",
-      tagClass: "tag-rent",
-      type: "rent",
-      beds: "2 Beds",
-      baths: "2 Baths",
-      sqft: "1050 sq.ft",
-      savedDate: "3 May 2024",
-      image:
-        "https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=600&q=80",
-    },
-  ]);
+  // Fetch saved properties from backend
+  const fetchSavedProperties = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
-  // Handle Unsaving/Removing Property
-  const handleRemoveSaved = (id) => {
-    setSavedProperties((prev) => prev.filter((item) => item.id !== id));
+    try {
+      const res = await axios.get(`${API_URL}/saved-properties`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const formatted = res.data.map((item) => ({
+        id: item.savedId,
+        propertyId: item.property.propertyId,
+        title: item.property.title,
+        location: `${item.property.city}, ${item.property.state}`,
+        price: item.property.price,
+        status: item.property.listingType === "RENT" ? "For Rent" : "For Sale",
+        tagClass:
+          item.property.listingType === "RENT" ? "tag-rent" : "tag-sale",
+        type: item.property.listingType === "RENT" ? "rent" : "sale",
+        beds: `${item.property.bedrooms || 1} Beds`,
+        baths: `${item.property.bathrooms || 1} Baths`,
+        sqft: `${item.property.areaSqft || 0} sq.ft`,
+        savedDate: item.savedOn
+          ? new Date(item.savedOn).toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
+          : "Recently",
+        image:
+          item.property.images?.[0]?.imageUrl ||
+          "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80",
+      }));
+
+      setSavedProperties(formatted);
+    } catch (err) {
+      console.error("Failed to fetch saved properties:", err);
+      setSavedProperties([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSavedProperties();
+  }, []);
+
+  // Listen for save/unsave events from BrowseProperties page
+  useEffect(() => {
+    const handleUpdate = () => fetchSavedProperties();
+    window.addEventListener("savedPropertiesUpdated", handleUpdate);
+    return () =>
+      window.removeEventListener("savedPropertiesUpdated", handleUpdate);
+  }, []);
+
+  // Handle Unsaving/Removing Property via backend
+  const handleRemoveSaved = async (propertyId) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      await axios.delete(`${API_URL}/saved-properties/${propertyId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSavedProperties((prev) =>
+        prev.filter((item) => item.propertyId !== propertyId)
+      );
+      window.dispatchEvent(new Event("savedPropertiesUpdated"));
+    } catch (err) {
+      console.error("Failed to remove saved property:", err);
+      alert("Failed to remove property. Please try again.");
+    }
+  };
+
+  // Format price for display
+  const formatDisplayPrice = (priceVal) => {
+    if (typeof priceVal === "string" && priceVal.includes("₹")) return priceVal;
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(priceVal);
   };
 
   // Filter Properties based on active tab
@@ -154,6 +120,15 @@ export default function SavedProperties() {
     if (activeTab === "sale") return property.type === "sale";
     if (activeTab === "rent") return property.type === "rent";
     return true;
+  });
+
+  // Sort properties
+  const sortedProperties = [...filteredProperties].sort((a, b) => {
+    if (sortOption === "price-low-high")
+      return Number(a.price) - Number(b.price);
+    if (sortOption === "price-high-low")
+      return Number(b.price) - Number(a.price);
+    return b.id - a.id; // recently-saved (newest first)
   });
 
   const countSale = savedProperties.filter((p) => p.type === "sale").length;
@@ -227,64 +202,97 @@ export default function SavedProperties() {
         </div>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div style={{ padding: "60px 0", textAlign: "center" }}>
+          <Loader size={32} className="spinning" />
+          <p style={{ marginTop: "12px", color: "#64748b" }}>
+            Loading saved properties...
+          </p>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && savedProperties.length === 0 && (
+        <div style={{ padding: "60px 0", textAlign: "center" }}>
+          <Heart size={48} color="#cbd5e1" />
+          <h3 style={{ marginTop: "16px", color: "#334155" }}>
+            No Saved Properties
+          </h3>
+          <p style={{ color: "#64748b" }}>
+            Browse properties and click the heart icon to save them here.
+          </p>
+          <button
+            onClick={() => navigate("/buyer/browse")}
+            style={{
+              marginTop: "16px",
+              padding: "10px 24px",
+              background: "#6366f1",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontSize: "14px",
+            }}
+          >
+            Browse Properties
+          </button>
+        </div>
+      )}
+
       {/* Property Grid Container */}
-      <div className={`saved-grid ${viewMode}-view`}>
-        {filteredProperties.map((property) => (
-          <div key={property.id} className="saved-card">
-            {/* Image Container */}
-            <div className="card-image-wrapper">
-              <img src={property.image} alt={property.title} />
-              <span className={`status-badge ${property.tagClass}`}>
-                {property.status}
-              </span>
-              <button
-                className="favorite-btn active"
-                onClick={() => handleRemoveSaved(property.id)}
-                title="Remove from saved"
-              >
-                <Heart size={16} fill="#ef4444" color="#ef4444" />
-              </button>
-            </div>
-
-            {/* Card Content Details */}
-            <div className="card-content">
-              <h3 className="property-title">{property.title}</h3>
-              <p className="property-location">{property.location}</p>
-              <div className="property-price">{property.price}</div>
-
-              {/* Specifications Bar */}
-              <div className="property-specs">
-                <span className="spec-item">
-                  <Bed size={15} /> {property.beds}
+      {!loading && sortedProperties.length > 0 && (
+        <div className={`saved-grid ${viewMode}-view`}>
+          {sortedProperties.map((property) => (
+            <div key={property.id} className="saved-card">
+              {/* Image Container */}
+              <div className="card-image-wrapper">
+                <img src={property.image} alt={property.title} />
+                <span className={`status-badge ${property.tagClass}`}>
+                  {property.status}
                 </span>
-                <span className="spec-item">
-                  <Bath size={15} /> {property.baths}
-                </span>
-                <span className="spec-item">
-                  <Maximize size={15} /> {property.sqft}
-                </span>
-              </div>
-
-              {/* Saved Date & Actions Footer */}
-              <div className="card-footer">
-                <div className="saved-date">
-                  <Calendar size={14} /> Saved on {property.savedDate}
-                </div>
-                <button className="more-options-btn">
-                  <MoreVertical size={16} />
+                <button
+                  className="favorite-btn active"
+                  onClick={() => handleRemoveSaved(property.propertyId)}
+                  title="Remove from saved"
+                >
+                  <Heart size={16} fill="#ef4444" color="#ef4444" />
                 </button>
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
 
-      {/* Load More Button */}
-      {filteredProperties.length > 0 && (
-        <div className="load-more-wrapper">
-          <button className="load-more-btn">
-            Load More Properties <ChevronDown size={16} />
-          </button>
+              {/* Card Content Details */}
+              <div className="card-content">
+                <h3 className="property-title">{property.title}</h3>
+                <p className="property-location">{property.location}</p>
+                <div className="property-price">
+                  {formatDisplayPrice(property.price)}
+                </div>
+
+                {/* Specifications Bar */}
+                <div className="property-specs">
+                  <span className="spec-item">
+                    <Bed size={15} /> {property.beds}
+                  </span>
+                  <span className="spec-item">
+                    <Bath size={15} /> {property.baths}
+                  </span>
+                  <span className="spec-item">
+                    <Maximize size={15} /> {property.sqft}
+                  </span>
+                </div>
+
+                {/* Saved Date & Actions Footer */}
+                <div className="card-footer">
+                  <div className="saved-date">
+                    <Calendar size={14} /> Saved on {property.savedDate}
+                  </div>
+                  <button className="more-options-btn">
+                    <MoreVertical size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -183,17 +183,24 @@ export default function BrowseProperties() {
   const [selectedTypes, setSelectedTypes] = useState([]);
 
   // Persistent Saved / Favorite State via localStorage
-  const [savedProperties, setSavedProperties] = useState(() => {
-    const saved = localStorage.getItem("saved_properties");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return [];
-      }
+    // Saved property IDs from backend
+  const [savedProperties, setSavedProperties] = useState([]);
+
+  // Fetch saved property IDs from backend on mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      axios
+        .get(`${API_URL}/saved-properties`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          const savedIds = res.data.map((item) => item.property.propertyId);
+          setSavedProperties(savedIds);
+        })
+        .catch(() => setSavedProperties([]));
     }
-    return [];
-  });
+  }, []);
 
   // Close IntelliSense suggestions on click outside
   useEffect(() => {
@@ -258,16 +265,35 @@ export default function BrowseProperties() {
     );
   }, [locationInput, allProperties]);
 
-  // Toggle favorite saved property & persist + emit custom event
-  const toggleSaveProperty = (id) => {
-    setSavedProperties((prev) => {
-      const nextSaved = prev.includes(id)
-        ? prev.filter((item) => item !== id)
-        : [...prev, id];
-      localStorage.setItem("saved_properties", JSON.stringify(nextSaved));
+    // Toggle favorite: save/unsave property via backend API
+  const toggleSaveProperty = async (id) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login to save properties");
+      return;
+    }
+
+    const isSaved = savedProperties.includes(id);
+
+    try {
+      if (isSaved) {
+        // Unsave - DELETE request
+        await axios.delete(`${API_URL}/saved-properties/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSavedProperties((prev) => prev.filter((item) => item !== id));
+      } else {
+        // Save - POST request
+        await axios.post(`${API_URL}/saved-properties/${id}`, null, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSavedProperties((prev) => [...prev, id]);
+      }
       window.dispatchEvent(new Event("savedPropertiesUpdated"));
-      return nextSaved;
-    });
+    } catch (err) {
+      console.error("Failed to save/unsave property:", err);
+      alert("Failed to update saved property. Please try again.");
+    }
   };
 
   // Toggle BHK Pill

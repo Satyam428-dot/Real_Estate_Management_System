@@ -48,16 +48,16 @@ export default function BuyerOverview() {
       )
       .finally(() => setLoading(false));
 
-    // Function to calculate live saved properties count from localStorage
+    // Fetch saved properties count from backend API
     const updateSavedCount = () => {
-      const saved = localStorage.getItem("saved_properties");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setSavedCount(Array.isArray(parsed) ? parsed.length : 0);
-        } catch (e) {
-          setSavedCount(0);
-        }
+      const token = localStorage.getItem("token");
+      if (token) {
+        axios
+          .get(`${API_URL}/saved-properties/count`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((res) => setSavedCount(res.data))
+          .catch(() => setSavedCount(0));
       } else {
         setSavedCount(0);
       }
