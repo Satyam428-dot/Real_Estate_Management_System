@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getUserProfileDetails } from "../../utils/auth";
 import {
   FaBell,
   FaChevronDown,
@@ -16,9 +17,23 @@ export default function OwnerNavbar() {
 
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [userProfile, setUserProfile] = useState({
+    fullName: "Property Owner",
+    role: "Owner",
+  });
 
   const profileRef = useRef(null);
   const notifRef = useRef(null);
+
+  useEffect(() => {
+    const details = getUserProfileDetails();
+    if (details && details.fullName) {
+      setUserProfile({
+        fullName: details.fullName,
+        role: details.role === "OWNER" ? "Owner" : details.role,
+      });
+    }
+  }, []);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -132,12 +147,12 @@ export default function OwnerNavbar() {
           >
             <img
               src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-              alt="John Owner"
+              alt={userProfile.fullName}
               className="user-avatar"
             />
             <div className="user-info">
-              <span className="user-name">John Owner</span>
-              <span className="user-role">Owner</span>
+              <span className="user-name">{userProfile.fullName}</span>
+              <span className="user-role">{userProfile.role}</span>
             </div>
             <FaChevronDown
               className={`dropdown-chevron ${showProfileDropdown ? "rotate" : ""}`}

@@ -14,4 +14,6 @@ public class LoginResponseDto {
 	private Long userId;
 	private String email;
 	private UserRole userRole;
+	private String firstName;
+	private String lastName;
 }

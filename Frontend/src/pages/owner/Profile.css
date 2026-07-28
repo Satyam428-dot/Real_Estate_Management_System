@@ -272,7 +272,7 @@
 
 .owner-form-submit-row {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   padding-top: 10px;
 }
 

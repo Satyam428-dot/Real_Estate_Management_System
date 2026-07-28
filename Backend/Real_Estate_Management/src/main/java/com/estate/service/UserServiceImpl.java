@@ -114,4 +114,16 @@ public class UserServiceImpl implements UserService {
 		return userRepo.save(user);
 	}
 
+	@Override
+	@Transactional
+	public User updateUserById(long id, ProfileUpdateRequest request) {
+		User user = getUserById(id);
+		user.setFirstName(request.getFirstName().trim());
+		user.setLastName(request.getLastName().trim());
+		if (request.getPhone() != null) {
+			user.setPhone(request.getPhone().trim());
+		}
+		return userRepo.save(user);
+	}
+
 }

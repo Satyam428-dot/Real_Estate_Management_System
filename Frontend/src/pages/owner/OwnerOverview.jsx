@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getUserProfileDetails } from "../../utils/auth";
 import {
   FaHome,
   FaKey,
@@ -19,12 +20,23 @@ import {
 import "./OwnerOverview.css";
 
 export default function OwnerOverview() {
+  const [userProfile, setUserProfile] = useState({
+    fullName: "Property Owner",
+  });
+
   const [statsData, setStatsData] = useState({
     totalProperties: 12,
     rentedProperties: 8,
     totalRentCollected: 125000,
     totalTenants: 10,
   });
+
+  useEffect(() => {
+    const details = getUserProfileDetails();
+    if (details && details.fullName) {
+      setUserProfile({ fullName: details.fullName });
+    }
+  }, []);
 
   const [recentProperties, setRecentProperties] = useState([
     {
@@ -232,9 +244,9 @@ export default function OwnerOverview() {
 
       {/* ===== WELCOME SECTION ===== */}
       <div className="welcome-section">
-        <h1 className="welcome-title">Dashboard Overview</h1>
+        <h1 className="welcome-title">Welcome back, {userProfile.fullName}!</h1>
         <p className="welcome-subtitle">
-          Welcome back! Here is what's happening with your properties today.
+          Here is what's happening with your properties today.
         </p>
       </div>
 
