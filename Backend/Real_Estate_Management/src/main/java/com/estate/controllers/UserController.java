@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/users")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 public class UserController {
 	private final UserService userService;
@@ -121,6 +123,15 @@ public class UserController {
 	@PutMapping("/me")
 	public ResponseEntity<?> updateMyProfile(Authentication authentication, @Valid @RequestBody ProfileUpdateRequest request) {
 		return ResponseEntity.ok(toProfileResponse(userService.updateMyProfile(authentication.getName(), request)));
+	}
+
+	@PutMapping("/{id}")
+	public ResponseEntity<?> updateUserById(@PathVariable long id, @Valid @RequestBody ProfileUpdateRequest request) {
+		try {
+			return ResponseEntity.ok(toProfileResponse(userService.updateUserById(id, request)));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		}
 	}
 
 	private UserProfileResponse toProfileResponse(User user) {

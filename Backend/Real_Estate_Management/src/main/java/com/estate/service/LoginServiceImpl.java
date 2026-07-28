@@ -42,7 +42,7 @@ public class LoginServiceImpl implements LoginService {
 		String tokenString = jwtUtil.generateToken(userEntity);
 
 		// Step 4:Return Response DTO
-		return new LoginResponseDto(tokenString, userEntity.getId(), userEntity.getEmail(), userEntity.getUserRoles());
+		return new LoginResponseDto(tokenString, userEntity.getId(), userEntity.getEmail(), userEntity.getUserRoles(), userEntity.getFirstName(), userEntity.getLastName());
 	}
 
 }

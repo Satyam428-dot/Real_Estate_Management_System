@@ -27,4 +27,6 @@ public interface UserService {
 
 	User updateMyProfile(String email, ProfileUpdateRequest request);
 
+	User updateUserById(long id, ProfileUpdateRequest request);
+
 }
