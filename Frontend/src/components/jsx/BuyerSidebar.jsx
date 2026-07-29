@@ -35,7 +35,7 @@ export default function BuyerSidebar() {
       <div className="brand">
         <Building className="brand-logo" size={26} />
         <div>
-          <h2>Real Estate</h2>
+          <h2>PROPERTY HQ</h2>
           <p>Find Your Dream Property</p>
         </div>
       </div>

@@ -17,23 +17,51 @@ import {
   Trees,
   Zap,
   Info,
-  Map,
+  Map as MapIcon,
   ArrowLeft,
   Star,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { GoogleMap, useJsApiLoader, MarkerF } from "@react-google-maps/api";
 import "./PropertyDetails.css";
+
+// Map Container Styling
+const mapContainerStyle = {
+  width: "100%",
+  height: "350px",
+  borderRadius: "12px",
+};
+
+// Map Initial Settings (Centered on Baner, Pune)
+const mapCenter = {
+  lat: 18.559,
+  lng: 73.7868,
+};
+
+const mapOptions = {
+  disableDefaultUI: false,
+  zoomControl: true,
+  streetViewControl: false,
+  mapTypeControl: false,
+};
 
 export default function PropertyDetails() {
   const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState("Overview");
 
+  // Load Google Maps Script
+  const { isLoaded, loadError } = useJsApiLoader({
+  id: "google-map-script",
+  googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
+});
+
   const propertyData = {
     id: "PRP-240521-001",
     title: "Luxury 3BHK Apartment",
     verified: true,
     location: "Baner, Pune, Maharashtra",
+    coordinates: { lat: 18.559, lng: 73.7868 }, // Coordinates for Baner, Pune
     price: "₹1,25,00,000",
     pricePerSqft: "₹8,620 / sq.ft",
     priceNegotiable: true,
@@ -57,7 +85,7 @@ export default function PropertyDetails() {
     owner: {
       name: "Atharv Dadhe",
       role: "Property Owner",
-      phone: "7747926022", // Country code +91 included without spaces or special characters
+      phone: "7747926022",
       rating: 4.8,
       reviewsCount: 32,
       avatar:
@@ -88,26 +116,22 @@ export default function PropertyDetails() {
     ],
   };
 
-  // WhatsApp Integration Handler
   const handleWhatsAppClick = () => {
     const phoneNumber = propertyData.owner.phone;
-
-    // Custom pre-filled message
     const customMessage = `Hello ${propertyData.owner.name}, I am interested in your property "${propertyData.title}" (ID: ${propertyData.id}) located at ${propertyData.location} listed for ${propertyData.price}. Please provide more details!`;
-
-    // Encode message string for safe URL construction
     const encodedMessage = encodeURIComponent(customMessage);
-
-    // Build WhatsApp Universal API Link
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-
-    // Redirect to WhatsApp direct chat
     window.open(whatsappUrl, "_blank");
+  };
+
+  const handleOpenExternalMap = () => {
+    const query = encodeURIComponent(`${propertyData.title}, ${propertyData.location}`);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, "_blank");
   };
 
   return (
     <div className="property-details-container">
-      {/* Top Header Breadcrumb & Actions */}
+      {/* Header */}
       <div className="pdetails-header">
         <div className="breadcrumbs">
           <span onClick={() => navigate("/buyer")} className="link-crumb">
@@ -163,9 +187,9 @@ export default function PropertyDetails() {
 
       {/* Main Grid Layout */}
       <div className="pdetails-main-layout">
-        {/* Left Column: Photos, Details, Tabs */}
+        {/* Left Column */}
         <div className="pdetails-left-content">
-          {/* Gallery Section */}
+          {/* Gallery */}
           <div className="property-gallery">
             <div className="gallery-main">
               <span className="featured-badge">Featured</span>
@@ -185,7 +209,7 @@ export default function PropertyDetails() {
             </div>
           </div>
 
-          {/* Quick Info Spec Bar */}
+          {/* Quick Specs */}
           <div className="quick-specs-bar">
             <div className="spec-item">
               <div className="spec-icon">
@@ -234,7 +258,7 @@ export default function PropertyDetails() {
             </div>
           </div>
 
-          {/* Navigation Tabs */}
+          {/* Tabs */}
           <div className="pdetails-tabs">
             {["Overview", "Amenities", "Location", "Floor Plan", "Reviews (28)"].map(
               (tab) => (
@@ -251,7 +275,7 @@ export default function PropertyDetails() {
             )}
           </div>
 
-          {/* Tab 1: Overview & About Property */}
+          {/* Overview */}
           <div className="pdetails-section-card">
             <div className="about-property-split">
               <div className="about-text-col">
@@ -295,33 +319,51 @@ export default function PropertyDetails() {
             </div>
           </div>
 
-          {/* Location Map Section */}
+          {/* Interactive Google Map Section */}
           <div className="pdetails-section-card location-card">
             <div className="location-card-header">
               <div>
                 <h3>Location</h3>
                 <p className="loc-text">{propertyData.location} 411045</p>
               </div>
-              <button className="btn-view-map">
-                <Map size={14} /> View on Map
+              <button className="btn-view-map" onClick={handleOpenExternalMap}>
+                <MapIcon size={14} /> Open in Google Maps
               </button>
             </div>
-            <div className="map-embed-wrapper">
-              <img
-                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1000&q=80"
-                alt="Map View Location"
-              />
-              <div className="map-pin-overlay">
-                <MapPin size={24} color="#ef4444" fill="#ef4444" />
-                <span>{propertyData.title}</span>
-              </div>
+
+            <div className="map-embed-wrapper" style={{ minHeight: "350px" }}>
+              {loadError && (
+                <div className="map-error">
+                  <p>Unable to load Google Maps. Please check your API key.</p>
+                </div>
+              )}
+
+              {!isLoaded && !loadError && (
+                <div className="map-loading" style={{ height: "350px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span>Loading Map...</span>
+                </div>
+              )}
+
+              {isLoaded && (
+                <GoogleMap
+                  mapContainerStyle={mapContainerStyle}
+                  center={propertyData.coordinates}
+                  zoom={15}
+                  options={mapOptions}
+                >
+                  <MarkerF
+                    position={propertyData.coordinates}
+                    title={propertyData.title}
+                  />
+                </GoogleMap>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Right Sidebar Widgets */}
+        {/* Right Sidebar */}
         <div className="pdetails-sidebar">
-          {/* Price & Action Box */}
+          {/* Price & Action Widget */}
           <div className="widget-card price-action-widget">
             <div className="price-tag-row">
               <span className="main-price">{propertyData.price}</span>
@@ -357,7 +399,7 @@ export default function PropertyDetails() {
             </div>
           </div>
 
-          {/* Owner Profile Card */}
+          {/* Owner Profile Widget */}
           <div className="widget-card owner-widget">
             <div className="owner-profile">
               <img
@@ -378,7 +420,7 @@ export default function PropertyDetails() {
             </div>
           </div>
 
-          {/* Property Highlights */}
+          {/* Property Highlights Widget */}
           <div className="widget-card highlights-widget">
             <h3>Property Highlights</h3>
             <ul className="highlights-list">
@@ -391,7 +433,7 @@ export default function PropertyDetails() {
             </ul>
           </div>
 
-          {/* Amenities Summary */}
+          {/* Amenities Widget */}
           <div className="widget-card amenities-widget">
             <h3>Amenities</h3>
             <div className="amenities-grid">
