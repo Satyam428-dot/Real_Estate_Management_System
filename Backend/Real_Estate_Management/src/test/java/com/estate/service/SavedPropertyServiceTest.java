@@ -24,6 +24,7 @@ import com.estate.entities.User;
 import com.estate.entities.UserRole;
 import com.estate.entities.enums.ListingType;
 import com.estate.entities.enums.PropertyStatus;
+import com.estate.repository.NotificationRepository;
 import com.estate.repository.PropertyRepository;
 import com.estate.repository.SavedPropertyRepository;
 import com.estate.repository.UserRepository;
@@ -39,6 +40,9 @@ class SavedPropertyServiceTest {
 
 	@Mock
 	private UserRepository userRepo;
+
+	@Mock
+	private NotificationRepository notificationRepo;
 
 	@InjectMocks
 	private SavedPropertyServiceImpl savedPropertyService;

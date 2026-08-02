@@ -10,10 +10,12 @@ import com.estate.customExceptions.ResourceNotFoundException;
 import com.estate.customExceptions.UserNotFoundException;
 import com.estate.dtos.ScheduleVisitRequestDTO;
 import com.estate.dtos.VisitResponseDTO;
+import com.estate.entities.Notification;
 import com.estate.entities.Property;
 import com.estate.entities.PropertyVisit;
 import com.estate.entities.User;
 import com.estate.entities.enums.VisitStatus;
+import com.estate.repository.NotificationRepository;
 import com.estate.repository.PropertyRepository;
 import com.estate.repository.PropertyVisitRepository;
 import com.estate.repository.UserRepository;
@@ -28,6 +30,7 @@ public class PropertyVisitServiceImpl implements PropertyVisitService {
 	private final PropertyVisitRepository visitRepo;
 	private final PropertyRepository propertyRepo;
 	private final UserRepository userRepo;
+	private final NotificationRepository notificationRepo;
 
 	@Override
 	@Transactional
@@ -46,6 +49,27 @@ public class PropertyVisitServiceImpl implements PropertyVisitService {
 				.messageToOwner(dto.getMessageToOwner()).status(VisitStatus.PENDING).build();
 
 		PropertyVisit savedVisit = visitRepo.save(visit);
+
+		// Notify Buyer
+		Notification buyerNotif = new Notification();
+		buyerNotif.setTitle("Property Visit Scheduled");
+		buyerNotif.setMessage("Your visit for \"" + property.getTitle() + "\" is scheduled on " + dto.getVisitDate() + " at " + dto.getTimeSlot());
+		buyerNotif.setCategory("Bookings & Visits");
+		buyerNotif.setUser(buyer);
+		buyerNotif.setRead(false);
+		notificationRepo.save(buyerNotif);
+
+		// Notify Owner if available
+		if (owner != null) {
+			Notification ownerNotif = new Notification();
+			ownerNotif.setTitle("New Visit Request");
+			ownerNotif.setMessage("A new visit request for \"" + property.getTitle() + "\" on " + dto.getVisitDate() + " was submitted by " + dto.getFullName());
+			ownerNotif.setCategory("Bookings & Visits");
+			ownerNotif.setUser(owner);
+			ownerNotif.setRead(false);
+			notificationRepo.save(ownerNotif);
+		}
+
 		return mapToDTO(savedVisit);
 	}
 
