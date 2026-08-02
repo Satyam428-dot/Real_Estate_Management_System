@@ -4,6 +4,7 @@ import buildingImage from "../assets/d1.png";
 import "./css/Login.css";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "react-toastify";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -30,6 +31,8 @@ const LoginPage = () => {
       // Store complete user object
       localStorage.setItem("loggedInUser", JSON.stringify(user));
 
+      toast.success("Welcome back! Login successful.");
+
       // Role-based navigation
       if (user.userRole === "ADMIN") {
         navigate("/admin/dashboard");
@@ -39,8 +42,8 @@ const LoginPage = () => {
         navigate("/buyer/dashboard");
       }
     } catch (error) {
-      console.log("Error logging in");
-      alert("❌ Invalid Email or Password");
+      console.log("Error logging in", error);
+      toast.error("Invalid Email or Password. Please try again.");
     }
   };
 

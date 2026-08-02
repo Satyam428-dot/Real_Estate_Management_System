@@ -76,11 +76,11 @@ export default function ScheduleAVisit() {
         },
       });
 
-      alert("Property visit scheduled successfully! Data saved to database.");
+      toast.success("Property visit scheduled successfully!");
       navigate("/buyer/visits");
     } catch (err) {
       console.error("Failed to save scheduled visit:", err);
-      alert(
+      toast.error(
         "Failed to schedule visit: " +
           (err.response?.data?.message || err.message || "Unknown error occurred.")
       );

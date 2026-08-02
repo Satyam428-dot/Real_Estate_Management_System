@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 import {
   Calendar as CalendarIcon,
   CheckCircle2,
@@ -77,10 +78,10 @@ export default function ScheduledVisits() {
             : item
         )
       );
-      alert("Visit request cancelled successfully!");
+      toast.success("Visit request cancelled successfully!");
     } catch (err) {
       console.error("Error cancelling visit:", err);
-      alert("Failed to cancel visit");
+      toast.error("Failed to cancel visit");
     }
   };
 
