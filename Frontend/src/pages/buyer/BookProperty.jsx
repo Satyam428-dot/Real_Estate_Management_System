@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 import {
   ShieldCheck,
   CheckCircle,
@@ -15,28 +17,92 @@ import "./BookProperty.css";
 
 export default function BookProperty() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Form State
+  const [property, setProperty] = useState(location.state?.property || null);
+  const loggedUser = JSON.parse(localStorage.getItem("user") || "{}");
+
   const [formData, setFormData] = useState({
-    fullName: "Abhishek Dhoran",
-    email: "abhishek.dhoran@gmail.com",
-    phone: "+91 98765 43210",
-    bookingDate: "2024-05-25",
-    bookingType: "Book Property",
-    tokenAmount: "50,000",
+    fullName: loggedUser.firstName ? `${loggedUser.firstName} ${loggedUser.lastName || ''}`.trim() : "Abhishek Dhoran",
+    email: loggedUser.email || "abhishek.dhoran@gmail.com",
+    phone: loggedUser.phone || "+91 98765 43210",
+    bookingDate: new Date().toISOString().split("T")[0],
+    bookingType: "BOOK_PROPERTY",
+    tokenAmount: "50000",
     message: "",
   });
+
+  const [submitting, setSubmitting] = useState(false);
+  const [loadingProperty, setLoadingProperty] = useState(false);
+
+  useEffect(() => {
+    if (!property) {
+      setLoadingProperty(true);
+      axios.get("http://localhost:8080/properties")
+        .then((res) => {
+          if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+            setProperty(res.data[0]);
+          }
+        })
+        .catch((err) => console.error("Error fetching properties for booking:", err))
+        .finally(() => setLoadingProperty(false));
+    }
+  }, [property]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Logic for booking submission
-    alert("Booking order placed successfully!");
-    navigate("/buyer/bookings");
+
+    const targetPropertyId = property?.id || property?.propertyId;
+
+    if (!targetPropertyId) {
+      toast.warn("No valid property selected. Please select a property to book.");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      
+      let parsedAmount = parseFloat(formData.tokenAmount.toString().replace(/,/g, ""));
+      if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        parsedAmount = 50000;
+      }
+
+      const payload = {
+        propertyId: targetPropertyId,
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        bookingDate: formData.bookingDate,
+        bookingType: formData.bookingType,
+        tokenAmount: parsedAmount,
+        messageToOwner: formData.message,
+      };
+
+      await axios.post("http://localhost:8080/bookings", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      toast.success("Booking placed successfully!");
+      navigate("/buyer/bookings");
+    } catch (err) {
+      console.error("Failed to place booking:", err);
+      toast.error(
+        "Failed to place booking: " +
+          (err.response?.data?.message || err.message || "Unknown error occurred.")
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -71,29 +137,27 @@ export default function BookProperty() {
       <div className="property-banner-card">
         <div className="banner-image-wrapper">
           <img
-            src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"
-            alt="Luxury 3BHK Apartment"
+            src={property?.images?.[0]?.imageUrl || property?.image || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"}
+            alt={property?.title || "Property"}
           />
         </div>
         <div className="banner-details">
           <div className="title-row">
-            <h3>Luxury 3BHK Apartment</h3>
+            <h3>{property?.title || "Property Details Loading..."}</h3>
             <span className="verified-badge">
               <CheckCircle size={14} /> Verified Property
             </span>
           </div>
-          <p className="location-text">Baner, Pune, Maharashtra</p>
+          <p className="location-text">{property?.address || property?.location ? `${property.address || property.location}, ${property.city || ''}` : "Location N/A"}</p>
 
           <div className="specs-pills-row">
-            <span className="spec-pill">🛏️ 3 Beds</span>
-            <span className="spec-pill">🛁 3 Baths</span>
-            <span className="spec-pill">📐 1450 sq.ft</span>
-            <span className="spec-pill">🚘 1 Parking</span>
+            <span className="spec-pill">🛏️ {property?.bedrooms || property?.beds || 0} Beds</span>
+            <span className="spec-pill">🛁 {property?.bathrooms || property?.baths || 0} Baths</span>
+            <span className="spec-pill">📐 {property?.areaSqft || property?.sqft || 0} sq.ft</span>
           </div>
 
           <div className="price-tag-row">
-            <span className="price-val">₹1,25,00,000</span>
-            <span className="per-sqft-val">(₹8,620 / sq.ft)</span>
+            <span className="price-val">₹{property?.price ? Number(property.price).toLocaleString("en-IN") : "N/A"}</span>
           </div>
         </div>
       </div>
@@ -170,9 +234,9 @@ export default function BookProperty() {
                   value={formData.bookingType}
                   onChange={handleChange}
                 >
-                  <option value="Book Property">Book Property</option>
-                  <option value="Token Payment">Token Payment</option>
-                  <option value="Full Purchase Advance">Full Purchase Advance</option>
+                  <option value="BOOK_PROPERTY">Book Property</option>
+                  <option value="TOKEN_PAYMENT">Token Payment</option>
+                  <option value="FULL_PURCHASE_ADVANCE">Full Purchase Advance</option>
                 </select>
               </div>
 
@@ -230,27 +294,27 @@ export default function BookProperty() {
             <div className="summary-list">
               <div className="summary-item">
                 <span className="lbl">Property</span>
-                <span className="val bold">Luxury 3BHK Apartment</span>
+                <span className="val bold">{property?.title || "Property"}</span>
               </div>
               <div className="summary-item">
                 <span className="lbl">Location</span>
-                <span className="val bold">Baner, Pune, Maharashtra</span>
+                <span className="val bold">{property?.address || property?.location ? `${property.address || property.location}, ${property.city || ''}` : "N/A"}</span>
               </div>
               <div className="summary-item">
                 <span className="lbl">Price</span>
-                <span className="val">₹1,25,00,000</span>
+                <span className="val">₹{property?.price ? Number(property.price).toLocaleString("en-IN") : "N/A"}</span>
               </div>
               <div className="summary-item">
                 <span className="lbl">Booking Type</span>
-                <span className="val">Book Property</span>
+                <span className="val">{formData.bookingType.replace(/_/g, " ")}</span>
               </div>
               <div className="summary-item">
                 <span className="lbl">Booking Date</span>
-                <span className="val">25 May 2024</span>
+                <span className="val">{formData.bookingDate}</span>
               </div>
               <div className="summary-item">
                 <span className="lbl">Token Amount</span>
-                <span className="val">₹50,000</span>
+                <span className="val">₹{formData.tokenAmount}</span>
               </div>
             </div>
 
@@ -261,11 +325,11 @@ export default function BookProperty() {
             <div className="summary-list">
               <div className="summary-item">
                 <span className="lbl">Property Price</span>
-                <span className="val">₹1,25,00,000</span>
+                <span className="val">₹{property?.price ? Number(property.price).toLocaleString("en-IN") : "N/A"}</span>
               </div>
               <div className="summary-item">
                 <span className="lbl">Token Amount</span>
-                <span className="val">₹50,000</span>
+                <span className="val">₹{formData.tokenAmount}</span>
               </div>
               <div className="summary-item total-row">
                 <span className="lbl-total">Total Amount</span>

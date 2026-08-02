@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   CheckCircle2,
   Clock,
@@ -17,7 +18,7 @@ import {
 } from "lucide-react";
 import "./MyBookings.css";
 
-const bookingsData = [
+const fallbackBookingsData = [
   {
     id: "BK-240520-001",
     title: "Luxury 2BHK Apartment",
@@ -35,79 +36,83 @@ const bookingsData = [
     image:
       "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80",
   },
-  {
-    id: "BK-240518-002",
-    title: "Elegant Villa",
-    location: "Kothrud, Pune",
-    beds: "4 Beds",
-    baths: "4 Baths",
-    sqft: "2800 sq.ft",
-    bookedOn: "18 May 2024",
-    visitDate: "25 May 2024",
-    visitTime: "04:00 PM",
-    status: "Pending",
-    amount: "₹ 1,500",
-    feeLabel: "(Booking Fee)",
-    actionLabel: "Reschedule",
-    image:
-      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "BK-240515-003",
-    title: "Modern 3BHK Apartment",
-    location: "Hinjewadi, Pune",
-    beds: "3 Beds",
-    baths: "3 Baths",
-    sqft: "1450 sq.ft",
-    bookedOn: "15 May 2024",
-    visitDate: "28 May 2024",
-    visitTime: "10:30 AM",
-    status: "Confirmed",
-    amount: "₹ 1,000",
-    feeLabel: "(Booking Fee)",
-    actionLabel: "View Details",
-    image:
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "BK-240510-004",
-    title: "Spacious 1BHK Apartment",
-    location: "Wakad, Pune",
-    beds: "1 Bed",
-    baths: "1 Bath",
-    sqft: "650 sq.ft",
-    bookedOn: "10 May 2024",
-    visitDate: "30 May 2024",
-    visitTime: "02:00 PM",
-    status: "Cancelled",
-    amount: "₹ 800",
-    feeLabel: "(Refunded)",
-    actionLabel: "View Details",
-    image:
-      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80",
-  },
 ];
 
 export default function MyBookings() {
   const [activeTab, setActiveTab] = useState("All");
   const [sortBy, setSortBy] = useState("Recently Booked");
+  const [bookingsList, setBookingsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const fetchBookings = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setBookingsList(fallbackBookingsData);
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get("http://localhost:8080/bookings/buyer", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data && Array.isArray(response.data)) {
+        const mapped = response.data.map((item) => ({
+          id: item.bookingCode || `BK-${item.bookingId}`,
+          numericId: item.bookingId,
+          title: item.propertyTitle || "Property",
+          location: item.propertyLocation || "Location N/A",
+          beds: item.beds ? `${item.beds} Beds` : "N/A",
+          baths: item.baths ? `${item.baths} Baths` : "N/A",
+          sqft: item.sqft ? `${item.sqft} sq.ft` : "N/A",
+          bookedOn: item.bookedOn || "Recently",
+          visitDate: item.bookingDate || "Scheduled",
+          visitTime: item.bookingType ? item.bookingType.replace(/_/g, " ") : "N/A",
+          status: item.status ? item.status.charAt(0) + item.status.slice(1).toLowerCase() : "Pending",
+          amount: item.formattedAmount || `₹ ${item.tokenAmount || 0}`,
+          feeLabel: "(Token Amount)",
+          actionLabel: "View Details",
+          image: item.propertyImage || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80",
+        }));
+        setBookingsList(mapped);
+      } else {
+        setBookingsList([]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch bookings from backend:", err);
+      // Fallback to offline/mock data if unauthenticated or network error occurs
+      setBookingsList(fallbackBookingsData);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Calculate Summary Counts
-  const confirmedCount = bookingsData.filter(
-    (b) => b.status === "Confirmed"
+  const confirmedCount = bookingsList.filter(
+    (b) => b.status.toLowerCase() === "confirmed"
   ).length;
-  const pendingCount = bookingsData.filter(
-    (b) => b.status === "Pending"
+  const pendingCount = bookingsList.filter(
+    (b) => b.status.toLowerCase() === "pending"
   ).length;
-  const cancelledCount = bookingsData.filter(
-    (b) => b.status === "Cancelled"
+  const cancelledCount = bookingsList.filter(
+    (b) => b.status.toLowerCase() === "cancelled"
   ).length;
 
   // Filter Bookings based on Tab Selection
-  const filteredBookings = bookingsData.filter((booking) => {
-    if (activeTab === "Confirmed") return booking.status === "Confirmed";
-    if (activeTab === "Pending") return booking.status === "Pending";
-    if (activeTab === "Cancelled") return booking.status === "Cancelled";
+  const filteredBookings = bookingsList.filter((booking) => {
+    if (activeTab === "Confirmed") return booking.status.toLowerCase() === "confirmed";
+    if (activeTab === "Pending") return booking.status.toLowerCase() === "pending";
+    if (activeTab === "Cancelled") return booking.status.toLowerCase() === "cancelled";
     return true;
   });
 
@@ -130,7 +135,7 @@ export default function MyBookings() {
                 className={`tab-btn ${activeTab === "All" ? "active" : ""}`}
                 onClick={() => setActiveTab("All")}
               >
-                All Bookings ({bookingsData.length})
+                All Bookings ({bookingsList.length})
               </button>
               <button
                 className={`tab-btn confirmed ${
@@ -302,7 +307,7 @@ export default function MyBookings() {
                   <Calendar size={16} className="icon-total" />
                   <span>Total Bookings</span>
                 </div>
-                <span className="summary-count total">{bookingsData.length}</span>
+                <span className="summary-count total">{bookingsList.length}</span>
               </div>
             </div>
           </div>

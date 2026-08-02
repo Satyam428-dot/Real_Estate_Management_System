@@ -409,7 +409,7 @@ export default function PropertyDetails() {
 
               <button
                 className="btn-primary-green"
-                onClick={() => navigate("/buyer/book-property")}
+                onClick={() => navigate("/buyer/book-property", { state: { property: backendProperty || propertyData.rawPropertyObj || propertyData } })}
               >
                 <Building size={16} /> Book Property
               </button>
