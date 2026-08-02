@@ -257,14 +257,32 @@ body {
   gap: 24px;
 }
 
+/* Welcome Banner */
+.welcome-banner {
+  background: linear-gradient(135deg, #0f62fe 0%, #1d4ed8 50%, #1e40af 100%);
+  padding: 44px 24px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 10px 25px -5px rgba(29, 78, 216, 0.25);
+  box-sizing: border-box;
+}
+
 .welcome-banner h1 {
-  font-size: 22px;
-  color: #0f172a;
+  font-size: 36px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
 }
 
 .welcome-banner p {
-  font-size: 13px;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+  font-weight: 400;
+  margin: 0 auto;
+  max-width: 650px;
+  line-height: 1.5;
 }
 
 /* Stats Cards Grid */

@@ -179,9 +179,39 @@ export default function BrowseProperties() {
   // Horizontal Filter Bar States
   const [selectedListingType, setSelectedListingType] = useState("ALL");
   const [selectedBathrooms, setSelectedBathrooms] = useState("");
-  const [maxBudgetLakhs, setMaxBudgetLakhs] = useState(200); // in Lakhs
   const [selectedBhks, setSelectedBhks] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
+
+  // Calculate lowest and highest property price available in database
+  const { minDbPrice, maxDbPrice } = useMemo(() => {
+    if (!allProperties || allProperties.length === 0) {
+      return { minDbPrice: 0, maxDbPrice: 20000000 };
+    }
+    const prices = allProperties
+      .map((p) => Number(p.price) || 0)
+      .filter((p) => p > 0);
+    if (prices.length === 0) {
+      return { minDbPrice: 0, maxDbPrice: 20000000 };
+    }
+    return {
+      minDbPrice: Math.min(...prices),
+      maxDbPrice: Math.max(...prices),
+    };
+  }, [allProperties]);
+
+  const [budgetMin, setBudgetMin] = useState(null);
+  const [budgetMax, setBudgetMax] = useState(null);
+
+  // Sync default budget range when database properties are loaded
+  useEffect(() => {
+    if (minDbPrice !== undefined && maxDbPrice !== undefined) {
+      setBudgetMin((prev) => (prev === null || prev < minDbPrice ? minDbPrice : prev));
+      setBudgetMax((prev) => (prev === null || prev > maxDbPrice ? maxDbPrice : prev));
+    }
+  }, [minDbPrice, maxDbPrice]);
+
+  const effectiveMinBudget = budgetMin !== null ? budgetMin : minDbPrice;
+  const effectiveMaxBudget = budgetMax !== null ? budgetMax : maxDbPrice;
 
   // Saved property IDs from backend
   const [savedProperties, setSavedProperties] = useState([]);
@@ -318,6 +348,19 @@ export default function BrowseProperties() {
     );
   };
 
+  const formatShortPrice = (val) => {
+    if (val === undefined || val === null || isNaN(val)) return "₹0";
+    if (val >= 10000000) {
+      const cr = val / 10000000;
+      return `₹${cr % 1 === 0 ? cr : cr.toFixed(2)} Cr`;
+    }
+    if (val >= 100000) {
+      const lakh = val / 100000;
+      return `₹${lakh % 1 === 0 ? lakh : lakh.toFixed(2)} L`;
+    }
+    return `₹${Number(val).toLocaleString("en-IN")}`;
+  };
+
   // Reset all filters to default
   const handleResetFilters = () => {
     setLocationInput("");
@@ -326,7 +369,8 @@ export default function BrowseProperties() {
     setMaxPrice("");
     setSelectedListingType("ALL");
     setSelectedBathrooms("");
-    setMaxBudgetLakhs(200);
+    setBudgetMin(minDbPrice);
+    setBudgetMax(maxDbPrice);
     setSelectedBhks([]);
     setSelectedTypes([]);
   };
@@ -344,12 +388,29 @@ export default function BrowseProperties() {
       });
     if (selectedBathrooms)
       chips.push({ id: "bath", label: `${selectedBathrooms}+ Baths`, type: "bath" });
-    if (minPrice) chips.push({ id: "minP", label: `Min ₹${minPrice}`, type: "minP" });
-    if (maxPrice) chips.push({ id: "maxP", label: `Max ₹${maxPrice}`, type: "maxP" });
+    if (minPrice) chips.push({ id: "minP", label: `Min ${formatShortPrice(Number(minPrice))}`, type: "minP" });
+    if (maxPrice) chips.push({ id: "maxP", label: `Max ${formatShortPrice(Number(maxPrice))}`, type: "maxP" });
+    if (effectiveMinBudget > minDbPrice)
+      chips.push({ id: "bMin", label: `Min ${formatShortPrice(effectiveMinBudget)}`, type: "bMin" });
+    if (effectiveMaxBudget < maxDbPrice)
+      chips.push({ id: "bMax", label: `Max ${formatShortPrice(effectiveMaxBudget)}`, type: "bMax" });
     selectedBhks.forEach((b) => chips.push({ id: `bhk-${b}`, label: `${b} BHK`, type: "bhk", val: b }));
     selectedTypes.forEach((t) => chips.push({ id: `stype-${t}`, label: t, type: "stype", val: t }));
     return chips;
-  }, [locationInput, propertyType, selectedListingType, selectedBathrooms, minPrice, maxPrice, selectedBhks, selectedTypes]);
+  }, [
+    locationInput,
+    propertyType,
+    selectedListingType,
+    selectedBathrooms,
+    minPrice,
+    maxPrice,
+    effectiveMinBudget,
+    effectiveMaxBudget,
+    minDbPrice,
+    maxDbPrice,
+    selectedBhks,
+    selectedTypes,
+  ]);
 
   // Remove individual filter chip
   const removeChip = (chip) => {
@@ -359,6 +420,8 @@ export default function BrowseProperties() {
     if (chip.type === "bath") setSelectedBathrooms("");
     if (chip.type === "minP") setMinPrice("");
     if (chip.type === "maxP") setMaxPrice("");
+    if (chip.type === "bMin") setBudgetMin(minDbPrice);
+    if (chip.type === "bMax") setBudgetMax(maxDbPrice);
     if (chip.type === "bhk") setSelectedBhks((prev) => prev.filter((b) => b !== chip.val));
     if (chip.type === "stype") setSelectedTypes((prev) => prev.filter((t) => t !== chip.val));
   };
@@ -405,21 +468,14 @@ export default function BrowseProperties() {
           if (item.bathrooms < minBaths) return false;
         }
 
-        // Price Min & Max filters (in Rupees)
         const priceNum = Number(item.price);
-        if (minPrice) {
-          const minVal = minPrice === "10l" ? 1000000 : minPrice === "25l" ? 2500000 : 5000000;
-          if (priceNum < minVal) return false;
-        }
 
-        if (maxPrice) {
-          const maxVal = maxPrice === "50l" ? 5000000 : maxPrice === "1cr" ? 10000000 : 20000000;
-          if (priceNum > maxVal) return false;
-        }
+        // Price Min & Max filters from top dropdowns
+        if (minPrice && priceNum < Number(minPrice)) return false;
+        if (maxPrice && priceNum > Number(maxPrice)) return false;
 
-        // Budget Range Slider filter (Lakhs)
-        const budgetRupees = maxBudgetLakhs * 100000;
-        if (priceNum > budgetRupees) {
+        // Dynamic Budget Range Filter (Lowest to Highest DB Price)
+        if (priceNum < effectiveMinBudget || priceNum > effectiveMaxBudget) {
           return false;
         }
 
@@ -440,7 +496,8 @@ export default function BrowseProperties() {
     selectedBathrooms,
     minPrice,
     maxPrice,
-    maxBudgetLakhs,
+    effectiveMinBudget,
+    effectiveMaxBudget,
     sortOption,
   ]);
 
@@ -457,8 +514,8 @@ export default function BrowseProperties() {
     <div className="browse-container">
       {/* Page Title Header */}
       <div className="browse-header">
-        <h1>Browse Properties</h1>
-        <p>Find the perfect property that matches your needs.</p>
+        <h1>Explore Our Properties</h1>
+        <p>Discover premium homes, luxury apartments, and modern condos tailored to your lifestyle.</p>
       </div>
 
       {/* Perfectly Aligned Top Main Search Bar */}
@@ -520,10 +577,13 @@ export default function BrowseProperties() {
             value={minPrice}
             onChange={(e) => setMinPrice(e.target.value)}
           >
-            <option value="">Min Price</option>
-            <option value="10l">₹ 10 Lakhs</option>
-            <option value="25l">₹ 25 Lakhs</option>
-            <option value="50l">₹ 50 Lakhs</option>
+            <option value="">Min Price (Any)</option>
+            <option value="15000">₹ 15,000</option>
+            <option value="30000">₹ 30,000</option>
+            <option value="1000000">₹ 10 Lakhs</option>
+            <option value="2500000">₹ 25 Lakhs</option>
+            <option value="5000000">₹ 50 Lakhs</option>
+            <option value="10000000">₹ 1 Crore</option>
           </select>
           <ChevronDown size={16} className="dropdown-arrow" />
         </div>
@@ -534,10 +594,12 @@ export default function BrowseProperties() {
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
           >
-            <option value="">Max Price</option>
-            <option value="50l">₹ 50 Lakhs</option>
-            <option value="1cr">₹ 1 Crore</option>
-            <option value="2cr">₹ 2 Crores+</option>
+            <option value="">Max Price (Any)</option>
+            <option value="50000">₹ 50,000</option>
+            <option value="2500000">₹ 25 Lakhs</option>
+            <option value="5000000">₹ 50 Lakhs</option>
+            <option value="10000000">₹ 1 Crore</option>
+            <option value="20000000">₹ 2 Crores+</option>
           </select>
           <ChevronDown size={16} className="dropdown-arrow" />
         </div>
@@ -636,20 +698,46 @@ export default function BrowseProperties() {
             </div>
           </div>
 
-          {/* Max Budget Slider */}
-          <div className="h-filter-item slider-item">
+          {/* Dynamic Budget Range Filter (Lowest to Highest DB Price) */}
+          <div className="h-filter-item slider-item budget-range-container">
             <div className="slider-label-row">
-              <span className="h-filter-label">Max Budget:</span>
-              <span className="slider-value-badge">₹ {maxBudgetLakhs} Lakhs</span>
+              <span className="h-filter-label">Budget Range:</span>
+              <span className="slider-value-badge">
+                {formatShortPrice(effectiveMinBudget)} - {formatShortPrice(effectiveMaxBudget)}
+              </span>
             </div>
-            <input
-              type="range"
-              min="10"
-              max="200"
-              value={maxBudgetLakhs}
-              onChange={(e) => setMaxBudgetLakhs(Number(e.target.value))}
-              className="range-slider"
-            />
+            <div className="range-inputs-wrapper">
+              <div className="range-slider-group">
+                <span className="range-bound-label">Min:</span>
+                <input
+                  type="range"
+                  min={minDbPrice}
+                  max={maxDbPrice}
+                  step={maxDbPrice - minDbPrice > 1000000 ? 50000 : 1000}
+                  value={effectiveMinBudget}
+                  onChange={(e) => {
+                    const val = Math.min(Number(e.target.value), effectiveMaxBudget);
+                    setBudgetMin(val);
+                  }}
+                  className="range-slider min-slider"
+                />
+              </div>
+              <div className="range-slider-group">
+                <span className="range-bound-label">Max:</span>
+                <input
+                  type="range"
+                  min={minDbPrice}
+                  max={maxDbPrice}
+                  step={maxDbPrice - minDbPrice > 1000000 ? 50000 : 1000}
+                  value={effectiveMaxBudget}
+                  onChange={(e) => {
+                    const val = Math.max(Number(e.target.value), effectiveMinBudget);
+                    setBudgetMax(val);
+                  }}
+                  className="range-slider max-slider"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Bathrooms */}

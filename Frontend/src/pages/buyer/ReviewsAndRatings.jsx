@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
 import {
   Star,
   Building,
@@ -7,14 +9,13 @@ import {
   PenSquare,
   CheckCircle2,
   MoreVertical,
-  HelpCircle,
   Headphones,
   ArrowRight,
-  Filter,
+  X,
 } from "lucide-react";
 import "./ReviewsAndRatings.css";
 
-const recentReviewsData = [
+const seedReviewsData = [
   {
     id: 1,
     title: "Luxury 2BHK Apartment",
@@ -82,6 +83,136 @@ export default function ReviewsAndRatings() {
   const [timeFilter, setTimeFilter] = useState("All Time");
   const [sortBy, setSortBy] = useState("Most Recent");
 
+  const [reviews, setReviews] = useState(seedReviewsData);
+  const [propertiesList, setPropertiesList] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Modal State for Writing a Review
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPropertyId, setSelectedPropertyId] = useState("");
+  const [ratingScore, setRatingScore] = useState(5);
+  const [locationRating, setLocationRating] = useState(4.5);
+  const [valueRating, setValueRating] = useState(4.5);
+  const [amenitiesRating, setAmenitiesRating] = useState(4.5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetchBackendReviews();
+    fetchBackendProperties();
+  }, []);
+
+  const fetchBackendReviews = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("http://localhost:8080/reviews");
+      if (res.data && res.data.length > 0) {
+        const formatted = res.data.map((item) => ({
+          id: item.id,
+          title: item.propertyTitle || "Property Review",
+          location: item.propertyLocation || "Pune",
+          rating: item.rating || 5.0,
+          reviewText: item.reviewText || item.comment || "",
+          reviewerName: item.reviewerName || "Verified User",
+          reviewerRole: item.reviewerRole || "Verified Buyer",
+          date: item.date || "Just now",
+          reviewerAvatar: item.reviewerAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+          propertyImage: item.propertyImage || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80",
+        }));
+        setReviews(formatted);
+      }
+    } catch (err) {
+      console.log("No live reviews yet, displaying default seed reviews.", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchBackendProperties = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/properties");
+      if (res.data && res.data.length > 0) {
+        setPropertiesList(res.data);
+        setSelectedPropertyId(res.data[0].id);
+      }
+    } catch (err) {
+      console.log("Could not fetch properties list for review modal:", err);
+    }
+  };
+
+  const handleCreateReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedPropertyId) {
+      toast.warn("Please select a property to review.");
+      return;
+    }
+    if (!reviewComment.trim()) {
+      toast.warn("Please enter your review comment.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const token = localStorage.getItem("token");
+      const payload = {
+        propertyId: parseInt(selectedPropertyId),
+        rating: parseFloat(ratingScore),
+        comment: reviewComment,
+        locationRating: parseFloat(locationRating),
+        valueForMoneyRating: parseFloat(valueRating),
+        amenitiesRating: parseFloat(amenitiesRating),
+      };
+
+      const res = await axios.post("http://localhost:8080/reviews", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const newReviewItem = {
+        id: res.data.id || Date.now(),
+        title: res.data.propertyTitle || "Reviewed Property",
+        location: res.data.propertyLocation || "Pune",
+        rating: res.data.rating || ratingScore,
+        reviewText: res.data.reviewText || reviewComment,
+        reviewerName: res.data.reviewerName || "You",
+        reviewerRole: "Verified Buyer",
+        date: res.data.date || new Date().toISOString().split("T")[0],
+        reviewerAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+        propertyImage: res.data.propertyImage || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80",
+      };
+
+      setReviews((prev) => [newReviewItem, ...prev]);
+      toast.success("Review & rating saved to database successfully!");
+      setIsModalOpen(false);
+      setReviewComment("");
+    } catch (err) {
+      console.error("Failed to submit review:", err);
+      toast.error(
+        "Failed to submit review: " +
+          (err.response?.data?.message || err.message || "Unknown error occurred.")
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Dynamic Rating Calculations
+  const totalReviewsCount = reviews.length;
+  const avgRatingScore =
+    totalReviewsCount > 0
+      ? (reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / totalReviewsCount).toFixed(1)
+      : "4.6";
+
+  const star5Count = reviews.filter((r) => r.rating >= 4.8).length;
+  const star4Count = reviews.filter((r) => r.rating >= 3.8 && r.rating < 4.8).length;
+  const star3Count = reviews.filter((r) => r.rating >= 2.8 && r.rating < 3.8).length;
+  const star2Count = reviews.filter((r) => r.rating >= 1.8 && r.rating < 2.8).length;
+  const star1Count = reviews.filter((r) => r.rating < 1.8).length;
+
+  const getPercent = (count) => (totalReviewsCount > 0 ? Math.round((count / totalReviewsCount) * 100) : 0);
+
   // Helper for rendering star icons
   const renderStars = (rating) => {
     const stars = [];
@@ -144,38 +275,38 @@ export default function ReviewsAndRatings() {
         <div className="metric-card overall-rating-card">
           <h4>Overall Rating</h4>
           <div className="rating-score-row">
-            <span className="big-rating-number">4.6</span>
+            <span className="big-rating-number">{avgRatingScore}</span>
             <div className="rating-stars-col">
-              <div className="stars-row">{renderStars(4.5)}</div>
-              <span className="sub-text">Based on 128 reviews</span>
+              <div className="stars-row">{renderStars(parseFloat(avgRatingScore))}</div>
+              <span className="sub-text">Based on {totalReviewsCount} reviews</span>
             </div>
           </div>
 
           <div className="rating-progress-bars">
             <div className="progress-item">
               <span className="star-level">5 <Star size={10} fill="#f59e0b" color="#f59e0b" /></span>
-              <div className="bar-bg"><div className="bar-fill" style={{ width: "61%" }}></div></div>
-              <span className="count-text">78 (61%)</span>
+              <div className="bar-bg"><div className="bar-fill" style={{ width: `${getPercent(star5Count)}%` }}></div></div>
+              <span className="count-text">{star5Count} ({getPercent(star5Count)}%)</span>
             </div>
             <div className="progress-item">
               <span className="star-level">4 <Star size={10} fill="#f59e0b" color="#f59e0b" /></span>
-              <div className="bar-bg"><div className="bar-fill" style={{ width: "25%" }}></div></div>
-              <span className="count-text">32 (25%)</span>
+              <div className="bar-bg"><div className="bar-fill" style={{ width: `${getPercent(star4Count)}%` }}></div></div>
+              <span className="count-text">{star4Count} ({getPercent(star4Count)}%)</span>
             </div>
             <div className="progress-item">
               <span className="star-level">3 <Star size={10} fill="#f59e0b" color="#f59e0b" /></span>
-              <div className="bar-bg"><div className="bar-fill" style={{ width: "8%" }}></div></div>
-              <span className="count-text">10 (8%)</span>
+              <div className="bar-bg"><div className="bar-fill" style={{ width: `${getPercent(star3Count)}%` }}></div></div>
+              <span className="count-text">{star3Count} ({getPercent(star3Count)}%)</span>
             </div>
             <div className="progress-item">
               <span className="star-level">2 <Star size={10} fill="#f59e0b" color="#f59e0b" /></span>
-              <div className="bar-bg"><div className="bar-fill" style={{ width: "4%" }}></div></div>
-              <span className="count-text">5 (4%)</span>
+              <div className="bar-bg"><div className="bar-fill" style={{ width: `${getPercent(star2Count)}%` }}></div></div>
+              <span className="count-text">{star2Count} ({getPercent(star2Count)}%)</span>
             </div>
             <div className="progress-item">
               <span className="star-level">1 <Star size={10} fill="#f59e0b" color="#f59e0b" /></span>
-              <div className="bar-bg"><div className="bar-fill" style={{ width: "2%" }}></div></div>
-              <span className="count-text">3 (2%)</span>
+              <div className="bar-bg"><div className="bar-fill" style={{ width: `${getPercent(star1Count)}%` }}></div></div>
+              <span className="count-text">{star1Count} ({getPercent(star1Count)}%)</span>
             </div>
           </div>
         </div>
@@ -228,36 +359,12 @@ export default function ReviewsAndRatings() {
                 />
                 <path
                   className="circle-segment segment-5"
-                  strokeDasharray="61, 100"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className="circle-segment segment-4"
-                  strokeDasharray="25, 100"
-                  strokeDashoffset="-61"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className="circle-segment segment-3"
-                  strokeDasharray="8, 100"
-                  strokeDashoffset="-86"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className="circle-segment segment-2"
-                  strokeDasharray="4, 100"
-                  strokeDashoffset="-94"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className="circle-segment segment-1"
-                  strokeDasharray="2, 100"
-                  strokeDashoffset="-98"
+                  strokeDasharray={`${getPercent(star5Count)}, 100`}
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
               </svg>
               <div className="donut-center-label">
-                <span className="donut-total">128</span>
+                <span className="donut-total">{totalReviewsCount}</span>
                 <span className="donut-sub">Reviews</span>
               </div>
             </div>
@@ -265,23 +372,15 @@ export default function ReviewsAndRatings() {
             <div className="chart-legend">
               <div className="legend-item">
                 <span className="legend-color color-5"></span>
-                <span>5 Star (61%)</span>
+                <span>5 Star ({getPercent(star5Count)}%)</span>
               </div>
               <div className="legend-item">
                 <span className="legend-color color-4"></span>
-                <span>4 Star (25%)</span>
+                <span>4 Star ({getPercent(star4Count)}%)</span>
               </div>
               <div className="legend-item">
                 <span className="legend-color color-3"></span>
-                <span>3 Star (8%)</span>
-              </div>
-              <div className="legend-item">
-                <span className="legend-color color-2"></span>
-                <span>2 Star (4%)</span>
-              </div>
-              <div className="legend-item">
-                <span className="legend-color color-1"></span>
-                <span>1 Star (2%)</span>
+                <span>3 Star ({getPercent(star3Count)}%)</span>
               </div>
             </div>
           </div>
@@ -293,7 +392,7 @@ export default function ReviewsAndRatings() {
         {/* Left Column: Recent Reviews List */}
         <div className="reviews-list-section">
           <div className="reviews-list-toolbar">
-            <h2>Recent Reviews</h2>
+            <h2>Recent Reviews ({reviews.length})</h2>
             <div className="sort-wrapper">
               <label>Sort by:</label>
               <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
@@ -305,7 +404,7 @@ export default function ReviewsAndRatings() {
           </div>
 
           <div className="reviews-cards-stack">
-            {recentReviewsData.map((item) => (
+            {reviews.map((item) => (
               <div className="review-item-card" key={item.id}>
                 <div className="review-card-left">
                   <div className="property-thumb-wrapper">
@@ -317,11 +416,11 @@ export default function ReviewsAndRatings() {
 
                     <div className="rating-score-badge-row">
                       <div className="stars-inline">{renderStars(item.rating)}</div>
-                      <span className="rating-num-bold">{item.rating.toFixed(1)}</span>
+                      <span className="rating-num-bold">{Number(item.rating).toFixed(1)}</span>
                     </div>
 
                     <span className="verified-badge">
-                      <CheckCircle2 size={12} /> Verified Buyer
+                      <CheckCircle2 size={12} /> {item.reviewerRole || "Verified Buyer"}
                     </span>
                   </div>
                 </div>
@@ -361,7 +460,7 @@ export default function ReviewsAndRatings() {
           <div className="widget-card share-review-widget">
             <h3>Share your experience</h3>
             <p>Your reviews help others find the right property.</p>
-            <button className="btn-write-review">
+            <button className="btn-write-review" onClick={() => setIsModalOpen(true)}>
               <PenSquare size={16} /> Write a Review
             </button>
           </div>
@@ -387,23 +486,103 @@ export default function ReviewsAndRatings() {
                 <span>Use proper language</span>
               </li>
             </ul>
-            <a href="#guidelines" className="view-guidelines-link">
-              View full guidelines <ArrowRight size={14} />
-            </a>
           </div>
 
           {/* Need Help Widget */}
           <div className="widget-card help-widget">
             <h3>Need Help?</h3>
-            <p>
-              Facing an issue with a review? Our support team is here to help.
-            </p>
+            <p>Facing an issue with a review? Our support team is here to help.</p>
             <button className="btn-contact-support">
               <Headphones size={16} /> Contact Support
             </button>
           </div>
         </div>
       </div>
+
+      {/* Write a Review Modal */}
+      {isModalOpen && (
+        <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-card review-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Write a Property Review</h3>
+              <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateReviewSubmit} className="review-modal-form">
+              <div className="form-group">
+                <label>Select Property <span className="req">*</span></label>
+                {propertiesList.length > 0 ? (
+                  <select
+                    value={selectedPropertyId}
+                    onChange={(e) => setSelectedPropertyId(e.target.value)}
+                    required
+                    className="modal-select"
+                  >
+                    {propertiesList.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.title} ({p.city || "Pune"})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="number"
+                    value={selectedPropertyId || 1}
+                    onChange={(e) => setSelectedPropertyId(e.target.value)}
+                    placeholder="Enter Property ID (e.g. 1)"
+                    required
+                    className="modal-input"
+                  />
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>Overall Rating Score <span className="req">*</span></label>
+                <div className="star-rating-picker">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      className={`star-pick-btn ${star <= ratingScore ? "selected" : ""}`}
+                      onClick={() => setRatingScore(star)}
+                    >
+                      <Star size={24} fill={star <= ratingScore ? "#f59e0b" : "none"} color={star <= ratingScore ? "#f59e0b" : "#cbd5e1"} />
+                    </button>
+                  ))}
+                  <span className="rating-score-label">{ratingScore}.0 / 5.0</span>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Review Comment <span className="req">*</span></label>
+                <textarea
+                  rows={4}
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder="Share your detailed experience regarding amenities, location, and owner interaction..."
+                  required
+                  className="modal-textarea"
+                />
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn-modal-secondary"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-modal-primary" disabled={submitting}>
+                  {submitting ? "Submitting..." : "Submit Review"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
