@@ -13,12 +13,14 @@ import com.estate.customExceptions.UserNotFoundException;
 import com.estate.dtos.BookingRequestDTO;
 import com.estate.dtos.BookingResponseDTO;
 import com.estate.entities.Booking;
+import com.estate.entities.Notification;
 import com.estate.entities.Property;
 import com.estate.entities.PropertyImage;
 import com.estate.entities.User;
 import com.estate.entities.UserRole;
 import com.estate.entities.enums.BookingStatus;
 import com.estate.repository.BookingRepository;
+import com.estate.repository.NotificationRepository;
 import com.estate.repository.PropertyRepository;
 import com.estate.repository.UserRepository;
 
@@ -32,6 +34,7 @@ public class BookingServiceImpl implements BookingService {
 	private final BookingRepository bookingRepo;
 	private final PropertyRepository propertyRepo;
 	private final UserRepository userRepo;
+	private final NotificationRepository notificationRepo;
 
 	@Override
 	@Transactional
@@ -59,6 +62,27 @@ public class BookingServiceImpl implements BookingService {
 				.build();
 
 		Booking savedBooking = bookingRepo.save(booking);
+
+		// Notify Buyer
+		Notification buyerNotif = new Notification();
+		buyerNotif.setTitle("Booking Placed Successfully");
+		buyerNotif.setMessage("Your booking for \"" + property.getTitle() + "\" has been received. Booking ID: BK-" + String.format("%06d", savedBooking.getId()));
+		buyerNotif.setCategory("Bookings & Visits");
+		buyerNotif.setUser(buyer);
+		buyerNotif.setRead(false);
+		notificationRepo.save(buyerNotif);
+
+		// Notify Owner if available
+		if (owner != null) {
+			Notification ownerNotif = new Notification();
+			ownerNotif.setTitle("New Booking Request");
+			ownerNotif.setMessage("You received a new booking request for \"" + property.getTitle() + "\" from " + dto.getFullName());
+			ownerNotif.setCategory("Bookings & Visits");
+			ownerNotif.setUser(owner);
+			ownerNotif.setRead(false);
+			notificationRepo.save(ownerNotif);
+		}
+
 		return mapToDTO(savedBooking);
 	}
 
@@ -107,6 +131,17 @@ public class BookingServiceImpl implements BookingService {
 
 		booking.setStatus(status);
 		Booking updated = bookingRepo.save(booking);
+
+		if (booking.getBuyer() != null) {
+			Notification notif = new Notification();
+			notif.setTitle("Booking " + status.name());
+			notif.setMessage("Your booking for \"" + (booking.getProperty() != null ? booking.getProperty().getTitle() : "Property") + "\" status was updated to " + status.name());
+			notif.setCategory("Bookings & Visits");
+			notif.setUser(booking.getBuyer());
+			notif.setRead(false);
+			notificationRepo.save(notif);
+		}
+
 		return mapToDTO(updated);
 	}
 
@@ -129,6 +164,16 @@ public class BookingServiceImpl implements BookingService {
 
 		booking.setStatus(BookingStatus.CANCELLED);
 		bookingRepo.save(booking);
+
+		if (booking.getBuyer() != null) {
+			Notification notif = new Notification();
+			notif.setTitle("Booking Cancelled");
+			notif.setMessage("Your booking for \"" + (booking.getProperty() != null ? booking.getProperty().getTitle() : "Property") + "\" has been cancelled.");
+			notif.setCategory("Bookings & Visits");
+			notif.setUser(booking.getBuyer());
+			notif.setRead(false);
+			notificationRepo.save(notif);
+		}
 	}
 
 	private BookingResponseDTO mapToDTO(Booking booking) {

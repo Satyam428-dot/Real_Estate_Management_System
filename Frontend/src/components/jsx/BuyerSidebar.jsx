@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { toast } from "react-toastify";
 import {
   LayoutDashboard,
@@ -15,8 +16,31 @@ import {
 } from "lucide-react";
 import "../css/BuyerSidebar.css";
 
+const API_URL = "http://localhost:8080";
+
 export default function BuyerSidebar() {
   const navigate = useNavigate();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnreadCount = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await axios.get(`${API_URL}/notifications`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data && Array.isArray(res.data)) {
+        const unread = res.data.filter((n) => !n.read && !n.isRead).length;
+        setUnreadCount(unread);
+      }
+    } catch (err) {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -34,7 +58,7 @@ export default function BuyerSidebar() {
     { name: "Scheduled Visit", path: "/buyer/visits", icon: <Calendar size={18} /> },
     { name: "My Bookings", path: "/buyer/bookings", icon: <Bookmark size={18} /> },
     { name: "My Inquiries", path: "/buyer/inquiries", icon: <MessageSquare size={18} /> },
-    { name: "Notifications", path: "/buyer/notifications", icon: <Bell size={18} />, badge: 5 },
+    { name: "Notifications", path: "/buyer/notifications", icon: <Bell size={18} />, badge: unreadCount > 0 ? unreadCount : null },
     { name: "Reviews & Ratings", path: "/buyer/reviews", icon: <Star size={18} /> },
     { name: "My Profile", path: "/buyer/profile", icon: <User size={18} /> },
   ];

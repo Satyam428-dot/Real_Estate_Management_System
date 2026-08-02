@@ -90,6 +90,7 @@ public class SecurityConfig {
 						.requestMatchers("/saved-properties", "/saved-properties/**").authenticated()
 						.requestMatchers("/bookings", "/bookings/**").authenticated()
 						.requestMatchers("/visits", "/visits/**").authenticated()
+						.requestMatchers("/notifications", "/notifications/**").authenticated()
 						.requestMatchers("/favourites", "/favourites/**", "/users/me", "/users/change-password").authenticated()
 						.anyRequest().permitAll());
 

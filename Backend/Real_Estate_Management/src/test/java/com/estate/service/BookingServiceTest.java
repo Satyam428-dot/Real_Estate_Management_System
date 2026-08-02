@@ -27,6 +27,7 @@ import com.estate.entities.UserRole;
 import com.estate.entities.enums.BookingStatus;
 import com.estate.entities.enums.BookingType;
 import com.estate.repository.BookingRepository;
+import com.estate.repository.NotificationRepository;
 import com.estate.repository.PropertyRepository;
 import com.estate.repository.UserRepository;
 
@@ -41,6 +42,9 @@ class BookingServiceTest {
 
 	@Mock
 	private UserRepository userRepo;
+
+	@Mock
+	private NotificationRepository notificationRepo;
 
 	@InjectMocks
 	private BookingServiceImpl bookingService;
