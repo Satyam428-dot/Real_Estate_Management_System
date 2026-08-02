@@ -87,8 +87,10 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/properties", "/properties/*/images").authenticated()
 						.requestMatchers(HttpMethod.PUT, "/properties/**").authenticated()
 						.requestMatchers(HttpMethod.DELETE, "/properties/**").authenticated()
-						.requestMatchers("/saved-properties/**").authenticated()
-						.requestMatchers("/favourites/**", "/users/me", "/users/change-password").authenticated()
+						.requestMatchers("/saved-properties", "/saved-properties/**").authenticated()
+						.requestMatchers("/bookings", "/bookings/**").authenticated()
+						.requestMatchers("/visits", "/visits/**").authenticated()
+						.requestMatchers("/favourites", "/favourites/**", "/users/me", "/users/change-password").authenticated()
 						.anyRequest().permitAll());
 
 		return http.build();

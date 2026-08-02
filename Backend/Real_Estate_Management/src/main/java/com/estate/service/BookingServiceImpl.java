@@ -16,6 +16,7 @@ import com.estate.entities.Booking;
 import com.estate.entities.Property;
 import com.estate.entities.PropertyImage;
 import com.estate.entities.User;
+import com.estate.entities.UserRole;
 import com.estate.entities.enums.BookingStatus;
 import com.estate.repository.BookingRepository;
 import com.estate.repository.PropertyRepository;
@@ -94,6 +95,16 @@ public class BookingServiceImpl implements BookingService {
 		Booking booking = bookingRepo.findById(bookingId)
 				.orElseThrow(() -> new ResourceNotFoundException("Booking not found with ID: " + bookingId));
 
+		User currentUser = userRepo.findByEmail(userEmail)
+				.orElseThrow(() -> new UserNotFoundException("User not found with email: " + userEmail));
+
+		boolean isOwner = booking.getOwner() != null && userEmail.equalsIgnoreCase(booking.getOwner().getEmail());
+		boolean isAdmin = currentUser.getUserRoles() == UserRole.ADMIN;
+
+		if (!isOwner && !isAdmin) {
+			throw new IllegalStateException("Only the property owner or an admin can update booking status.");
+		}
+
 		booking.setStatus(status);
 		Booking updated = bookingRepo.save(booking);
 		return mapToDTO(updated);
@@ -104,6 +115,17 @@ public class BookingServiceImpl implements BookingService {
 	public void cancelBooking(Long bookingId, String userEmail) {
 		Booking booking = bookingRepo.findById(bookingId)
 				.orElseThrow(() -> new ResourceNotFoundException("Booking not found with ID: " + bookingId));
+
+		User currentUser = userRepo.findByEmail(userEmail)
+				.orElseThrow(() -> new UserNotFoundException("User not found with email: " + userEmail));
+
+		boolean isBuyer = booking.getBuyer() != null && userEmail.equalsIgnoreCase(booking.getBuyer().getEmail());
+		boolean isOwner = booking.getOwner() != null && userEmail.equalsIgnoreCase(booking.getOwner().getEmail());
+		boolean isAdmin = currentUser.getUserRoles() == UserRole.ADMIN;
+
+		if (!isBuyer && !isOwner && !isAdmin) {
+			throw new IllegalStateException("Only the buyer, property owner, or an admin can cancel this booking.");
+		}
 
 		booking.setStatus(BookingStatus.CANCELLED);
 		bookingRepo.save(booking);
@@ -140,9 +162,9 @@ public class BookingServiceImpl implements BookingService {
 				.propertyTitle(property != null ? property.getTitle() : "N/A")
 				.propertyLocation(locationStr)
 				.propertyImage(mainImage)
-				.beds(property != null ? property.getBedrooms() : 0)
-				.baths(property != null ? property.getBathrooms() : 0)
-				.sqft(property != null ? property.getAreaSqft() : 0)
+				.beds(property != null && property.getBedrooms() != null ? property.getBedrooms() : 0)
+				.baths(property != null && property.getBathrooms() != null ? property.getBathrooms() : 0)
+				.sqft(property != null && property.getAreaSqft() != null ? property.getAreaSqft() : 0)
 				.propertyPrice(property != null ? property.getPrice() : null)
 				.buyerId(booking.getBuyer() != null ? booking.getBuyer().getId() : null)
 				.ownerId(booking.getOwner() != null ? booking.getOwner().getId() : null)

@@ -1,22 +1,32 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   LayoutDashboard,
   Building,
   Heart,
-  GitCompare,
   Calendar,
   Bookmark,
   MessageSquare,
   Bell,
   Star,
   User,
-  HelpCircle,
   LogOut,
 } from "lucide-react";
 import "../css/BuyerSidebar.css";
 
 export default function BuyerSidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("user");
+    localStorage.removeItem("role");
+    toast.info("Logged out successfully.");
+    navigate("/login");
+  };
+
   const sidebarItems = [
     { name: "Dashboard", path: "/buyer/dashboard", icon: <LayoutDashboard size={18} /> },
     { name: "Browse Properties", path: "/buyer/browse", icon: <Building size={18} /> },
@@ -53,6 +63,12 @@ export default function BuyerSidebar() {
             {item.badge && <span className="badge">{item.badge}</span>}
           </NavLink>
         ))}
+
+        {/* Red Logout Button under My Profile */}
+        <div className="nav-item logout-nav-item" onClick={handleLogout}>
+          <span className="nav-icon"><LogOut size={18} /></span>
+          <span className="nav-text">Logout</span>
+        </div>
       </nav>
     </aside>
   );

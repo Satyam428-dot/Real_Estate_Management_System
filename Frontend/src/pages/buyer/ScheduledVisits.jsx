@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import {
@@ -10,7 +10,6 @@ import {
   Bed,
   Bath,
   Maximize,
-  RotateCcw,
   Trash2,
   ChevronLeft,
   ChevronRight,
@@ -25,6 +24,10 @@ export default function ScheduledVisits() {
 
   const [visits, setVisits] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Real-time Calendar States
+  const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
 
   useEffect(() => {
     fetchVisits();
@@ -44,15 +47,24 @@ export default function ScheduledVisits() {
         id: item.id,
         title: item.propertyTitle || "Property Visit",
         location: `${item.propertyLocation || ""}, ${item.propertyCity || ""}`,
-        status: item.status === "PENDING" ? "Upcoming" : item.status === "CONFIRMED" ? "Confirmed" : item.status === "COMPLETED" ? "Completed" : "Cancelled",
-        statusType: item.status.toLowerCase(),
+        status:
+          item.status === "PENDING"
+            ? "Upcoming"
+            : item.status === "CONFIRMED"
+            ? "Confirmed"
+            : item.status === "COMPLETED"
+            ? "Completed"
+            : "Cancelled",
+        statusType: (item.status || "").toLowerCase(),
         date: item.visitDate,
         time: item.timeSlot,
         agent: item.ownerName || "Property Owner",
         beds: "3 Beds",
         baths: "2 Baths",
         sqft: "1200 sq.ft",
-        image: item.propertyImage || "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80",
+        image:
+          item.propertyImage ||
+          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80",
       }));
 
       setVisits(formatted);
@@ -71,28 +83,166 @@ export default function ScheduledVisits() {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
-      setVisits((prev) =>
-        prev.map((item) =>
-          item.id === id
-            ? { ...item, status: "Cancelled", statusType: "cancelled" }
-            : item
-        )
-      );
-      toast.success("Visit request cancelled successfully!");
+      setVisits((prev) => prev.filter((item) => item.id !== id));
+      toast.success("Scheduled visit cancelled and removed successfully!");
     } catch (err) {
       console.error("Error cancelling visit:", err);
-      toast.error("Failed to cancel visit");
+      toast.error(
+        "Failed to cancel visit: " +
+          (err.response?.data?.message || err.message || "Unknown error occurred.")
+      );
     }
   };
 
-  const upcomingCount = visits.filter((v) => v.statusType === "upcoming" || v.statusType === "pending" || v.statusType === "confirmed").length;
+  // Calendar Navigation Handlers
+  const handlePrevMonth = () => {
+    setCurrentCalendarDate(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1)
+    );
+  };
+
+  const handleNextMonth = () => {
+    setCurrentCalendarDate(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1)
+    );
+  };
+
+  const handleTodayClick = () => {
+    const today = new Date();
+    setCurrentCalendarDate(today);
+    const todayStr = `${today.getFullYear()}-${String(
+      today.getMonth() + 1
+    ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    setSelectedCalendarDate(todayStr);
+  };
+
+  // Real-Time Calendar Calculations
+  const currentMonthName = currentCalendarDate.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+
+  const calendarCells = useMemo(() => {
+    const year = currentCalendarDate.getFullYear();
+    const month = currentCalendarDate.getMonth();
+
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    const todayObj = new Date();
+    const todayStr = `${todayObj.getFullYear()}-${String(
+      todayObj.getMonth() + 1
+    ).padStart(2, "0")}-${String(todayObj.getDate()).padStart(2, "0")}`;
+
+    const cells = [];
+
+    // Trailing days from previous month
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+      const dayNum = daysInPrevMonth - i;
+      cells.push({
+        dayNum,
+        isCurrentMonth: false,
+        dateStr: "",
+      });
+    }
+
+    // Days in current month
+    for (let d = 1; d <= daysInMonth; d++) {
+      const monthStr = String(month + 1).padStart(2, "0");
+      const dayStr = String(d).padStart(2, "0");
+      const dateStr = `${year}-${monthStr}-${dayStr}`;
+
+      const dayVisits = visits.filter((v) => {
+        if (!v.date) return false;
+        return v.date.includes(dateStr) || v.date === dateStr;
+      });
+
+      cells.push({
+        dayNum: d,
+        isCurrentMonth: true,
+        dateStr,
+        isToday: dateStr === todayStr,
+        isSelected: dateStr === selectedCalendarDate,
+        hasEvent: dayVisits.length > 0,
+        hasUpcoming: dayVisits.some(
+          (v) =>
+            v.statusType === "upcoming" ||
+            v.statusType === "pending" ||
+            v.statusType === "confirmed"
+        ),
+        hasCompleted: dayVisits.some((v) => v.statusType === "completed"),
+        eventCount: dayVisits.length,
+      });
+    }
+
+    // Leading days for next month to complete 35 or 42 slots
+    const totalSlots = cells.length > 35 ? 42 : 35;
+    const remaining = totalSlots - cells.length;
+    for (let d = 1; d <= remaining; d++) {
+      cells.push({
+        dayNum: d,
+        isCurrentMonth: false,
+        dateStr: "",
+      });
+    }
+
+    return cells;
+  }, [currentCalendarDate, visits, selectedCalendarDate]);
+
+  const upcomingCount = visits.filter(
+    (v) =>
+      v.statusType === "upcoming" ||
+      v.statusType === "pending" ||
+      v.statusType === "confirmed"
+  ).length;
   const completedCount = visits.filter((v) => v.statusType === "completed").length;
   const cancelledCount = visits.filter((v) => v.statusType === "cancelled").length;
 
   const filteredVisits = visits.filter((item) => {
-    if (activeTab === "upcoming") return item.statusType === "upcoming" || item.statusType === "pending" || item.statusType === "confirmed";
-    if (activeTab === "completed") return item.statusType === "completed";
-    if (activeTab === "cancelled") return item.statusType === "cancelled";
+    if (
+      activeTab === "upcoming" &&
+      !(
+        item.statusType === "upcoming" ||
+        item.statusType === "pending" ||
+        item.statusType === "confirmed"
+      )
+    )
+      return false;
+    if (activeTab === "completed" && item.statusType !== "completed")
+      return false;
+    if (activeTab === "cancelled" && item.statusType !== "cancelled")
+      return false;
+
+    // Filter by real-time calendar date selection
+    if (selectedCalendarDate) {
+      if (!item.date || !item.date.includes(selectedCalendarDate)) {
+        return false;
+      }
+    }
+
+    // Filter by dropdown selection (All / This Week / This Month)
+    if (dateFilter === "this-week") {
+      if (item.date) {
+        const vDate = new Date(item.date);
+        const now = new Date();
+        const firstDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+        const lastDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
+        if (vDate < firstDayOfWeek || vDate > lastDayOfWeek) return false;
+      }
+    } else if (dateFilter === "this-month") {
+      if (item.date) {
+        const vDate = new Date(item.date);
+        const now = new Date();
+        if (
+          vDate.getMonth() !== now.getMonth() ||
+          vDate.getFullYear() !== now.getFullYear()
+        ) {
+          return false;
+        }
+      }
+    }
+
     return true;
   });
 
@@ -148,6 +298,27 @@ export default function ScheduledVisits() {
             </div>
           </div>
 
+          {selectedCalendarDate && (
+            <div className="active-date-banner">
+              <span>
+                Showing visits for{" "}
+                <strong>
+                  {new Date(selectedCalendarDate).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </strong>
+              </span>
+              <button
+                className="clear-date-banner-btn"
+                onClick={() => setSelectedCalendarDate(null)}
+              >
+                Show All Dates
+              </button>
+            </div>
+          )}
+
           {/* Visits Cards List */}
           <div className="visits-list">
             {filteredVisits.length > 0 ? (
@@ -199,11 +370,8 @@ export default function ScheduledVisits() {
                     <span className={`status-badge ${visit.statusType}`}>
                       {visit.status}
                     </span>
-                    {visit.statusType === "upcoming" && (
+                    {visit.statusType !== "cancelled" && (
                       <div className="action-buttons">
-                        <button className="btn-reschedule">
-                          <RotateCcw size={14} /> Reschedule
-                        </button>
                         <button
                           className="btn-cancel"
                           onClick={() => handleCancelVisit(visit.id)}
@@ -227,13 +395,28 @@ export default function ScheduledVisits() {
           <div className="sidebar-card calendar-card">
             <div className="calendar-header">
               <h3>Calendar Overview</h3>
+              <button
+                className="today-pill-btn"
+                onClick={handleTodayClick}
+                title="Go to Today"
+              >
+                Today
+              </button>
             </div>
             <div className="calendar-month-selector">
-              <button className="month-nav-btn">
+              <button
+                className="month-nav-btn"
+                onClick={handlePrevMonth}
+                title="Previous Month"
+              >
                 <ChevronLeft size={16} />
               </button>
-              <span className="current-month">May 2024</span>
-              <button className="month-nav-btn">
+              <span className="current-month">{currentMonthName}</span>
+              <button
+                className="month-nav-btn"
+                onClick={handleNextMonth}
+                title="Next Month"
+              >
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -248,46 +431,45 @@ export default function ScheduledVisits() {
               <span className="day-name">Fr</span>
               <span className="day-name">Sa</span>
 
-              <span className="day-number muted">28</span>
-              <span className="day-number muted">29</span>
-              <span className="day-number muted">30</span>
-              <span className="day-number">1</span>
-              <span className="day-number">2</span>
-              <span className="day-number">3</span>
-              <span className="day-number">4</span>
-
-              <span className="day-number">5</span>
-              <span className="day-number">6</span>
-              <span className="day-number">7</span>
-              <span className="day-number">8</span>
-              <span className="day-number">9</span>
-              <span className="day-number">10</span>
-              <span className="day-number">11</span>
-
-              <span className="day-number">12</span>
-              <span className="day-number">13</span>
-              <span className="day-number">14</span>
-              <span className="day-number">15</span>
-              <span className="day-number">16</span>
-              <span className="day-number has-dot">17</span>
-              <span className="day-number has-dot">18</span>
-
-              <span className="day-number">19</span>
-              <span className="day-number has-dot">20</span>
-              <span className="day-number has-dot">21</span>
-              <span className="day-number">22</span>
-              <span className="day-number has-dot">23</span>
-              <span className="day-number active-date">24</span>
-              <span className="day-number active-date">25</span>
-
-              <span className="day-number">26</span>
-              <span className="day-number has-dot">27</span>
-              <span className="day-number active-date">28</span>
-              <span className="day-number">29</span>
-              <span className="day-number active-date">30</span>
-              <span className="day-number">31</span>
-              <span className="day-number muted">1</span>
+              {calendarCells.map((cell, idx) => (
+                <span
+                  key={idx}
+                  className={`day-number ${
+                    !cell.isCurrentMonth ? "muted" : ""
+                  } ${cell.isToday ? "today-date" : ""} ${
+                    cell.isSelected ? "selected-date" : ""
+                  } ${cell.hasEvent ? "has-dot" : ""} ${
+                    cell.hasUpcoming ? "dot-upcoming" : ""
+                  } ${cell.hasCompleted ? "dot-completed" : ""}`}
+                  onClick={() => {
+                    if (cell.isCurrentMonth && cell.dateStr) {
+                      setSelectedCalendarDate((prev) =>
+                        prev === cell.dateStr ? null : cell.dateStr
+                      );
+                    }
+                  }}
+                  title={
+                    cell.hasEvent
+                      ? `${cell.eventCount} visit(s) on ${cell.dateStr}`
+                      : cell.dateStr
+                  }
+                >
+                  {cell.dayNum}
+                </span>
+              ))}
             </div>
+
+            {selectedCalendarDate && (
+              <div className="calendar-filter-indicator">
+                <span>Filter: {selectedCalendarDate}</span>
+                <button
+                  onClick={() => setSelectedCalendarDate(null)}
+                  className="clear-cal-filter"
+                >
+                  Clear Filter
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Visit Summary Widget */}

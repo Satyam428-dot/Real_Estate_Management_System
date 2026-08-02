@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 import {
   MapPin,
   Heart,
@@ -14,6 +15,7 @@ import {
   Calendar,
   MessageCircle,
   Phone,
+  Mail,
   ShieldCheck,
   Dumbbell,
   Trees,
@@ -147,6 +149,31 @@ export default function PropertyDetails() {
     const encodedMessage = encodeURIComponent(customMessage);
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
     window.open(whatsappUrl, "_blank");
+  };
+
+  const handleContactOwnerClick = () => {
+    const ownerEmail = backendProperty?.ownerEmail || propertyData.owner?.email || "rahul.sharma@gmail.com";
+    const ownerName = backendProperty?.ownerName || propertyData.owner?.name || "Property Owner";
+    
+    const subject = `Inquiry regarding Property: ${propertyData.title}`;
+    const body = `Hello ${ownerName},
+
+I am interested in your property "${propertyData.title}" (ID: ${propertyData.id}) located at ${propertyData.location} listed for ${propertyData.price}.
+
+Property Specifications:
+- Bedrooms: ${propertyData.beds}
+- Bathrooms: ${propertyData.baths}
+- Area: ${propertyData.sqft}
+
+Please provide more details regarding property availability, scheduling a site visit, and documentation.
+
+Looking forward to hearing from you.
+
+Best regards!`;
+
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(ownerEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    toast.success(`Opening Gmail Web to contact ${ownerName}...`);
+    window.open(gmailUrl, "_blank");
   };
 
   const handleOpenExternalMap = () => {
@@ -414,8 +441,8 @@ export default function PropertyDetails() {
                 <Building size={16} /> Book Property
               </button>
 
-              <button className="btn-outline-blue">
-                <Phone size={16} /> Contact Owner
+              <button className="btn-outline-blue" onClick={handleContactOwnerClick}>
+                <Mail size={16} /> Contact Owner
               </button>
 
               <button className="btn-whatsapp" onClick={handleWhatsAppClick}>

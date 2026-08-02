@@ -43,6 +43,7 @@ export default function SavedProperties() {
       const formatted = res.data.map((item) => ({
         id: item.savedId,
         propertyId: item.property.propertyId,
+        rawObj: item.property,
         title: item.property.title,
         location: `${item.property.city}, ${item.property.state}`,
         price: item.property.price,
@@ -244,7 +245,15 @@ export default function SavedProperties() {
       {!loading && sortedProperties.length > 0 && (
         <div className={`saved-grid ${viewMode}-view`}>
           {sortedProperties.map((property) => (
-            <div key={property.id} className="saved-card">
+            <div
+              key={property.id}
+              className="saved-card"
+              onClick={() =>
+                navigate(`/buyer/property-details/${property.propertyId}`, {
+                  state: { property: property.rawObj || property },
+                })
+              }
+            >
               {/* Image Container */}
               <div className="card-image-wrapper">
                 <img src={property.image} alt={property.title} />
@@ -253,7 +262,10 @@ export default function SavedProperties() {
                 </span>
                 <button
                   className="favorite-btn active"
-                  onClick={() => handleRemoveSaved(property.propertyId)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveSaved(property.propertyId);
+                  }}
                   title="Remove from saved"
                 >
                   <Heart size={16} fill="#ef4444" color="#ef4444" />
@@ -286,7 +298,10 @@ export default function SavedProperties() {
                   <div className="saved-date">
                     <Calendar size={14} /> Saved on {property.savedDate}
                   </div>
-                  <button className="more-options-btn">
+                  <button
+                    className="more-options-btn"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <MoreVertical size={16} />
                   </button>
                 </div>

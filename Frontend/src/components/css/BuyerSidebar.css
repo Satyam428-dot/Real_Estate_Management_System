@@ -129,17 +129,23 @@ html, body {
   font-weight: 700;
 }
 
-/* Logout Button Styling at Bottom */
-.buyer-sidebar .logout-btn {
-  margin-top: auto;
+/* Logout Button Styling under My Profile */
+.buyer-sidebar .logout-nav-item {
+  margin-top: 8px;
   color: #ef4444; /* Bright Red Text */
-  border-top: 1px solid #1e293b;
-  border-radius: 0;
-  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 14px;
 }
 
-.buyer-sidebar .logout-btn:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+.buyer-sidebar .logout-nav-item .nav-icon {
+  color: #ef4444; /* Red Icon */
+}
+
+.buyer-sidebar .logout-nav-item:hover {
+  background-color: rgba(239, 68, 68, 0.15);
   color: #f87171;
-  transform: none;
+}
+
+.buyer-sidebar .logout-nav-item:hover .nav-icon {
+  color: #f87171;
 }
