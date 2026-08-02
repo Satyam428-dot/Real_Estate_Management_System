@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { favouritesApi } from "../../utils/buyerApi";
 import {
@@ -18,6 +19,7 @@ import "./BuyerOverview.css";
 const API_URL = "http://localhost:8080";
 
 export default function BuyerOverview() {
+  const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -328,7 +330,12 @@ export default function BuyerOverview() {
         )}
         <div className="properties-cards-grid">
           {filteredProperties.map((property) => (
-            <div key={property.propertyId} className="property-card">
+            <div
+              key={property.propertyId || property.id}
+              className="property-card"
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate(`/buyer/property-details/${property.propertyId || property.id}`, { state: { property } })}
+            >
               <div className="card-image-wrapper">
                 {property.images?.[0] ? (
                   <img
@@ -341,7 +348,10 @@ export default function BuyerOverview() {
                   </div>
                 )}
                 <span className="type-badge">{property.propertyType}</span>
-                <button className="like-btn">
+                <button
+                  className="like-btn"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Heart size={16} />
                 </button>
               </div>
@@ -364,7 +374,15 @@ export default function BuyerOverview() {
                     <Maximize size={14} /> {property.areaSqft ?? 0} sqft
                   </span>
                 </div>
-                <button className="details-btn">View Details</button>
+                <button
+                  className="details-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/buyer/property-details/${property.propertyId || property.id}`, { state: { property } });
+                  }}
+                >
+                  View Details
+                </button>
               </div>
             </div>
           ))}

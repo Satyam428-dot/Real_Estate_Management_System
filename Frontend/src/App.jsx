@@ -88,6 +88,7 @@ function App() {
         <Route path="profile" element={<BuyerMyProfile />} />
 
         <Route path="property-details" element={<PropertyDetails />} />
+        <Route path="property-details/:id" element={<PropertyDetails />} />
         <Route path="book-property" element={<BookProperty />} />
         <Route path="schedule-visit" element={<ScheduleAVisit />} />
 

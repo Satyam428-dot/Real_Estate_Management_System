@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import axios from "axios";
 import {
   MapPin,
   Heart,
@@ -21,9 +23,10 @@ import {
   ArrowLeft,
   Star,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { GoogleMap, useJsApiLoader, MarkerF } from "@react-google-maps/api";
 import "./PropertyDetails.css";
+
+const API_URL = "http://localhost:8080";
 
 // Map Container Styling
 const mapContainerStyle = {
@@ -47,35 +50,57 @@ const mapOptions = {
 
 export default function PropertyDetails() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { id } = useParams();
+
   const [isSaved, setIsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState("Overview");
 
+  const [backendProperty, setBackendProperty] = useState(location.state?.property || null);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch from backend API if ID exists
+  useEffect(() => {
+    const targetId = id || location.state?.property?.id || location.state?.property?.propertyId;
+    if (targetId) {
+      setLoading(true);
+      axios
+        .get(`${API_URL}/properties/${targetId}`)
+        .then((res) => {
+          if (res.data) setBackendProperty(res.data);
+        })
+        .catch((err) => console.error("Could not fetch property from backend:", err))
+        .finally(() => setLoading(false));
+    }
+  }, [id]);
+
   // Load Google Maps Script
   const { isLoaded, loadError } = useJsApiLoader({
-  id: "google-map-script",
-  googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
-});
+    id: "google-map-script",
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
+  });
 
+  // Construct view object from backendProperty or fallback defaults
+  const p = backendProperty;
   const propertyData = {
-    id: "PRP-240521-001",
-    title: "Luxury 3BHK Apartment",
+    id: p?.id || p?.propertyId || "PRP-240521-001",
+    title: p?.title || "Luxury 3BHK Apartment",
     verified: true,
-    location: "Baner, Pune, Maharashtra",
-    coordinates: { lat: 18.559, lng: 73.7868 }, // Coordinates for Baner, Pune
-    price: "₹1,25,00,000",
+    location: p?.address ? `${p.address}, ${p.city || ""}` : (p?.location || "Baner, Pune, Maharashtra"),
+    coordinates: { lat: 18.559, lng: 73.7868 },
+    price: typeof p?.price === "number" ? `₹${p.price.toLocaleString("en-IN")}` : (p?.price || "₹1,25,00,000"),
     pricePerSqft: "₹8,620 / sq.ft",
     priceNegotiable: true,
-    beds: "3",
-    baths: "3",
-    sqft: "1450 sq.ft",
+    beds: String(p?.bedrooms || p?.beds || "3"),
+    baths: String(p?.bathrooms || p?.baths || "3"),
+    sqft: p?.areaSqft ? `${p.areaSqft} sq.ft` : (p?.sqft || "1450 sq.ft"),
     parking: "1",
-    propertyType: "Apartment",
+    propertyType: p?.propertyType || "Apartment",
     listedOn: "21 May 2024",
     possession: "Ready to Move",
     furnishing: "Semi Furnished",
     reraId: "P52100012345",
-    description:
-      "Experience luxury living in this beautiful 3BHK apartment located in the prime area of Baner. This property offers spacious rooms, modern amenities, and excellent connectivity to key locations in Pune.",
+    description: p?.description || "Experience luxury living in this beautiful property with modern amenities.",
     highlightsPoints: [
       "Spacious living and dining area with balcony",
       "Modular kitchen with premium fittings",
@@ -83,20 +108,20 @@ export default function PropertyDetails() {
       "24x7 security with CCTV surveillance",
     ],
     owner: {
-      name: "Atharv Dadhe",
+      name: p?.owner ? `${p.owner.firstName || ""} ${p.owner.lastName || ""}` : "Atharv Dadhe",
       role: "Property Owner",
-      phone: "7747926022",
+      phone: p?.owner?.phone || "7747926022",
       rating: 4.8,
       reviewsCount: 32,
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
     },
     images: {
-      main: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80",
-      thumb1: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=400&q=80",
-      thumb2: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=400&q=80",
-      thumb3: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80",
+      main: p?.images?.[0]?.imageUrl || p?.image || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80",
+      thumb1: p?.images?.[1]?.imageUrl || "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=400&q=80",
+      thumb2: p?.images?.[2]?.imageUrl || "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=400&q=80",
+      thumb3: p?.images?.[3]?.imageUrl || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80",
     },
+    rawPropertyObj: p,
     highlightsList: [
       "Prime Location",
       "Gated Community",
@@ -377,7 +402,7 @@ export default function PropertyDetails() {
             <div className="action-btns-group">
               <button
                 className="btn-primary-blue"
-                onClick={() => navigate("/buyer/schedule-visit")}
+                onClick={() => navigate("/buyer/schedule-visit", { state: { property: propertyData.rawPropertyObj || propertyData } })}
               >
                 <Calendar size={16} /> Schedule a Visit
               </button>
