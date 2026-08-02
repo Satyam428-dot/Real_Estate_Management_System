@@ -743,7 +743,7 @@ export default function BrowseProperties() {
                 key={property.id}
                 className="property-card"
                 style={{ cursor: "pointer" }}
-                onClick={() => navigate("/buyer/property-details")}
+                onClick={() => navigate(`/buyer/property-details/${property.id}`, { state: { property } })}
               >
                 <div className="card-image-wrapper">
                   <img src={property.image} alt={property.title} />

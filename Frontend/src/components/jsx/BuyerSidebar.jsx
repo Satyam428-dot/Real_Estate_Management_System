@@ -21,7 +21,7 @@ export default function BuyerSidebar() {
     { name: "Dashboard", path: "/buyer/dashboard", icon: <LayoutDashboard size={18} /> },
     { name: "Browse Properties", path: "/buyer/browse", icon: <Building size={18} /> },
     { name: "Saved Properties", path: "/buyer/saved", icon: <Heart size={18} /> },
-    { name: "Schedule Visit", path: "/buyer/visits", icon: <Calendar size={18} /> },
+    { name: "Scheduled Visit", path: "/buyer/visits", icon: <Calendar size={18} /> },
     { name: "My Bookings", path: "/buyer/bookings", icon: <Bookmark size={18} /> },
     { name: "My Inquiries", path: "/buyer/inquiries", icon: <MessageSquare size={18} /> },
     { name: "Notifications", path: "/buyer/notifications", icon: <Bell size={18} />, badge: 5 },
@@ -35,7 +35,7 @@ export default function BuyerSidebar() {
       <div className="brand">
         <Building className="brand-logo" size={26} />
         <div>
-          <h2>Real Estate</h2>
+          <h2>PROPERTY HQ</h2>
           <p>Find Your Dream Property</p>
         </div>
       </div>

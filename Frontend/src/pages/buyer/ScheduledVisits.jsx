@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Calendar as CalendarIcon,
   CheckCircle2,
@@ -21,100 +22,74 @@ export default function ScheduledVisits() {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [dateFilter, setDateFilter] = useState("all");
 
-  const [visits, setVisits] = useState([
-    {
-      id: 1,
-      title: "Luxury 2BHK Apartment",
-      location: "Baner, Pune",
-      status: "Upcoming",
-      statusType: "upcoming",
-      date: "24 May 2024",
-      time: "11:00 AM",
-      agent: "Rohit Sharma",
-      beds: "2 Beds",
-      baths: "2 Baths",
-      sqft: "1100 sq.ft",
-      image:
-        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 2,
-      title: "Elegant Villa",
-      location: "Kothrud, Pune",
-      status: "Upcoming",
-      statusType: "upcoming",
-      date: "25 May 2024",
-      time: "04:00 PM",
-      agent: "Priya Mehta",
-      beds: "4 Beds",
-      baths: "4 Baths",
-      sqft: "2800 sq.ft",
-      image:
-        "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 3,
-      title: "Modern 3BHK Apartment",
-      location: "Hinjewadi, Pune",
-      status: "Upcoming",
-      statusType: "upcoming",
-      date: "28 May 2024",
-      time: "10:30 AM",
-      agent: "Amit Patil",
-      beds: "3 Beds",
-      baths: "3 Baths",
-      sqft: "1450 sq.ft",
-      image:
-        "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 4,
-      title: "Spacious 1BHK Apartment",
-      location: "Wakad, Pune",
-      status: "Upcoming",
-      statusType: "upcoming",
-      date: "30 May 2024",
-      time: "02:00 PM",
-      agent: "Rohit Sharma",
-      beds: "1 Bed",
-      baths: "1 Bath",
-      sqft: "650 sq.ft",
-      image:
-        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 5,
-      title: "Furnished 3BHK Apartment",
-      location: "Viman Nagar, Pune",
-      status: "Upcoming",
-      statusType: "upcoming",
-      date: "02 Jun 2024",
-      time: "11:00 AM",
-      agent: "Priya Mehta",
-      beds: "3 Beds",
-      baths: "3 Baths",
-      sqft: "1600 sq.ft",
-      image:
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80",
-    },
-  ]);
+  const [visits, setVisits] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleCancelVisit = (id) => {
-    setVisits((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, status: "Cancelled", statusType: "cancelled" }
-          : item
-      )
-    );
+  useEffect(() => {
+    fetchVisits();
+  }, []);
+
+  const fetchVisits = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const response = await axios.get("http://localhost:8080/visits/buyer", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const formatted = response.data.map((item) => ({
+        id: item.id,
+        title: item.propertyTitle || "Property Visit",
+        location: `${item.propertyLocation || ""}, ${item.propertyCity || ""}`,
+        status: item.status === "PENDING" ? "Upcoming" : item.status === "CONFIRMED" ? "Confirmed" : item.status === "COMPLETED" ? "Completed" : "Cancelled",
+        statusType: item.status.toLowerCase(),
+        date: item.visitDate,
+        time: item.timeSlot,
+        agent: item.ownerName || "Property Owner",
+        beds: "3 Beds",
+        baths: "2 Baths",
+        sqft: "1200 sq.ft",
+        image: item.propertyImage || "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80",
+      }));
+
+      setVisits(formatted);
+    } catch (err) {
+      console.error("Failed to fetch buyer visits from backend:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const upcomingCount = visits.filter((v) => v.statusType === "upcoming").length;
-  const completedCount = 3; // Static count matching standard view summary
-  const cancelledCount = visits.filter((v) => v.statusType === "cancelled").length + 1;
+  const handleCancelVisit = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        await axios.delete(`http://localhost:8080/visits/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+      setVisits((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? { ...item, status: "Cancelled", statusType: "cancelled" }
+            : item
+        )
+      );
+      alert("Visit request cancelled successfully!");
+    } catch (err) {
+      console.error("Error cancelling visit:", err);
+      alert("Failed to cancel visit");
+    }
+  };
+
+  const upcomingCount = visits.filter((v) => v.statusType === "upcoming" || v.statusType === "pending" || v.statusType === "confirmed").length;
+  const completedCount = visits.filter((v) => v.statusType === "completed").length;
+  const cancelledCount = visits.filter((v) => v.statusType === "cancelled").length;
 
   const filteredVisits = visits.filter((item) => {
-    if (activeTab === "upcoming") return item.statusType === "upcoming";
+    if (activeTab === "upcoming") return item.statusType === "upcoming" || item.statusType === "pending" || item.statusType === "confirmed";
     if (activeTab === "completed") return item.statusType === "completed";
     if (activeTab === "cancelled") return item.statusType === "cancelled";
     return true;
