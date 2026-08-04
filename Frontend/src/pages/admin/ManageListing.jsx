@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaBan, FaTrash, FaSearch, FaCheckCircle, FaBuilding } from "react-icons/fa";
+import { FaBan, FaTrash, FaSearch, FaCheckCircle, FaBuilding, FaTimes } from "react-icons/fa";
 import "./ManageListing.css";
 
 export default function ManageListings() {
@@ -11,6 +11,11 @@ export default function ManageListings() {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
+
+  // Modal States
+  const [banningPropertyId, setBanningPropertyId] = useState(null);
+  const [banReason, setBanReason] = useState("Flagged for policy violation / illegal activity");
+  const [updating, setUpdating] = useState(false);
 
   const fetchProperties = async () => {
     try {
@@ -33,27 +38,86 @@ export default function ManageListings() {
   }, []);
 
   const handleToggleBlacklist = async (property) => {
-    const newBlacklist = !property.blacklist;
-    const action = newBlacklist ? "blacklist" : "remove from blacklist";
-    if (!window.confirm(`Are you sure you want to ${action} this property listing?`)) return;
+    // If property is currently blacklisted, unblacklist directly
+    if (property.blacklist) {
+      if (!window.confirm("Are you sure you want to unblacklist and restore this property listing?")) return;
+
+      try {
+        setUpdating(true);
+        const token = localStorage.getItem("token");
+        const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+        await axios.put(
+          `http://localhost:8080/properties/${property.propertyId}`,
+          { blacklist: false },
+          config
+        );
+        await axios.put(
+          `http://localhost:8080/properties/${property.propertyId}/verification-status?status=APPROVED`,
+          {},
+          config
+        );
+
+        setProperties((prev) =>
+          prev.map((p) =>
+            p.propertyId === property.propertyId
+              ? { ...p, blacklist: false, verificationStatus: "APPROVED", rejectionReason: null }
+              : p
+          )
+        );
+      } catch (err) {
+        console.error("Failed to unblacklist property:", err);
+        alert("Failed to unblacklist property.");
+      } finally {
+        setUpdating(false);
+      }
+    } else {
+      // If property is NOT blacklisted, open custom Ban Modal UI
+      setBanningPropertyId(property.propertyId);
+      setBanReason("Flagged for policy violation / illegal activity");
+    }
+  };
+
+  const confirmBanProperty = async () => {
+    if (!banningPropertyId) return;
 
     try {
+      setUpdating(true);
       const token = localStorage.getItem("token");
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
       await axios.put(
-        `http://localhost:8080/properties/${property.propertyId}`,
-        { blacklist: newBlacklist },
+        `http://localhost:8080/properties/${banningPropertyId}`,
+        { blacklist: true },
+        config
+      );
+      await axios.put(
+        `http://localhost:8080/properties/${banningPropertyId}/verification-status?status=REJECTED&rejectionReason=${encodeURIComponent(
+          banReason || "Banned by Admin for policy violation"
+        )}`,
+        {},
         config
       );
 
       setProperties((prev) =>
         prev.map((p) =>
-          p.propertyId === property.propertyId ? { ...p, blacklist: newBlacklist } : p
+          p.propertyId === banningPropertyId
+            ? {
+                ...p,
+                blacklist: true,
+                verificationStatus: "REJECTED",
+                rejectionReason: banReason || "Banned by Admin",
+              }
+            : p
         )
       );
+
+      setBanningPropertyId(null);
+      setBanReason("Flagged for policy violation / illegal activity");
     } catch (err) {
-      console.error("Failed to update blacklist status:", err);
-      alert("Failed to update property status.");
+      console.error("Error banning property:", err);
+      alert("Failed to ban property.");
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -190,22 +254,24 @@ export default function ManageListings() {
                           <span className="ml-badge active-status">No</span>
                         )}
                       </td>
-                      <td>
-                        <button
-                          className="ml-btn-icon ml-btn-blacklist"
-                          title={p.blacklist ? "Unblacklist Property" : "Blacklist Property"}
-                          onClick={() => handleToggleBlacklist(p)}
-                        >
-                          {p.blacklist ? <FaCheckCircle color="#16a34a" /> : <FaBan />}
-                        </button>
+                      <td className="ml-actions-cell">
+                        <div className="ml-actions-flex">
+                          <button
+                            className="ml-btn-icon ml-btn-blacklist"
+                            title={p.blacklist ? "Unblacklist Property" : "Blacklist Property"}
+                            onClick={() => handleToggleBlacklist(p)}
+                          >
+                            {p.blacklist ? <FaCheckCircle color="#16a34a" /> : <FaBan />}
+                          </button>
 
-                        <button
-                          className="ml-btn-icon ml-btn-delete"
-                          title="Delete Property"
-                          onClick={() => handleDeleteProperty(p.propertyId)}
-                        >
-                          <FaTrash />
-                        </button>
+                          <button
+                            className="ml-btn-icon ml-btn-delete"
+                            title="Delete Property"
+                            onClick={() => handleDeleteProperty(p.propertyId)}
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -213,6 +279,49 @@ export default function ManageListings() {
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Ban & Blacklist Reason Modal */}
+      {banningPropertyId && (
+        <div className="ap-modal-overlay" onClick={() => setBanningPropertyId(null)}>
+          <div className="ap-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="ap-modal-header">
+              <h3 style={{ color: "#dc2626", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <FaBan /> Ban & Blacklist Property
+              </h3>
+              <button className="ap-modal-close" onClick={() => setBanningPropertyId(null)}>
+                <FaTimes />
+              </button>
+            </div>
+            <div className="ap-modal-body">
+              <p style={{ fontSize: "0.9rem", color: "#475569", marginBottom: "1rem" }}>
+                This action will immediately blacklist the property, flag it for policy violation, and hide it from all customers.
+              </p>
+              <label style={{ fontSize: "0.85rem", fontWeight: "700", color: "#1e293b", display: "block", marginBottom: "0.35rem" }}>
+                Reason for Banning / Blacklisting <span style={{ color: "#dc2626" }}>*</span>
+              </label>
+              <textarea
+                rows="4"
+                placeholder="e.g. Flagged for policy violation / illegal activity"
+                value={banReason}
+                onChange={(e) => setBanReason(e.target.value)}
+              />
+            </div>
+            <div className="ap-modal-actions">
+              <button className="ap-doc-btn" onClick={() => setBanningPropertyId(null)}>
+                Cancel
+              </button>
+              <button
+                className="ap-btn-reject"
+                style={{ backgroundColor: "#dc2626" }}
+                disabled={updating || !banReason.trim()}
+                onClick={confirmBanProperty}
+              >
+                <FaBan /> Confirm Ban & Blacklist
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
