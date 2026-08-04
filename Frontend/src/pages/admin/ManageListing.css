@@ -1,0 +1,134 @@
+/* Frontend/src/pages/admin/ManageListing.css */
+.manage-listings-container {
+  padding: 2rem;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.ml-header {
+  margin-bottom: 2rem;
+}
+
+.ml-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.ml-header p {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.ml-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.ml-search-input {
+  flex: 1;
+  min-width: 280px;
+  padding: 0.6rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.ml-filter-select {
+  padding: 0.6rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: #ffffff;
+}
+
+.ml-table-container {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  overflow-x: auto;
+}
+
+.ml-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.ml-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.ml-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.ml-table tr:hover {
+  background: #f8fafc;
+}
+
+.ml-prop-thumb {
+  width: 60px;
+  height: 45px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.ml-badge {
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.ml-badge.available { background: #dcfce7; color: #16a34a; }
+.ml-badge.rented { background: #dbeafe; color: #2563eb; }
+.ml-badge.sold { background: #f3e8ff; color: #9333ea; }
+
+.ml-badge.blacklisted { background: #fee2e2; color: #dc2626; }
+.ml-badge.active-status { background: #f0fdf4; color: #16a34a; }
+
+.ml-btn-icon {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 0.4rem;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.ml-btn-icon:hover {
+  background: #f1f5f9;
+}
+
+.ml-btn-blacklist {
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.ml-btn-blacklist:hover {
+  background: #fee2e2;
+}
+
+.ml-btn-delete {
+  color: #b91c1c;
+  border-color: #f87171;
+}
+
+.ml-btn-delete:hover {
+  background: #fef2f2;
+}
