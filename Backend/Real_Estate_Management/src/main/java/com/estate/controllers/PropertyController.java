@@ -82,6 +82,30 @@ public class PropertyController {
 		propertyService.deleteProperty(id);
 		return ResponseEntity.ok("property deleted sucessfully");
 	}
+
+	@GetMapping("/pending")
+	public ResponseEntity<List<PropertyResponseDTO>> getPendingProperties() {
+		return ResponseEntity.ok(propertyService.listPendingProperties());
+	}
+
+	@PostMapping(value = "/{id}/verification-docs", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<PropertyResponseDTO> uploadVerificationDocs(
+			@PathVariable Long id,
+			@RequestParam(value = "titleDeed", required = false) MultipartFile titleDeed,
+			@RequestParam(value = "taxReceipt", required = false) MultipartFile taxReceipt,
+			@RequestParam(value = "noc", required = false) MultipartFile noc,
+			Authentication authentication) {
+		String ownerEmail = (authentication != null) ? authentication.getName() : null;
+		return ResponseEntity.ok(propertyService.uploadPropertyVerificationDocs(id, titleDeed, taxReceipt, noc, ownerEmail));
+	}
+
+	@PutMapping("/{id}/verification-status")
+	public ResponseEntity<PropertyResponseDTO> updateVerificationStatus(
+			@PathVariable Long id,
+			@RequestParam("status") com.estate.entities.VerificationStatus status,
+			@RequestParam(value = "rejectionReason", required = false) String rejectionReason) {
+		return ResponseEntity.ok(propertyService.updateVerificationStatus(id, status, rejectionReason));
+	}
 	
 	
 	

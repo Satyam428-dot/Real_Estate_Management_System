@@ -84,7 +84,7 @@ public class SecurityConfig {
 						.requestMatchers("/register", "/login", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
 						.permitAll()
 						.requestMatchers(HttpMethod.GET, "/properties/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/properties", "/properties/*/images").authenticated()
+						.requestMatchers(HttpMethod.POST, "/properties", "/properties/*/images", "/properties/*/verification-docs").authenticated()
 						.requestMatchers(HttpMethod.PUT, "/properties/**").authenticated()
 						.requestMatchers(HttpMethod.DELETE, "/properties/**").authenticated()
 						.requestMatchers("/saved-properties", "/saved-properties/**").authenticated()

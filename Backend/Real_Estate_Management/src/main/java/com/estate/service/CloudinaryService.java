@@ -46,6 +46,18 @@ public class CloudinaryService {
 		return new UploadResult((String) response.get("secure_url"), (String) response.get("public_id"));
 	}
 
+	public UploadResult uploadPropertyDoc(MultipartFile file, Long propertyId, String docType) throws IOException {
+		if (cloudName.isBlank() || apiKey.isBlank() || apiSecret.isBlank()) {
+			String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "doc.jpg";
+			return new UploadResult("properties/" + propertyId + "/docs/" + docType + "_" + originalFilename, "mock_prop_doc_public_id");
+		}
+
+		Map<?, ?> response = cloudinary().uploader().upload(file.getBytes(), ObjectUtils.asMap(
+				"folder", "real_estate_management/properties/property_" + propertyId + "/docs/" + docType,
+				"resource_type", "auto"));
+		return new UploadResult((String) response.get("secure_url"), (String) response.get("public_id"));
+	}
+
 	public void deleteImage(String publicId) throws IOException {
 		if (!cloudName.isBlank() && !apiKey.isBlank() && !apiSecret.isBlank()) {
 			cloudinary().uploader().destroy(publicId, ObjectUtils.emptyMap());

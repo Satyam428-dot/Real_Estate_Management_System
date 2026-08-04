@@ -65,7 +65,7 @@ public class PropertyServiceImpl implements PropertyService {
 
 	@Override
 	public List<PropertyResponseDTO> listAvailableProperties() {
-		return propertyRepo.findByStatusAndBlacklistFalse(PropertyStatus.AVAILABLE).stream().map(this::toResponse)
+		return propertyRepo.findByStatusAndVerificationStatusAndBlacklistFalse(PropertyStatus.AVAILABLE, com.estate.entities.VerificationStatus.APPROVED).stream().map(this::toResponse)
 				.toList();
 	}
 
@@ -205,9 +205,56 @@ public class PropertyServiceImpl implements PropertyService {
 	}
 
 	private void assertOwnedBy(Property property, String ownerEmail) {
-		if (!property.getOwner().getEmail().equalsIgnoreCase(ownerEmail)) {
-			throw new IllegalStateException("You can upload images only for your own properties");
+		if (ownerEmail != null && property.getOwner() != null && property.getOwner().getEmail() != null
+				&& !property.getOwner().getEmail().equalsIgnoreCase(ownerEmail)) {
+			throw new IllegalStateException("You can upload images or documents only for your own properties");
 		}
+	}
+
+	@Override
+	public List<PropertyResponseDTO> listPendingProperties() {
+		return propertyRepo.findByVerificationStatus(com.estate.entities.VerificationStatus.PENDING)
+				.stream().map(this::toResponse).toList();
+	}
+
+	@Override
+	@Transactional
+	public PropertyResponseDTO uploadPropertyVerificationDocs(Long id, MultipartFile titleDeed, MultipartFile taxReceipt, MultipartFile noc, String ownerEmail) {
+		Property property = findProperty(id);
+		assertOwnedBy(property, ownerEmail);
+
+		try {
+			if (titleDeed != null && !titleDeed.isEmpty()) {
+				CloudinaryService.UploadResult uploaded = cloudinaryService.uploadPropertyDoc(titleDeed, id, "title_deed");
+				property.setTitleDeedUrl(uploaded.secureUrl());
+			}
+			if (taxReceipt != null && !taxReceipt.isEmpty()) {
+				CloudinaryService.UploadResult uploaded = cloudinaryService.uploadPropertyDoc(taxReceipt, id, "tax_receipt");
+				property.setTaxReceiptUrl(uploaded.secureUrl());
+			}
+			if (noc != null && !noc.isEmpty()) {
+				CloudinaryService.UploadResult uploaded = cloudinaryService.uploadPropertyDoc(noc, id, "noc");
+				property.setNocCertificateUrl(uploaded.secureUrl());
+			}
+		} catch (Exception e) {
+			System.err.println("Document upload warning: " + e.getMessage());
+		}
+
+		property.setVerificationStatus(com.estate.entities.VerificationStatus.PENDING);
+		return toResponse(propertyRepo.save(property));
+	}
+
+	@Override
+	@Transactional
+	public PropertyResponseDTO updateVerificationStatus(Long id, com.estate.entities.VerificationStatus status, String rejectionReason) {
+		Property property = findProperty(id);
+		property.setVerificationStatus(status);
+		if (status == com.estate.entities.VerificationStatus.REJECTED) {
+			property.setRejectionReason(rejectionReason);
+		} else if (status == com.estate.entities.VerificationStatus.APPROVED) {
+			property.setRejectionReason(null);
+		}
+		return toResponse(propertyRepo.save(property));
 	}
 
 	private PropertyResponseDTO toResponse(Property property) {
@@ -230,6 +277,11 @@ public class PropertyServiceImpl implements PropertyService {
 		response.setAreaSqft(property.getAreaSqft());
 		response.setStatus(property.getStatus());
 		response.setBlacklist(property.getBlacklist());
+		response.setVerificationStatus(property.getVerificationStatus());
+		response.setTitleDeedUrl(property.getTitleDeedUrl());
+		response.setTaxReceiptUrl(property.getTaxReceiptUrl());
+		response.setNocCertificateUrl(property.getNocCertificateUrl());
+		response.setRejectionReason(property.getRejectionReason());
 		response.setUpdatedAt(property.getUpdatedAt());
 		response.setImages(property.getImages().stream()
 				.sorted(Comparator.comparing(PropertyImage::getIsMain).reversed()).map(image -> {

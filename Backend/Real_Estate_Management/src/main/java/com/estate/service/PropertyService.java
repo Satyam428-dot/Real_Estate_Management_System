@@ -28,4 +28,9 @@ public interface PropertyService {
 
 	PropertyResponseDTO deletePropertyImage(Long propertyId, Long imageId);
 
+	PropertyResponseDTO uploadPropertyVerificationDocs(Long id, MultipartFile titleDeed, MultipartFile taxReceipt, MultipartFile noc, String ownerEmail);
+
+	PropertyResponseDTO updateVerificationStatus(Long id, com.estate.entities.VerificationStatus status, String rejectionReason);
+
+	List<PropertyResponseDTO> listPendingProperties();
 }

@@ -94,6 +94,23 @@ public class Property extends BaseClass {
 	@Column(nullable = false)
 	private Boolean blacklist = false;
 
+	@Builder.Default
+	@Enumerated(EnumType.STRING)
+	@Column(name = "verification_status", nullable = false)
+	private VerificationStatus verificationStatus = VerificationStatus.PENDING;
+
+	@Column(name = "title_deed_url")
+	private String titleDeedUrl;
+
+	@Column(name = "tax_receipt_url")
+	private String taxReceiptUrl;
+
+	@Column(name = "noc_certificate_url")
+	private String nocCertificateUrl;
+
+	@Column(name = "rejection_reason", columnDefinition = "TEXT")
+	private String rejectionReason;
+
 	@Column(name = "updated_at")
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
