@@ -55,9 +55,9 @@ export default function PropertyDetails() {
       "24x7 security with CCTV surveillance",
     ],
     owner: {
-      name: "Atharv Dadhe",
+      name: "Ayush Behera",
       role: "Property Owner",
-      phone: "7747926022", // Country code +91 included without spaces or special characters
+      phone: "9834031109", // Country code +91 included without spaces or special characters
       rating: 4.8,
       reviewsCount: 32,
       avatar:
@@ -65,9 +65,12 @@ export default function PropertyDetails() {
     },
     images: {
       main: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80",
-      thumb1: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=400&q=80",
-      thumb2: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=400&q=80",
-      thumb3: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80",
+      thumb1:
+        "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=400&q=80",
+      thumb2:
+        "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=400&q=80",
+      thumb3:
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80",
     },
     highlightsList: [
       "Prime Location",
@@ -114,7 +117,10 @@ export default function PropertyDetails() {
             Home
           </span>
           <span className="crumb-sep">&gt;</span>
-          <span onClick={() => navigate("/buyer/browse")} className="link-crumb">
+          <span
+            onClick={() => navigate("/buyer/browse")}
+            className="link-crumb"
+          >
             Properties
           </span>
           <span className="crumb-sep">&gt;</span>
@@ -236,19 +242,23 @@ export default function PropertyDetails() {
 
           {/* Navigation Tabs */}
           <div className="pdetails-tabs">
-            {["Overview", "Amenities", "Location", "Floor Plan", "Reviews (28)"].map(
-              (tab) => (
-                <button
-                  key={tab}
-                  className={`tab-link ${
-                    activeTab === tab.split(" ")[0] ? "active" : ""
-                  }`}
-                  onClick={() => setActiveTab(tab.split(" ")[0])}
-                >
-                  {tab}
-                </button>
-              )
-            )}
+            {[
+              "Overview",
+              "Amenities",
+              "Location",
+              "Floor Plan",
+              "Reviews (28)",
+            ].map((tab) => (
+              <button
+                key={tab}
+                className={`tab-link ${
+                  activeTab === tab.split(" ")[0] ? "active" : ""
+                }`}
+                onClick={() => setActiveTab(tab.split(" ")[0])}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
 
           {/* Tab 1: Overview & About Property */}
