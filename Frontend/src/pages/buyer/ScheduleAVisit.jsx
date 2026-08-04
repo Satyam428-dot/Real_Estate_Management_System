@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 import {
   CheckCircle2,
   Calendar,
@@ -15,27 +17,77 @@ import "./ScheduleAVisit.css";
 
 export default function ScheduleAVisit() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Selected property passed from Property Details or Catalog
+  const selectedProp = location.state?.property;
+
+  const property = {
+    id: selectedProp?.id || selectedProp?.propertyId || 1,
+    title: selectedProp?.title || "Luxury 3BHK Apartment",
+    location: selectedProp?.location || (selectedProp?.city ? `${selectedProp.address || ''}, ${selectedProp.city}` : "Baner, Pune, Maharashtra"),
+    price: typeof selectedProp?.price === "number" ? `₹${selectedProp.price.toLocaleString("en-IN")}` : (selectedProp?.price || "₹1,25,00,000"),
+    beds: String(selectedProp?.bedrooms || selectedProp?.beds || "3"),
+    baths: String(selectedProp?.bathrooms || selectedProp?.baths || "3"),
+    sqft: selectedProp?.areaSqft ? `${selectedProp.areaSqft} sq.ft` : (selectedProp?.sqft || "1450 sq.ft"),
+    image: selectedProp?.images?.[0]?.imageUrl || selectedProp?.image || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
+    description: selectedProp?.description || "Experience luxury living in this beautiful property with modern amenities.",
+    rawObj: selectedProp
+  };
 
   // Form State
   const [formData, setFormData] = useState({
     fullName: "Abhishek Dhoran",
     email: "abhishek.dhoran@gmail.com",
     phone: "+91 98765 43210",
-    visitDate: "2024-05-27",
+    visitDate: new Date().toISOString().split("T")[0],
     timeSlot: "11:00 AM - 01:00 PM",
     specificRequirements: "",
     messageToOwner: "",
   });
+
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Property visit scheduled successfully!");
-    navigate("/buyer/scheduled-visits");
+    setSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const payload = {
+        propertyId: property.id,
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        visitDate: formData.visitDate,
+        timeSlot: formData.timeSlot,
+        specificRequirements: formData.specificRequirements,
+        messageToOwner: formData.messageToOwner,
+      };
+
+      await axios.post("http://localhost:8080/visits", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      toast.success("Property visit scheduled successfully!");
+      navigate("/buyer/visits");
+    } catch (err) {
+      console.error("Failed to save scheduled visit:", err);
+      toast.error(
+        "Failed to schedule visit: " +
+          (err.response?.data?.message || err.message || "Unknown error occurred.")
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -196,43 +248,39 @@ export default function ScheduleAVisit() {
             
             <div className="sidebar-image-wrapper">
               <img
-                src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"
-                alt="Luxury 3BHK Apartment"
+                src={property.image}
+                alt={property.title}
               />
             </div>
 
             <div className="sidebar-property-info">
-              <h3>Luxury 3BHK Apartment</h3>
+              <h3>{property.title}</h3>
               <span className="verified-badge">
                 <CheckCircle2 size={13} /> Verified Property
               </span>
-              <p className="location-text">📍 Baner, Pune, Maharashtra</p>
+              <p className="location-text">📍 {property.location}</p>
 
               <div className="specs-pills-row">
-                <span className="spec-pill">🛏️ 3 Beds</span>
-                <span className="spec-pill">🛁 3 Baths</span>
-                <span className="spec-pill">📐 1450 sq.ft</span>
-                <span className="spec-pill">🚘 1 Parking</span>
+                <span className="spec-pill">🛏️ {property.beds} Beds</span>
+                <span className="spec-pill">🛁 {property.baths} Baths</span>
+                <span className="spec-pill">📐 {property.sqft}</span>
               </div>
 
               <div className="price-tag-row">
-                <span className="price-val">₹1,25,00,000</span>
-                <span className="per-sqft-val">(₹8,620 / sq.ft)</span>
+                <span className="price-val">{property.price}</span>
               </div>
 
               <hr className="divider-line" />
 
               <div className="about-property-mini">
                 <h5>About Property</h5>
-                <p>
-                  Experience luxury living in this beautiful 3BHK apartment located in the prime area of Baner. This property offers spacious rooms, modern amenities, and excellent connectivity to key locations in Pune.
-                </p>
+                <p>{property.description}</p>
               </div>
 
               <button
                 className="view-property-details-btn"
                 type="button"
-                onClick={() => navigate("/buyer/property-details")}
+                onClick={() => navigate(`/buyer/property-details/${property.id}`, { state: { property: property.rawObj } })}
               >
                 👁️ View Property Details
               </button>

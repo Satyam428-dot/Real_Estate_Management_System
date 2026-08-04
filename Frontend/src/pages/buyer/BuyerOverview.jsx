@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { favouritesApi } from "../../utils/buyerApi";
 import {
@@ -18,12 +19,15 @@ import "./BuyerOverview.css";
 const API_URL = "http://localhost:8080";
 
 export default function BuyerOverview() {
+  const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Real-time Saved Properties Count state
+  // Real-time Counts state
   const [savedCount, setSavedCount] = useState(0);
+  const [visitsCount, setVisitsCount] = useState(0);
+  const [bookingsCount, setBookingsCount] = useState(0);
 
   // Form Filter State
   const [location, setLocation] = useState("Pune, Maharashtra");
@@ -49,25 +53,36 @@ export default function BuyerOverview() {
       )
       .finally(() => setLoading(false));
 
-    // Fetch saved properties count from backend API
-    const updateSavedCount = () => {
+    // Fetch user dashboard counts from backend API
+    const fetchCounts = () => {
       const token = localStorage.getItem("token");
-      if (token) {
-        axios
-          .get(`${API_URL}/saved-properties/count`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          .then((res) => setSavedCount(res.data))
-          .catch(() => setSavedCount(0));
-      } else {
-        setSavedCount(0);
-      }
+      if (!token) return;
+
+      const headers = { Authorization: `Bearer ${token}` };
+
+      // Saved Properties Count
+      axios
+        .get(`${API_URL}/saved-properties/count`, { headers })
+        .then((res) => setSavedCount(res.data))
+        .catch(() => setSavedCount(0));
+
+      // Scheduled Visits Count
+      axios
+        .get(`${API_URL}/visits/buyer`, { headers })
+        .then((res) => setVisitsCount(Array.isArray(res.data) ? res.data.length : 0))
+        .catch(() => setVisitsCount(0));
+
+      // My Bookings Count
+      axios
+        .get(`${API_URL}/bookings/buyer`, { headers })
+        .then((res) => setBookingsCount(Array.isArray(res.data) ? res.data.length : 0))
+        .catch(() => setBookingsCount(0));
     };
 
-    updateSavedCount();
-    window.addEventListener("savedPropertiesUpdated", updateSavedCount);
+    fetchCounts();
+    window.addEventListener("savedPropertiesUpdated", fetchCounts);
     return () =>
-      window.removeEventListener("savedPropertiesUpdated", updateSavedCount);
+      window.removeEventListener("savedPropertiesUpdated", fetchCounts);
   }, []);
 
   const formatPrice = (price, listingType) =>
@@ -172,7 +187,7 @@ export default function BuyerOverview() {
           </div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card" style={{ cursor: "pointer" }} onClick={() => navigate("/buyer/saved")}>
           <div className="stat-icon pink-bg">
             <Heart size={22} />
           </div>
@@ -183,24 +198,24 @@ export default function BuyerOverview() {
           </div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card" style={{ cursor: "pointer" }} onClick={() => navigate("/buyer/visits")}>
           <div className="stat-icon green-bg">
             <Calendar size={22} />
           </div>
           <div>
             <span className="stat-label">My Visits</span>
-            <h3 className="stat-value">0</h3>
+            <h3 className="stat-value">{visitsCount}</h3>
             <span className="stat-sub">Scheduled Visits</span>
           </div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card" style={{ cursor: "pointer" }} onClick={() => navigate("/buyer/bookings")}>
           <div className="stat-icon orange-bg">
             <Bookmark size={22} />
           </div>
           <div>
             <span className="stat-label">My Bookings</span>
-            <h3 className="stat-value">0</h3>
+            <h3 className="stat-value">{bookingsCount}</h3>
             <span className="stat-sub">Active Bookings</span>
           </div>
         </div>
@@ -328,7 +343,12 @@ export default function BuyerOverview() {
         )}
         <div className="properties-cards-grid">
           {filteredProperties.map((property) => (
-            <div key={property.propertyId} className="property-card">
+            <div
+              key={property.propertyId || property.id}
+              className="property-card"
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate(`/buyer/property-details/${property.propertyId || property.id}`, { state: { property } })}
+            >
               <div className="card-image-wrapper">
                 {property.images?.[0] ? (
                   <img
@@ -341,7 +361,10 @@ export default function BuyerOverview() {
                   </div>
                 )}
                 <span className="type-badge">{property.propertyType}</span>
-                <button className="like-btn">
+                <button
+                  className="like-btn"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Heart size={16} />
                 </button>
               </div>
@@ -364,7 +387,15 @@ export default function BuyerOverview() {
                     <Maximize size={14} /> {property.areaSqft ?? 0} sqft
                   </span>
                 </div>
-                <button className="details-btn">View Details</button>
+                <button
+                  className="details-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/buyer/property-details/${property.propertyId || property.id}`, { state: { property } });
+                  }}
+                >
+                  View Details
+                </button>
               </div>
             </div>
           ))}

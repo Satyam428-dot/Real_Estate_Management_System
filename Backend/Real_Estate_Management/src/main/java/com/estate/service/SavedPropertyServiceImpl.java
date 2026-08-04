@@ -10,10 +10,12 @@ import com.estate.customExceptions.ResourceNotFoundException;
 import com.estate.dtos.PropertyImageDTO;
 import com.estate.dtos.PropertyResponseDTO;
 import com.estate.dtos.SavedPropertyResponseDTO;
+import com.estate.entities.Notification;
 import com.estate.entities.Property;
 import com.estate.entities.PropertyImage;
 import com.estate.entities.SavedProperty;
 import com.estate.entities.User;
+import com.estate.repository.NotificationRepository;
 import com.estate.repository.PropertyRepository;
 import com.estate.repository.SavedPropertyRepository;
 import com.estate.repository.UserRepository;
@@ -28,6 +30,7 @@ public class SavedPropertyServiceImpl implements SavedPropertyService {
 	private final SavedPropertyRepository savedPropertyRepo;
 	private final PropertyRepository propertyRepo;
 	private final UserRepository userRepo;
+	private final NotificationRepository notificationRepo;
 
 	@Override
 	@Transactional
@@ -46,7 +49,18 @@ public class SavedPropertyServiceImpl implements SavedPropertyService {
 				.property(property)
 				.build();
 
-		return toResponse(savedPropertyRepo.save(savedProperty));
+		SavedProperty saved = savedPropertyRepo.save(savedProperty);
+
+		// Save notification
+		Notification notif = new Notification();
+		notif.setTitle("Property Saved");
+		notif.setMessage("\"" + property.getTitle() + "\" has been saved to your collection.");
+		notif.setCategory("Saved Properties");
+		notif.setUser(buyer);
+		notif.setRead(false);
+		notificationRepo.save(notif);
+
+		return toResponse(saved);
 	}
 
 	@Override

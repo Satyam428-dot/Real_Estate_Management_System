@@ -133,13 +133,16 @@
 // export default Register;
 
 import React, { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import buildingImage from "../assets/d1.png";
 import "./css/Register.css";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Register = () => {
+  const navigate = useNavigate();
+
   useEffect(() => {
     document.body.classList.add("register-active");
 
@@ -171,13 +174,13 @@ const Register = () => {
       !password ||
       !confirmPassword
     ) {
-      alert("Please fill all fields");
+      toast.warn("Please fill all required fields.");
       return;
     }
 
     // Password match validation
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      toast.warn("Passwords do not match!");
       return;
     }
 
@@ -195,15 +198,19 @@ const Register = () => {
     console.log(newUser);
     // -----------------------Save user------------------------------------------
     try {
-      const response = await axios.post(
+      await axios.post(
         "http://localhost:8080/register",
         newUser,
       );
 
-      alert("🎉 User Registered Successfully!");
+      toast.success("User registered successfully! Please log in.");
+      navigate("/login");
     } catch (error) {
       console.log(error);
-      alert("Error saving user");
+      toast.error(
+        "Error registering user: " +
+          (error.response?.data?.message || error.message || "Registration failed")
+      );
     }
 
     // Clear form

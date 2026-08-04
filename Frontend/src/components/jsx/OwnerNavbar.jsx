@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { getUserProfileDetails } from "../../utils/auth";
 import {
   FaBell,
@@ -12,6 +13,8 @@ import {
 } from "react-icons/fa";
 import "../css/OwnerNavbar.css";
 
+const API_URL = "http://localhost:8080";
+
 export default function OwnerNavbar() {
   const navigate = useNavigate();
 
@@ -21,6 +24,7 @@ export default function OwnerNavbar() {
     fullName: "Property Owner",
     role: "Owner",
   });
+  const [notifications, setNotifications] = useState([]);
 
   const profileRef = useRef(null);
   const notifRef = useRef(null);
@@ -33,7 +37,23 @@ export default function OwnerNavbar() {
         role: details.role === "OWNER" ? "Owner" : details.role,
       });
     }
+    fetchNotifications();
   }, []);
+
+  const fetchNotifications = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await axios.get(`${API_URL}/notifications`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data && Array.isArray(res.data)) {
+        setNotifications(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch owner notifications:", err);
+    }
+  };
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -55,9 +75,11 @@ export default function OwnerNavbar() {
     navigate("/Login");
   };
 
+  const unreadCount = notifications.filter((n) => !n.read && !n.isRead).length;
+
   return (
     <header className="owner-navbar">
-      {/* Left side: empty spacer (hamburger removed per user request) */}
+      {/* Left side spacer */}
       <div className="navbar-left"></div>
 
       {/* Right side: Notifications + Profile */}
@@ -74,63 +96,36 @@ export default function OwnerNavbar() {
             title="Notifications"
           >
             <FaBell className="bell-icon" />
-            <span className="notification-badge">3</span>
+            {unreadCount > 0 && (
+              <span className="notification-badge">{unreadCount}</span>
+            )}
           </button>
 
           {showNotifications && (
             <div className="notif-popup">
               <div className="notif-popup-header">
                 <h4>Notifications</h4>
-                <span className="notif-count-pill">3 New</span>
+                <span className="notif-count-pill">{unreadCount} New</span>
               </div>
               <div className="notif-popup-list">
-                <div className="notif-popup-item">
-                  <div className="notif-popup-icon green">
-                    <FaCheckCircle />
+                {notifications.length === 0 ? (
+                  <div style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>
+                    No notifications yet
                   </div>
-                  <div className="notif-popup-content">
-                    <p className="notif-popup-text">Rent received from Rahul Sharma</p>
-                    <span className="notif-popup-meta">Property: Modern Apartment in Downtown</span>
-                    <span className="notif-popup-time">2 hours ago</span>
-                  </div>
-                  <span className="notif-popup-amount green">₹25,000</span>
-                </div>
-
-                <div className="notif-popup-item">
-                  <div className="notif-popup-icon blue">
-                    <FaWrench />
-                  </div>
-                  <div className="notif-popup-content">
-                    <p className="notif-popup-text">New maintenance request received</p>
-                    <span className="notif-popup-meta">Property: Luxury Villa in Green City</span>
-                    <span className="notif-popup-time">5 hours ago</span>
-                  </div>
-                </div>
-
-                <div className="notif-popup-item">
-                  <div className="notif-popup-icon green">
-                    <FaCheckCircle />
-                  </div>
-                  <div className="notif-popup-content">
-                    <p className="notif-popup-text">Rent received from Priya Mehta</p>
-                    <span className="notif-popup-meta">Property: Studio Apartment</span>
-                    <span className="notif-popup-time">1 day ago</span>
-                  </div>
-                  <span className="notif-popup-amount green">₹12,000</span>
-                </div>
-
-                <div className="notif-popup-item">
-                  <div className="notif-popup-icon orange">
-                    <FaExclamationCircle />
-                  </div>
-                  <div className="notif-popup-content">
-                    <p className="notif-popup-text">Property "Commercial Shop" marked as vacant</p>
-                    <span className="notif-popup-time">1 day ago</span>
-                  </div>
-                </div>
-              </div>
-              <div className="notif-popup-footer">
-                <button className="notif-view-all">View All Notifications</button>
+                ) : (
+                  notifications.map((item) => (
+                    <div key={item.id} className="notif-popup-item">
+                      <div className="notif-popup-icon blue">
+                        <FaCheckCircle />
+                      </div>
+                      <div className="notif-popup-content">
+                        <p className="notif-popup-text">{item.title}</p>
+                        <span className="notif-popup-meta">{item.message}</span>
+                        <span className="notif-popup-time">{item.createdOn || "Recently"}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
