@@ -7,6 +7,7 @@ import java.util.List;
 import com.estate.entities.enums.ListingType;
 import com.estate.entities.enums.PropertyStatus;
 import com.estate.entities.enums.PropertyType;
+import com.estate.entities.VerificationStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,6 +55,16 @@ public class PropertyResponseDTO {
     private PropertyStatus status;
 
     private Boolean blacklist;
+
+    private VerificationStatus verificationStatus;
+
+    private String titleDeedUrl;
+
+    private String taxReceiptUrl;
+
+    private String nocCertificateUrl;
+
+    private String rejectionReason;
 
     private List<PropertyImageDTO> images;
 

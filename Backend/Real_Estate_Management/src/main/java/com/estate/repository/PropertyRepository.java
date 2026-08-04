@@ -20,6 +20,12 @@ public interface PropertyRepository extends JpaRepository<Property,Long> {
 	List<Property> findByStatusAndBlacklistFalse(PropertyStatus status);
 
 	@EntityGraph(attributePaths = { "owner", "images" })
+	List<Property> findByVerificationStatus(com.estate.entities.VerificationStatus status);
+
+	@EntityGraph(attributePaths = { "owner", "images" })
+	List<Property> findByStatusAndVerificationStatusAndBlacklistFalse(PropertyStatus status, com.estate.entities.VerificationStatus verificationStatus);
+
+	@EntityGraph(attributePaths = { "owner", "images" })
 	Optional<Property> findById(Long id);
 
 	@EntityGraph(attributePaths = { "owner", "images" })

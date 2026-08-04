@@ -249,6 +249,13 @@ export default function OwnerPropertyDetails() {
               {property.status}
             </span>
             <span className="badge prop-type">{property.propertyType}</span>
+            {property.verificationStatus === "APPROVED" ? (
+              <span className="badge verif-status approved" style={{ backgroundColor: "#dcfce7", color: "#16a34a" }}>✅ Admin Verified</span>
+            ) : property.verificationStatus === "REJECTED" ? (
+              <span className="badge verif-status rejected" style={{ backgroundColor: "#fee2e2", color: "#dc2626" }} title={property.rejectionReason}>❌ Verification Rejected</span>
+            ) : (
+              <span className="badge verif-status pending" style={{ backgroundColor: "#fef3c7", color: "#d97706" }}>⏳ Pending Admin Verification</span>
+            )}
           </div>
           <h1 className="header-title">{property.title}</h1>
           <p className="header-location">

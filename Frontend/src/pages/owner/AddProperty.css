@@ -200,3 +200,62 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
 }
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Spinner Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner-icon {
+  animation: spin 1s linear infinite;
+}
+
+.spinner-icon-lg {
+  font-size: 2.5rem;
+  color: #3b82f6;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.submitting-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1.5rem;
+}
+
+.submitting-box {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  text-align: center;
+  max-width: 420px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.submitting-box h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.submitting-box p {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}

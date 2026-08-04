@@ -1,0 +1,313 @@
+/* Frontend/src/pages/admin/ApproveProperties.css */
+.approve-properties-container {
+  padding: 2rem;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.ap-header {
+  margin-bottom: 2rem;
+}
+
+.ap-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.ap-header p {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.ap-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.75rem;
+}
+
+.ap-tab-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #64748b;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ap-tab-btn.active {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.ap-tab-btn:hover:not(.active) {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.ap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.5rem;
+}
+
+.ap-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ap-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.ap-card-img-wrapper {
+  position: relative;
+  height: 200px;
+  background: #f8fafc;
+}
+
+.ap-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ap-no-img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.ap-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ap-badge.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.ap-badge.approved {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.ap-badge.rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.ap-card-content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.ap-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.35rem;
+}
+
+.ap-card-price {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #2563eb;
+  margin-bottom: 0.75rem;
+}
+
+.ap-card-meta {
+  font-size: 0.85rem;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.ap-doc-section {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.ap-doc-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.ap-doc-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ap-doc-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+}
+
+.ap-doc-btn:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #2563eb;
+}
+
+.ap-card-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.ap-btn-approve {
+  flex: 1;
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: background 0.2s ease;
+}
+
+.ap-btn-approve:hover {
+  background: #15803d;
+}
+
+.ap-btn-reject {
+  flex: 1;
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: background 0.2s ease;
+}
+
+.ap-btn-reject:hover {
+  background: #b91c1c;
+}
+
+/* Modal Overlay */
+.ap-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.ap-modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  padding: 1.5rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.ap-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.ap-modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ap-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.ap-modal-body textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+  resize: vertical;
+}
+
+.ap-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.ap-doc-preview-img {
+  width: 100%;
+  max-height: 450px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
