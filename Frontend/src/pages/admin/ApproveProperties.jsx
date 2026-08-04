@@ -10,6 +10,7 @@ import {
   FaBath,
   FaRulerCombined,
   FaUser,
+  FaBan,
 } from "react-icons/fa";
 import "./ApproveProperties.css";
 
@@ -23,6 +24,10 @@ export default function ApproveProperties() {
   const [selectedDoc, setSelectedDoc] = useState(null); // { title: string, url: string }
   const [rejectingPropertyId, setRejectingPropertyId] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
+
+  const [banningPropertyId, setBanningPropertyId] = useState(null);
+  const [banReason, setBanReason] = useState("Flagged for policy violation / illegal activity");
+
   const [updating, setUpdating] = useState(false);
 
   const fetchProperties = async () => {
@@ -58,11 +63,18 @@ export default function ApproveProperties() {
 
       await axios.put(url, {}, config);
 
+      // If restoring from blacklist, also set blacklist to false
+      await axios.put(
+        `http://localhost:8080/properties/${propertyId}`,
+        { blacklist: false },
+        config
+      );
+
       // Update local state
       setProperties((prev) =>
         prev.map((prop) =>
           prop.propertyId === propertyId
-            ? { ...prop, verificationStatus: status, rejectionReason: reason }
+            ? { ...prop, verificationStatus: status, rejectionReason: reason, blacklist: false }
             : prop
         )
       );
@@ -77,15 +89,101 @@ export default function ApproveProperties() {
     }
   };
 
+  const confirmBanProperty = async () => {
+    if (!banningPropertyId) return;
+
+    try {
+      setUpdating(true);
+      const token = localStorage.getItem("token");
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
+      await axios.put(
+        `http://localhost:8080/properties/${banningPropertyId}`,
+        { blacklist: true },
+        config
+      );
+      await axios.put(
+        `http://localhost:8080/properties/${banningPropertyId}/verification-status?status=REJECTED&rejectionReason=${encodeURIComponent(
+          banReason || "Banned by Admin for policy violation"
+        )}`,
+        {},
+        config
+      );
+
+      setProperties((prev) =>
+        prev.map((p) =>
+          p.propertyId === banningPropertyId
+            ? {
+                ...p,
+                blacklist: true,
+                verificationStatus: "REJECTED",
+                rejectionReason: banReason || "Banned by Admin",
+              }
+            : p
+        )
+      );
+
+      setBanningPropertyId(null);
+      setBanReason("Flagged for policy violation / illegal activity");
+    } catch (err) {
+      console.error("Error banning property:", err);
+      alert("Failed to ban property.");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleUnblacklistProperty = async (propertyId) => {
+    try {
+      setUpdating(true);
+      const token = localStorage.getItem("token");
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
+      await axios.put(
+        `http://localhost:8080/properties/${propertyId}`,
+        { blacklist: false },
+        config
+      );
+      await axios.put(
+        `http://localhost:8080/properties/${propertyId}/verification-status?status=APPROVED`,
+        {},
+        config
+      );
+
+      setProperties((prev) =>
+        prev.map((p) =>
+          p.propertyId === propertyId
+            ? { ...p, blacklist: false, verificationStatus: "APPROVED", rejectionReason: null }
+            : p
+        )
+      );
+      alert("Property unblacklisted and restored to APPROVED status! It is now live for buyers.");
+    } catch (err) {
+      console.error("Error unblacklisting property:", err);
+      alert("Failed to unblacklist property.");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const filteredProperties = properties.filter((prop) => {
+    const isBlacklisted = Boolean(prop.blacklist);
     const status = prop.verificationStatus || "PENDING";
+
+    if (activeTab === "BLACKLISTED") return isBlacklisted;
     if (activeTab === "ALL") return true;
+
+    // For PENDING, APPROVED, REJECTED tabs, exclude blacklisted properties
+    if (isBlacklisted) return false;
     return status === activeTab;
   });
 
-  const getCount = (statusKey) => {
-    if (statusKey === "ALL") return properties.length;
-    return properties.filter((p) => (p.verificationStatus || "PENDING") === statusKey).length;
+  const getCount = (tabKey) => {
+    if (tabKey === "ALL") return properties.length;
+    if (tabKey === "BLACKLISTED") return properties.filter((p) => Boolean(p.blacklist)).length;
+    return properties.filter(
+      (p) => !p.blacklist && (p.verificationStatus || "PENDING") === tabKey
+    ).length;
   };
 
   return (
@@ -116,6 +214,12 @@ export default function ApproveProperties() {
           Rejected <span className="ap-count-badge">{getCount("REJECTED")}</span>
         </button>
         <button
+          className={`ap-tab-btn ${activeTab === "BLACKLISTED" ? "active" : ""}`}
+          onClick={() => setActiveTab("BLACKLISTED")}
+        >
+          Blacklisted <span className="ap-count-badge">{getCount("BLACKLISTED")}</span>
+        </button>
+        <button
           className={`ap-tab-btn ${activeTab === "ALL" ? "active" : ""}`}
           onClick={() => setActiveTab("ALL")}
         >
@@ -138,6 +242,7 @@ export default function ApproveProperties() {
           {filteredProperties.map((property) => {
             const mainImg = property.images && property.images.length > 0 ? property.images[0].imageUrl : null;
             const status = property.verificationStatus || "PENDING";
+            const isBlacklisted = Boolean(property.blacklist);
 
             return (
               <div key={property.propertyId} className="ap-card">
@@ -147,7 +252,11 @@ export default function ApproveProperties() {
                   ) : (
                     <div className="ap-no-img">No Image Available</div>
                   )}
-                  <span className={`ap-badge ${status.toLowerCase()}`}>{status}</span>
+                  {isBlacklisted ? (
+                    <span className="ap-badge rejected">BLACKLISTED</span>
+                  ) : (
+                    <span className={`ap-badge ${status.toLowerCase()}`}>{status}</span>
+                  )}
                 </div>
 
                 <div className="ap-card-content">
@@ -214,26 +323,58 @@ export default function ApproveProperties() {
 
                   {property.rejectionReason && (
                     <div style={{ fontSize: "0.85rem", color: "#dc2626", marginBottom: "1rem", background: "#fee2e2", padding: "0.5rem", borderRadius: "6px" }}>
-                      <strong>Rejection Reason:</strong> {property.rejectionReason}
+                      <strong>{isBlacklisted ? "Ban Reason:" : "Rejection Reason:"}</strong> {property.rejectionReason}
                     </div>
                   )}
 
                   {/* Action Buttons */}
                   <div className="ap-card-actions">
-                    <button
-                      className="ap-btn-approve"
-                      disabled={updating || status === "APPROVED"}
-                      onClick={() => handleStatusChange(property.propertyId, "APPROVED")}
-                    >
-                      <FaCheck /> Approve
-                    </button>
-                    <button
-                      className="ap-btn-reject"
-                      disabled={updating || status === "REJECTED"}
-                      onClick={() => setRejectingPropertyId(property.propertyId)}
-                    >
-                      <FaTimes /> Reject
-                    </button>
+                    {isBlacklisted ? (
+                      <button
+                        className="ap-btn-approve"
+                        disabled={updating}
+                        onClick={() => handleUnblacklistProperty(property.propertyId)}
+                      >
+                        <FaCheck /> Unblacklist / Restore
+                      </button>
+                    ) : status === "APPROVED" ? (
+                      <button
+                        className="ap-btn-reject"
+                        style={{ backgroundColor: "#dc2626" }}
+                        disabled={updating}
+                        onClick={() => {
+                          setBanningPropertyId(property.propertyId);
+                          setBanReason("Flagged for policy violation / illegal activity");
+                        }}
+                      >
+                        <FaBan /> Ban / Blacklist Property
+                      </button>
+                    ) : status === "REJECTED" ? (
+                      <button
+                        className="ap-btn-approve"
+                        disabled={updating}
+                        onClick={() => handleStatusChange(property.propertyId, "APPROVED")}
+                      >
+                        <FaCheck /> Approve Listing
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          className="ap-btn-approve"
+                          disabled={updating}
+                          onClick={() => handleStatusChange(property.propertyId, "APPROVED")}
+                        >
+                          <FaCheck /> Approve
+                        </button>
+                        <button
+                          className="ap-btn-reject"
+                          disabled={updating}
+                          onClick={() => setRejectingPropertyId(property.propertyId)}
+                        >
+                          <FaTimes /> Reject
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -351,6 +492,49 @@ export default function ApproveProperties() {
                 onClick={() => handleStatusChange(rejectingPropertyId, "REJECTED", rejectionReason)}
               >
                 Confirm Rejection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ban / Blacklist Reason Modal */}
+      {banningPropertyId && (
+        <div className="ap-modal-overlay" onClick={() => setBanningPropertyId(null)}>
+          <div className="ap-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="ap-modal-header">
+              <h3 style={{ color: "#dc2626", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <FaBan /> Ban & Blacklist Property
+              </h3>
+              <button className="ap-modal-close" onClick={() => setBanningPropertyId(null)}>
+                <FaTimes />
+              </button>
+            </div>
+            <div className="ap-modal-body">
+              <p style={{ fontSize: "0.9rem", color: "#475569", marginBottom: "1rem" }}>
+                This action will immediately blacklist the property, flag it for policy violation, and hide it from all customers.
+              </p>
+              <label style={{ fontSize: "0.85rem", fontWeight: "700", color: "#1e293b", display: "block", marginBottom: "0.35rem" }}>
+                Reason for Banning / Blacklisting <span style={{ color: "#dc2626" }}>*</span>
+              </label>
+              <textarea
+                rows="4"
+                placeholder="e.g. Flagged for policy violation / illegal activity"
+                value={banReason}
+                onChange={(e) => setBanReason(e.target.value)}
+              />
+            </div>
+            <div className="ap-modal-actions">
+              <button className="ap-doc-btn" onClick={() => setBanningPropertyId(null)}>
+                Cancel
+              </button>
+              <button
+                className="ap-btn-reject"
+                style={{ backgroundColor: "#dc2626" }}
+                disabled={updating || !banReason.trim()}
+                onClick={confirmBanProperty}
+              >
+                <FaBan /> Confirm Ban & Blacklist
               </button>
             </div>
           </div>
