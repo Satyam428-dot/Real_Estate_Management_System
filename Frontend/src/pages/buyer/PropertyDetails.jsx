@@ -190,7 +190,10 @@ Best regards!`;
             Home
           </span>
           <span className="crumb-sep">&gt;</span>
-          <span onClick={() => navigate("/buyer/browse")} className="link-crumb">
+          <span
+            onClick={() => navigate("/buyer/browse")}
+            className="link-crumb"
+          >
             Properties
           </span>
           <span className="crumb-sep">&gt;</span>
@@ -312,19 +315,23 @@ Best regards!`;
 
           {/* Tabs */}
           <div className="pdetails-tabs">
-            {["Overview", "Amenities", "Location", "Floor Plan", "Reviews (28)"].map(
-              (tab) => (
-                <button
-                  key={tab}
-                  className={`tab-link ${
-                    activeTab === tab.split(" ")[0] ? "active" : ""
-                  }`}
-                  onClick={() => setActiveTab(tab.split(" ")[0])}
-                >
-                  {tab}
-                </button>
-              )
-            )}
+            {[
+              "Overview",
+              "Amenities",
+              "Location",
+              "Floor Plan",
+              "Reviews (28)",
+            ].map((tab) => (
+              <button
+                key={tab}
+                className={`tab-link ${
+                  activeTab === tab.split(" ")[0] ? "active" : ""
+                }`}
+                onClick={() => setActiveTab(tab.split(" ")[0])}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
 
           {/* Overview */}
