@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { getLoggedInUser } from "../../utils/auth";
 import axios from "axios";
 import {
@@ -16,6 +17,7 @@ import {
 import "./DashboardOverview.css";
 
 export default function DashboardOverview() {
+  const navigate = useNavigate();
   const loggedInUser = getLoggedInUser();
 
   const [stats, setStats] = useState({
@@ -32,14 +34,8 @@ export default function DashboardOverview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Tracks whether the component is still mounted, so we don't set state
-  // after unmount when the 60s polling interval resolves late.
+  // Tracks whether the component is still mounted
   const isMounted = useRef(true);
-
-  // TODO: property-approval endpoint isn't implemented on the backend yet.
-  // Hardcoded for now — replace with a real fetched value once
-  // GET /properties/pending (or whatever route you build) exists.
-  const HARDCODED_PENDING_PROPERTIES = 0;
 
   const fetchStats = async () => {
     try {
@@ -59,24 +55,34 @@ export default function DashboardOverview() {
 
       if (!isMounted.current) return;
 
+      const propData = properties.data || [];
+      const ownerData = owners.data || [];
+      const customerData = customers.data || [];
+
       setStats({
-        totalUsers: owners.data.length + customers.data.length,
-        totalOwners: owners.data.length,
-        totalCustomers: customers.data.length,
-        totalProperties: properties.data.length,
-        pendingOwners: pendingOwners.data.length,
-        pendingProperties: HARDCODED_PENDING_PROPERTIES,
-        activeListings: properties.data.filter((p) => p.status === "ACTIVE")
-          .length,
-        disabledUsers: [...owners.data, ...customers.data].filter(
-          (u) => u.status === false,
+        totalUsers: ownerData.length + customerData.length,
+        totalOwners: ownerData.length,
+        totalCustomers: customerData.length,
+        totalProperties: propData.length,
+        pendingOwners: (pendingOwners.data || []).length,
+        pendingProperties: propData.filter(
+          (p) => (p.verificationStatus || "PENDING") === "PENDING" && !p.blacklist
+        ).length,
+        activeListings: propData.filter(
+          (p) =>
+            p.verificationStatus === "APPROVED" &&
+            p.status === "AVAILABLE" &&
+            !p.blacklist
+        ).length,
+        disabledUsers: [...ownerData, ...customerData].filter(
+          (u) => u.status === false
         ).length,
       });
     } catch (err) {
       console.error(err);
       if (isMounted.current) {
         setError(
-          "Couldn't load dashboard data. Check that the backend is running and try again.",
+          "Couldn't load dashboard data. Check that the backend is running and try again."
         );
       }
     } finally {
@@ -295,11 +301,18 @@ export default function DashboardOverview() {
       <div className="glass-card quick-actions">
         <h3 className="card-title">Quick Actions</h3>
         <div className="quick-action-buttons">
-          {/* BACKEND / ROUTING: wire these up to your router / pending-approvals views */}
-          <button className="qa-btn">👤 Review Pending Owners</button>
-          <button className="qa-btn">🏢 Review Pending Properties</button>
-          <button className="qa-btn">📊 View Full Reports</button>
-          <button className="qa-btn">👥 Manage All Users</button>
+          <button className="qa-btn" onClick={() => navigate("/admin/owners")}>
+            👤 Review Pending Owners
+          </button>
+          <button className="qa-btn" onClick={() => navigate("/admin/properties")}>
+            🏢 Review Pending Properties
+          </button>
+          <button className="qa-btn" onClick={() => navigate("/admin/reports")}>
+            📊 View Full Reports
+          </button>
+          <button className="qa-btn" onClick={() => navigate("/admin/users")}>
+            👥 Manage All Users
+          </button>
         </div>
       </div>
     </div>
