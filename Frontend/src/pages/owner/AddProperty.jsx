@@ -8,6 +8,7 @@ import {
   FaBed,
   FaArrowLeft,
   FaPlus,
+  FaSpinner,
 } from "react-icons/fa";
 
 import "./AddProperty.css";
@@ -31,6 +32,10 @@ export default function AddProperty() {
     areaSqft: "",
   });
   const [images, setImages] = useState([]);
+  const [titleDeed, setTitleDeed] = useState(null);
+  const [taxReceipt, setTaxReceipt] = useState(null);
+  const [noc, setNoc] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,10 +44,12 @@ export default function AddProperty() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         alert("Please log in as an owner before adding a property.");
+        setIsSubmitting(false);
         return;
       }
       const requestConfig = { headers: { Authorization: `Bearer ${token}` } };
@@ -61,6 +68,7 @@ export default function AddProperty() {
 
       if (!userId) {
         alert("User ID not found. Please log in again.");
+        setIsSubmitting(false);
         return;
       }
 
@@ -86,20 +94,39 @@ export default function AddProperty() {
         formData,
         requestConfig,
       );
+
+      const propertyId = propertyResponse.data.propertyId || propertyResponse.data.id;
+
       if (images.length > 0) {
         const imageData = new FormData();
         images.forEach((image) => imageData.append("images", image));
         await axios.post(
-          `http://localhost:8080/properties/${propertyResponse.data.propertyId}/images`,
+          `http://localhost:8080/properties/${propertyId}/images`,
           imageData,
           requestConfig,
         );
       }
-      alert("Property added successfully!");
+
+      if (titleDeed || taxReceipt || noc) {
+        const docData = new FormData();
+        if (titleDeed) docData.append("titleDeed", titleDeed);
+        if (taxReceipt) docData.append("taxReceipt", taxReceipt);
+        if (noc) docData.append("noc", noc);
+
+        await axios.post(
+          `http://localhost:8080/properties/${propertyId}/verification-docs`,
+          docData,
+          requestConfig,
+        );
+      }
+
+      alert("Property submitted successfully! It will be reviewed by an Admin before publishing.");
       navigate("/owner/properties");
     } catch (error) {
       console.error("Failed to add property:", error);
       alert("Failed to add property. Please check all fields.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -340,20 +367,83 @@ export default function AddProperty() {
           </div>
         </div>
 
+        {/* Section 6: Legal Verification Documents */}
+        <div className="form-section">
+          <h4 className="form-section-title">
+            📄 Legal Property Verification Documents
+          </h4>
+          <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "1rem" }}>
+            Upload legal documents to verify ownership and obtain Admin approval.
+          </p>
+
+          <div className="form-row cols-3">
+            <div className="form-group">
+              <label>
+                Title Deed / Ownership Proof <span className="required">*</span>
+              </label>
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) => setTitleDeed(e.target.files[0])}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>
+                Property Tax Receipt / Index II <span className="required">*</span>
+              </label>
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) => setTaxReceipt(e.target.files[0])}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>No Objection Certificate (NOC) / OC</label>
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) => setNoc(e.target.files[0])}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Action Buttons */}
         <div className="form-actions">
           <button
             type="button"
             className="cancel-btn"
+            disabled={isSubmitting}
             onClick={() => navigate("/owner/properties")}
           >
             Cancel
           </button>
-          <button type="submit" className="submit-btn">
-            <FaPlus /> Add Property
+          <button type="submit" className="submit-btn" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <FaSpinner className="spinner-icon" /> Uploading & Adding Property...
+              </>
+            ) : (
+              <>
+                <FaPlus /> Add Property
+              </>
+            )}
           </button>
         </div>
       </form>
+
+      {/* Submitting Loading Overlay */}
+      {isSubmitting && (
+        <div className="submitting-overlay">
+          <div className="submitting-box">
+            <FaSpinner className="spinner-icon-lg" />
+            <h3>Uploading Property & Legal Documents</h3>
+            <p>Please wait while your details and verification files are processed...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

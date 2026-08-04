@@ -12,6 +12,9 @@ import {
   FaBed,
   FaBath,
   FaRulerCombined,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaClock,
 } from "react-icons/fa";
 
 import "./MyProperties.css";
@@ -271,6 +274,30 @@ export default function MyProperties() {
                 <span className="prop-card-listing-badge">
                   {property.listingType}
                 </span>
+
+                {/* Verification Status Tag */}
+                {(() => {
+                  const verif = property.verificationStatus || "PENDING";
+                  if (verif === "APPROVED") {
+                    return (
+                      <span className="prop-card-verif-tag approved">
+                        <FaCheckCircle /> Verified
+                      </span>
+                    );
+                  } else if (verif === "REJECTED") {
+                    return (
+                      <span className="prop-card-verif-tag rejected" title={property.rejectionReason || "Listing Rejected"}>
+                        <FaTimesCircle /> Rejected
+                      </span>
+                    );
+                  } else {
+                    return (
+                      <span className="prop-card-verif-tag pending">
+                        <FaClock /> Pending Verification
+                      </span>
+                    );
+                  }
+                })()}
               </div>
 
               {/* Middle: Info */}
@@ -297,6 +324,17 @@ export default function MyProperties() {
                     <FaRulerCombined /> {property.areaSqft} sqft
                   </span>
                 </div>
+
+                {/* Verification Notice Banner */}
+                {property.verificationStatus === "PENDING" || !property.verificationStatus ? (
+                  <div className="verif-notice-box pending">
+                    ⏳ <strong>Under Verification:</strong> Pending Admin approval before publishing to buyers.
+                  </div>
+                ) : property.verificationStatus === "REJECTED" ? (
+                  <div className="verif-notice-box rejected">
+                    ❌ <strong>Rejected:</strong> {property.rejectionReason || "Verification documents did not meet guidelines."}
+                  </div>
+                ) : null}
               </div>
 
               {/* Bottom: Action buttons (View & Delete only) */}
