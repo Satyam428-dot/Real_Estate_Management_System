@@ -14,7 +14,7 @@ import {
   ChevronDown,
   RotateCcw,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { favouritesApi } from "../../utils/buyerApi";
 import "./BrowseProperties.css";
 
@@ -157,6 +157,7 @@ const sampleProperties = [
 
 export default function BrowseProperties() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState("grid");
 
   // Property list state from API / Fallback
@@ -167,9 +168,18 @@ export default function BrowseProperties() {
   const [showHorizontalFilters, setShowHorizontalFilters] = useState(true);
 
   // Search & Filter State
-  const [locationInput, setLocationInput] = useState("");
+  const initialSearch = searchParams.get("search") || "";
+  const [locationInput, setLocationInput] = useState(initialSearch);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const locationRef = useRef(null);
+
+  // Sync search input when search query param changes
+  useEffect(() => {
+    const q = searchParams.get("search");
+    if (q !== null) {
+      setLocationInput(q);
+    }
+  }, [searchParams]);
 
   const [propertyType, setPropertyType] = useState("");
   const [minPrice, setMinPrice] = useState("");

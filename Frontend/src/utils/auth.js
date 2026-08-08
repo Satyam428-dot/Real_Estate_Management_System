@@ -115,3 +115,12 @@ export function getUserRole() {
 
   return null;
 }
+
+export function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("loggedInUser");
+  localStorage.removeItem("user");
+  localStorage.removeItem("buyer_profile");
+  window.dispatchEvent(new Event("profileUpdated"));
+}
+

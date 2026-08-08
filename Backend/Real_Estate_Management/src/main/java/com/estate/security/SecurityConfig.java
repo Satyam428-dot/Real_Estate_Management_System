@@ -83,15 +83,12 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						.requestMatchers("/register", "/login", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
 						.permitAll()
-						.requestMatchers(HttpMethod.GET, "/properties/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/properties", "/properties/*/images", "/properties/*/verification-docs").authenticated()
-						.requestMatchers(HttpMethod.PUT, "/properties/**").authenticated()
-						.requestMatchers(HttpMethod.DELETE, "/properties/**").authenticated()
-						.requestMatchers("/saved-properties", "/saved-properties/**").authenticated()
-						.requestMatchers("/bookings", "/bookings/**").authenticated()
-						.requestMatchers("/visits", "/visits/**").authenticated()
-						.requestMatchers("/notifications", "/notifications/**").authenticated()
-						.requestMatchers("/favourites", "/favourites/**", "/users/me", "/users/change-password").authenticated()
+						.requestMatchers(HttpMethod.GET, "/blogs/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/blogs/seed").permitAll()
+						.requestMatchers(HttpMethod.POST, "/blogs/**").authenticated()
+						.requestMatchers(HttpMethod.PUT, "/blogs/**").authenticated()
+						.requestMatchers(HttpMethod.PATCH, "/blogs/**").authenticated()
+						.requestMatchers(HttpMethod.DELETE, "/blogs/**").authenticated()
 						.anyRequest().permitAll());
 
 		return http.build();
