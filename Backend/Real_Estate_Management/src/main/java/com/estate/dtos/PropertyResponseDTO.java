@@ -52,6 +52,10 @@ public class PropertyResponseDTO {
 
     private Integer areaSqft;
 
+    private String amenities;
+
+    private String highlights;
+
     private PropertyStatus status;
 
     private Boolean blacklist;
