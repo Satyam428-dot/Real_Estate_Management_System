@@ -1,0 +1,32 @@
+.blog-detail-shell {
+  min-height: 80vh;
+}
+
+.blog-detail-hero {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border-bottom: 4px solid #2563eb;
+}
+
+.blog-detail-img {
+  width: 100%;
+  max-height: 480px;
+  object-fit: cover;
+}
+
+.blog-excerpt-callout {
+  background: #f8fafc;
+  line-height: 1.6;
+}
+
+.blog-article-content p {
+  color: #334155 !important;
+  font-size: 1.05rem !important;
+  line-height: 1.8 !important;
+}
+
+.blog-article-content h3 {
+  font-size: 1.35rem;
+  color: #0f172a;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 6px;
+}

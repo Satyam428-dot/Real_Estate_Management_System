@@ -6,6 +6,7 @@ import LoginPage from "./pages/Login";
 import Properties from "./pages/Properties";
 import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
+import BlogDetail from "./pages/BlogDetail";
 import Agents from "./pages/Agents";
 
 // Admin Imports
@@ -15,6 +16,7 @@ import ViewAllUsers from "./pages/admin/ViewAllUsers";
 import ApproveOwners from "./pages/admin/ApproveOwner";
 import ApproveProperties from "./pages/admin/ApproveProperties";
 import ManageListings from "./pages/admin/ManageListing";
+import ManageBlogs from "./pages/admin/ManageBlogs";
 import ViewReports from "./pages/admin/ViewReport";
 import MyProfile from "./pages/admin/MyProfile";
 import ChangePassword from "./pages/admin/ChangePassword";
@@ -76,6 +78,7 @@ function App() {
         <Route path="/properties" element={<Properties />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:id" element={<BlogDetail />} />
         <Route path="/agents" element={<Agents />} />
 
         {/* Admin Routes */}
@@ -86,6 +89,7 @@ function App() {
           <Route path="owners" element={<ApproveOwners />} />
           <Route path="properties" element={<ApproveProperties />} />
           <Route path="listings" element={<ManageListings />} />
+          <Route path="blogs" element={<ManageBlogs />} />
           <Route path="reports" element={<ViewReports />} />
           <Route path="profile" element={<MyProfile />} />
           <Route path="change-password" element={<ChangePassword />} />

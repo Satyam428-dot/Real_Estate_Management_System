@@ -5,6 +5,7 @@ import {
   FaUserCheck,
   FaBuilding,
   FaListAlt,
+  FaBook,
   FaChartBar,
 } from "react-icons/fa";
 
@@ -46,6 +47,13 @@ export default function AdminSidebar() {
           <li className="sidebar-item">
             <FaListAlt className="sidebar-icon" />
             <span>Manage Listings</span>
+          </li>
+        </NavLink>
+
+        <NavLink to="/admin/blogs" className="nav-link">
+          <li className="sidebar-item">
+            <FaBook className="sidebar-icon" />
+            <span>Manage Blogs</span>
           </li>
         </NavLink>
 

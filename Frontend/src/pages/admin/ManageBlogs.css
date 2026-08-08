@@ -1,0 +1,9 @@
+.manage-blogs-container {
+  background-color: #f8fafc;
+  min-height: calc(100vh - 60px);
+}
+
+.tab-modal-backdrop {
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+}
