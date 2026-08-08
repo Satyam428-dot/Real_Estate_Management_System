@@ -112,11 +112,13 @@ export default function Notifications() {
         prev.map((item) => ({ ...item, isRead: true }))
       );
       toast.success("All notifications marked as read.");
+      window.dispatchEvent(new Event("notificationsUpdated"));
     } catch (err) {
       console.error("Error marking all as read:", err);
       setNotifications((prev) =>
         prev.map((item) => ({ ...item, isRead: true }))
       );
+      window.dispatchEvent(new Event("notificationsUpdated"));
     }
   };
 
@@ -138,6 +140,7 @@ export default function Notifications() {
           item.id === id ? { ...item, isRead: true } : item
         )
       );
+      window.dispatchEvent(new Event("notificationsUpdated"));
     } catch (err) {
       console.error("Error marking notification as read:", err);
       setNotifications((prev) =>
@@ -145,6 +148,7 @@ export default function Notifications() {
           item.id === id ? { ...item, isRead: true } : item
         )
       );
+      window.dispatchEvent(new Event("notificationsUpdated"));
     }
   };
 
@@ -160,9 +164,11 @@ export default function Notifications() {
       }
       setNotifications((prev) => prev.filter((item) => item.id !== id));
       toast.info("Notification removed.");
+      window.dispatchEvent(new Event("notificationsUpdated"));
     } catch (err) {
       console.error("Error deleting notification:", err);
       setNotifications((prev) => prev.filter((item) => item.id !== id));
+      window.dispatchEvent(new Event("notificationsUpdated"));
     }
   };
 
