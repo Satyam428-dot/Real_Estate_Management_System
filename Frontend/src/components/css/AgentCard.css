@@ -1,26 +1,212 @@
-.agent-card{
-  background:white;
-  border-radius:10px;
-  overflow:hidden;
-  box-shadow:0 2px 10px rgba(0,0,0,0.1);
-  padding:20px;
-  text-align:center;
+.agent-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #eef2f6;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.agent-card img{
-  inline-size:150px;
-  block-size:150px;
-  border-radius:50%;
-  object-fit:cover;
-  margin-block-end:20px;
+.agent-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
 
-.agent-card button{
-  margin-block-start:15px;
-  inline-size:100%;
-  padding:10px;
-  border:none;
-  background:#0d6efd;
-  color:white;
-  cursor:pointer;
+.agent-card-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 20px;
 }
+
+.agent-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #f1f5f9;
+}
+
+.agent-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.agent-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 3px 0;
+  line-height: 1.25;
+}
+
+.agent-role {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2563eb;
+  margin: 0 0 6px 0;
+}
+
+.agent-location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.agent-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.star-icon {
+  color: #f59e0b;
+  font-size: 0.95rem;
+}
+
+.rating-num {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.reviews-count {
+  color: #64748b;
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+.agent-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.agent-badge.verified {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
+}
+
+.agent-badge.top-rated {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #dcfce7;
+}
+
+/* Specializations */
+.agent-specializations {
+  margin-bottom: 20px;
+}
+
+.agent-specializations h4 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.spec-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.spec-tag {
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 6px;
+}
+
+/* Stats */
+.agent-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 12px 8px;
+  margin-bottom: 20px;
+  border: 1px solid #f1f5f9;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-icon-box {
+  background: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+.stat-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.stat-text strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.stat-text span {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 28px;
+  background-color: #e2e8f0;
+}
+
+/* Contact Button */
+.contact-agent-btn {
+  width: 100%;
+  background-color: #0052ff;
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.contact-agent-btn:hover {
+  background-color: #0043cc;
+}

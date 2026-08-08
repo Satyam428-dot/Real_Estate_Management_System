@@ -1,0 +1,52 @@
+.agents-page-wrapper {
+  background-color: #f8fafc;
+  min-height: calc(100vh - 150px);
+  padding: 40px 24px 80px;
+}
+
+.agents-container {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.agents-header {
+  margin-bottom: 36px;
+}
+
+.agents-header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.agents-header p {
+  font-size: 1.05rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1200px) {
+  .agents-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .agents-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .agents-grid {
+    grid-template-columns: 1fr;
+  }
+}
