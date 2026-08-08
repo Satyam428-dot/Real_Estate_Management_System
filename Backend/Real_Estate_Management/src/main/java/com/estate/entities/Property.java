@@ -85,6 +85,12 @@ public class Property extends BaseClass {
 	@Column(name = "area_sqft")
 	private Integer areaSqft;
 
+	@Column(columnDefinition = "TEXT")
+	private String amenities;
+
+	@Column(columnDefinition = "TEXT")
+	private String highlights;
+
 	@Builder.Default
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)

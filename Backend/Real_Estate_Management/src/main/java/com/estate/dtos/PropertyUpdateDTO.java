@@ -48,4 +48,8 @@ public class PropertyUpdateDTO {
     private PropertyStatus status;
 
     private Boolean blacklist;
+
+    private String amenities;
+
+    private String highlights;
 }

@@ -55,6 +55,8 @@ public class PropertyServiceImpl implements PropertyService {
 		property.setBathrooms(dto.getBathrooms());
 		property.setHalls(dto.getHalls());
 		property.setAreaSqft(dto.getAreaSqft());
+		property.setAmenities(dto.getAmenities());
+		property.setHighlights(dto.getHighlights());
 		return toResponse(propertyRepo.save(property));
 	}
 
@@ -113,6 +115,10 @@ public class PropertyServiceImpl implements PropertyService {
 			property.setStatus(dto.getStatus());
 		if (dto.getBlacklist() != null)
 			property.setBlacklist(dto.getBlacklist());
+		if (dto.getAmenities() != null)
+			property.setAmenities(dto.getAmenities());
+		if (dto.getHighlights() != null)
+			property.setHighlights(dto.getHighlights());
 		return toResponse(propertyRepo.save(property));
 	}
 
@@ -275,6 +281,8 @@ public class PropertyServiceImpl implements PropertyService {
 		response.setBathrooms(property.getBathrooms());
 		response.setHalls(property.getHalls());
 		response.setAreaSqft(property.getAreaSqft());
+		response.setAmenities(property.getAmenities());
+		response.setHighlights(property.getHighlights());
 		response.setStatus(property.getStatus());
 		response.setBlacklist(property.getBlacklist());
 		response.setVerificationStatus(property.getVerificationStatus());

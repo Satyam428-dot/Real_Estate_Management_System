@@ -59,4 +59,8 @@ public class PropertyRequestDTO {
 
     @Positive(message = "Area should be greater than 0")
     private Integer areaSqft;
+
+    private String amenities;
+
+    private String highlights;
 }
