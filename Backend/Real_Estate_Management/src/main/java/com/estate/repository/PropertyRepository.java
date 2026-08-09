@@ -13,23 +13,23 @@ import com.estate.entities.enums.PropertyStatus;
 
 
 public interface PropertyRepository extends JpaRepository<Property,Long> {
-	@EntityGraph(attributePaths = { "owner", "images" })
+	@Query("SELECT DISTINCT p FROM Property p LEFT JOIN FETCH p.owner LEFT JOIN FETCH p.images")
 	List<Property> findAll();
 
-	@EntityGraph(attributePaths = { "owner", "images" })
-	List<Property> findByStatusAndBlacklistFalse(PropertyStatus status);
+	@Query("SELECT DISTINCT p FROM Property p LEFT JOIN FETCH p.owner LEFT JOIN FETCH p.images WHERE p.status = :status AND p.blacklist = false")
+	List<Property> findByStatusAndBlacklistFalse(@Param("status") PropertyStatus status);
 
-	@EntityGraph(attributePaths = { "owner", "images" })
-	List<Property> findByVerificationStatus(com.estate.entities.VerificationStatus status);
+	@Query("SELECT DISTINCT p FROM Property p LEFT JOIN FETCH p.owner LEFT JOIN FETCH p.images WHERE p.verificationStatus = :status")
+	List<Property> findByVerificationStatus(@Param("status") com.estate.entities.VerificationStatus status);
 
-	@EntityGraph(attributePaths = { "owner", "images" })
-	List<Property> findByStatusAndVerificationStatusAndBlacklistFalse(PropertyStatus status, com.estate.entities.VerificationStatus verificationStatus);
+	@Query("SELECT DISTINCT p FROM Property p LEFT JOIN FETCH p.owner LEFT JOIN FETCH p.images WHERE p.status = :status AND p.verificationStatus = :verificationStatus AND p.blacklist = false")
+	List<Property> findByStatusAndVerificationStatusAndBlacklistFalse(@Param("status") PropertyStatus status, @Param("verificationStatus") com.estate.entities.VerificationStatus verificationStatus);
 
-	@EntityGraph(attributePaths = { "owner", "images" })
-	Optional<Property> findById(Long id);
+	@Query("SELECT DISTINCT p FROM Property p LEFT JOIN FETCH p.owner LEFT JOIN FETCH p.images WHERE p.id = :id")
+	Optional<Property> findById(@Param("id") Long id);
 
-	@EntityGraph(attributePaths = { "owner", "images" })
-	List<Property> findByOwnerId(Long ownerId);
+	@Query("SELECT DISTINCT p FROM Property p LEFT JOIN FETCH p.owner LEFT JOIN FETCH p.images WHERE p.owner.id = :ownerId")
+	List<Property> findByOwnerId(@Param("ownerId") Long ownerId);
 
 	@Modifying
 	@Query(value = "DELETE FROM saved_properties WHERE property_id = :propertyId", nativeQuery = true)
