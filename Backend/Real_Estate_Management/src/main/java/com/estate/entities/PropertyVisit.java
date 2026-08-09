@@ -38,7 +38,7 @@ public class PropertyVisit extends BaseClass {
 	private Property property;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "owner_id", nullable = false)
+	@JoinColumn(name = "owner_id", nullable = true)
 	private User owner;
 
 	@Column(name = "full_name", nullable = false)
@@ -66,7 +66,7 @@ public class PropertyVisit extends BaseClass {
 	private String messageToOwner;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(name = "status", nullable = false)
 	@Builder.Default
 	private VisitStatus status = VisitStatus.PENDING;
 }
