@@ -5,6 +5,7 @@ import "./css/Login.css";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
+import { JAVA_BACKEND_URL } from "../utils/config";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ const LoginPage = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:8080/login", {
+      const response = await axios.post(`${JAVA_BACKEND_URL}/login`, {
         email,
         password,
       });

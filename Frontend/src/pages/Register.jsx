@@ -139,6 +139,7 @@ import "./css/Register.css";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
+import { JAVA_BACKEND_URL } from "../utils/config";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -199,7 +200,7 @@ const Register = () => {
     // -----------------------Save user------------------------------------------
     try {
       await axios.post(
-        "http://localhost:8080/register",
+        `${JAVA_BACKEND_URL}/register`,
         newUser,
       );
 
