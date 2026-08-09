@@ -39,7 +39,7 @@ public class Booking extends BaseClass {
 	private Property property;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "owner_id", nullable = false)
+	@JoinColumn(name = "owner_id", nullable = true)
 	private User owner;
 
 	@Column(name = "full_name", nullable = false)

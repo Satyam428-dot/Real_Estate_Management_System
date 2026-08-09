@@ -1,1 +1,6 @@
 /.metadata/
+[Bb]in/
+[Oo]bj/
+**/appsettings.json
+**/bin/
+**/obj/
