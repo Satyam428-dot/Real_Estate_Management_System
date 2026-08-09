@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import OwnerSidebar from "../../components/jsx/OwnerSidebar";
 import OwnerNavbar from "../../components/jsx/OwnerNavbar";
+import Chatbot from "../../components/jsx/Chatbot";
 import "./OwnerDashboard.css";
 
 export default function OwnerDashboard() {
@@ -17,6 +18,10 @@ export default function OwnerDashboard() {
           <Outlet />
         </main>
       </div>
+
+      {/* Floating AI Assistant Widget for Owner Pages */}
+      <Chatbot mode="floating" title="Groq AI Assistant" />
     </div>
   );
 }
+

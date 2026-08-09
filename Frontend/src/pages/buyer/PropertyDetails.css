@@ -1236,10 +1236,6 @@
   white-space: nowrap;
   line-height: 1;
 }
-  border: 1px solid #bfdbfe;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
 
 .emi-result-box {
   background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
