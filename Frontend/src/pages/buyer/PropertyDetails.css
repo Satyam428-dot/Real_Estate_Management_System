@@ -1172,74 +1172,94 @@
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
-  padding: 20px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 }
 
 .emi-widget-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  flex-wrap: nowrap;
 }
 
 .emi-icon-title {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
-.emi-header-icon {
+.emi-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #eff6ff;
   color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .emi-widget-header h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .emi-rate-badge {
   background: #eff6ff;
   color: #2563eb;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 4px 9px;
   border-radius: 20px;
+  border: 1px solid #bfdbfe;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .emi-result-box {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+  border: 1px solid #dbeafe;
   border-radius: 12px;
   padding: 14px;
   text-align: center;
 }
 
 .emi-result-label {
-  font-size: 12px;
+  font-size: 11px;
   color: #64748b;
-  font-weight: 500;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .emi-result-val {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
-  color: #0f172a;
+  color: #1e3a8a;
   margin: 4px 0;
 }
 
 .emi-per-mo {
-  font-size: 13px;
-  color: #64748b;
-  font-weight: 500;
+  font-size: 12px;
+  color: #3b82f6;
+  font-weight: 600;
 }
 
 .emi-loan-sub {
   font-size: 11px;
-  color: #94a3b8;
+  color: #64748b;
   font-weight: 500;
 }
 
@@ -1252,7 +1272,7 @@
 .emi-slider-label {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
+  font-size: 12px;
   color: #334155;
   font-weight: 600;
 }
@@ -1261,13 +1281,14 @@
   width: 100%;
   accent-color: #2563eb;
   cursor: pointer;
+  height: 5px;
 }
 
 .btn-apply-loan {
-  background: #1e293b;
+  background: #2563eb;
   color: #ffffff;
   border: none;
-  padding: 10px;
+  padding: 11px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;

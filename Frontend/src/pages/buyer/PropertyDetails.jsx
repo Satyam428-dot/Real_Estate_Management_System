@@ -820,8 +820,10 @@ Best regards!`;
           <div className="widget-card emi-calculator-widget">
             <div className="emi-widget-header">
               <div className="emi-icon-title">
-                <Calculator size={18} className="emi-header-icon" />
-                <h3>Home Loan Calculator</h3>
+                <div className="emi-icon-box">
+                  <Calculator size={16} />
+                </div>
+                <h3>Home Loan EMI</h3>
               </div>
               <span className="emi-rate-badge">{interestRate}% p.a.</span>
             </div>
