@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -38,7 +39,7 @@ export default function BookProperty() {
   useEffect(() => {
     if (!property) {
       setLoadingProperty(true);
-      axios.get("http://localhost:8080/properties")
+      axios.get(`${JAVA_BACKEND_URL}/properties`)
         .then((res) => {
           if (res.data && Array.isArray(res.data) && res.data.length > 0) {
             setProperty(res.data[0]);
@@ -85,7 +86,7 @@ export default function BookProperty() {
         messageToOwner: formData.message,
       };
 
-      await axios.post("http://localhost:8080/bookings", payload, {
+      await axios.post(`${JAVA_BACKEND_URL}/bookings`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
@@ -19,7 +20,7 @@ import {
 import { getLoggedInUser, logout } from "../../utils/auth";
 import "../css/BuyerNavbar.css";
 
-const API_URL = "http://localhost:8080";
+const API_URL = `${JAVA_BACKEND_URL}`;
 
 const defaultNotifications = [
   {

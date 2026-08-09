@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -74,7 +75,7 @@ export default function AddProperty() {
 
       // Check owner verification status from backend table owner_verification
       const verificationResponse = await axios.get(
-        `http://localhost:8080/verify/owner/${userId}/status`,
+        `${JAVA_BACKEND_URL}/verify/owner/${userId}/status`,
         requestConfig
       );
 
@@ -90,7 +91,7 @@ export default function AddProperty() {
       }
 
       const propertyResponse = await axios.post(
-        "http://localhost:8080/properties",
+        `${JAVA_BACKEND_URL}/properties`,
         formData,
         requestConfig,
       );
@@ -101,7 +102,7 @@ export default function AddProperty() {
         const imageData = new FormData();
         images.forEach((image) => imageData.append("images", image));
         await axios.post(
-          `http://localhost:8080/properties/${propertyId}/images`,
+          `${JAVA_BACKEND_URL}/properties/${propertyId}/images`,
           imageData,
           requestConfig,
         );
@@ -114,7 +115,7 @@ export default function AddProperty() {
         if (noc) docData.append("noc", noc);
 
         await axios.post(
-          `http://localhost:8080/properties/${propertyId}/verification-docs`,
+          `${JAVA_BACKEND_URL}/properties/${propertyId}/verification-docs`,
           docData,
           requestConfig,
         );

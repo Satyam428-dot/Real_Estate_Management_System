@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -42,12 +43,12 @@ export default function ViewAllUsers() {
     try {
       setLoading(true);
       const ownerResponse = await axios.get(
-        "http://localhost:8080/users/role/owners",
+        `${JAVA_BACKEND_URL}/users/role/owners`,
       );
       setOwners(ownerResponse.data);
 
       const customerResponse = await axios.get(
-        "http://localhost:8080/users/role/customers",
+        `${JAVA_BACKEND_URL}/users/role/customers`,
       );
       setCustomers(customerResponse.data);
     } catch (error) {
@@ -75,7 +76,7 @@ export default function ViewAllUsers() {
 
     try {
       const response = await axios.put(
-        `http://localhost:8080/users/${user.id}/status`,
+        `${JAVA_BACKEND_URL}/users/${user.id}/status`,
         { status: updatedStatus },
       );
 

@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -39,7 +40,7 @@ export default function ScheduledVisits() {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const response = await axios.get("http://localhost:8080/visits/buyer", {
+      const response = await axios.get(`${JAVA_BACKEND_URL}/visits/buyer`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -79,7 +80,7 @@ export default function ScheduledVisits() {
     try {
       const token = localStorage.getItem("token");
       if (token) {
-        await axios.delete(`http://localhost:8080/visits/${id}`, {
+        await axios.delete(`${JAVA_BACKEND_URL}/visits/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }

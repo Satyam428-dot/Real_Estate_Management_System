@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -44,7 +45,7 @@ export default function OwnerPropertyDetails() {
   const fetchPropertyDetails = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:8080/properties/${id}`);
+      const res = await axios.get(`${JAVA_BACKEND_URL}/properties/${id}`);
       setProperty(res.data);
       setEditForm({
         title: res.data.title || "",
@@ -83,7 +84,7 @@ export default function OwnerPropertyDetails() {
       setSavingEdit(true);
       const token = localStorage.getItem("token");
       const res = await axios.put(
-        `http://localhost:8080/properties/${id}`,
+        `${JAVA_BACKEND_URL}/properties/${id}`,
         {
           ...editForm,
           price: parseFloat(editForm.price),
@@ -125,7 +126,7 @@ export default function OwnerPropertyDetails() {
       });
 
       const res = await axios.post(
-        `http://localhost:8080/properties/${id}/images`,
+        `${JAVA_BACKEND_URL}/properties/${id}/images`,
         formData,
         {
           headers: {
@@ -156,7 +157,7 @@ export default function OwnerPropertyDetails() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.delete(
-        `http://localhost:8080/properties/${id}/images/${imageId}`,
+        `${JAVA_BACKEND_URL}/properties/${id}/images/${imageId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -177,7 +178,7 @@ export default function OwnerPropertyDetails() {
     }
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:8080/properties/${id}`, {
+      await axios.delete(`${JAVA_BACKEND_URL}/properties/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Property deleted successfully.");

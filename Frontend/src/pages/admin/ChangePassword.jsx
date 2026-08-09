@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import "./ChangePassword.css";
 import { useState } from "react";
 
@@ -42,7 +43,7 @@ export default function ChangePassword() {
     setIsSaving(true);
 
     try {
-      const res = await fetch("http://localhost:8080/users/change-password", {
+      const res = await fetch(`${JAVA_BACKEND_URL}/users/change-password`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

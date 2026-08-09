@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaBuilding, FaCheckCircle, FaClock, FaTags } from "react-icons/fa";
@@ -13,7 +14,7 @@ export default function ViewReports() {
         setLoading(true);
         const token = localStorage.getItem("token");
         const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-        const response = await axios.get("http://localhost:8080/properties", config);
+        const response = await axios.get(`${JAVA_BACKEND_URL}/properties`, config);
         setProperties(response.data);
       } catch (err) {
         console.error("Error fetching report analytics:", err);

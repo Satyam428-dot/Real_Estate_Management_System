@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useState, useEffect } from "react";
 import {
   FaSearch,
@@ -75,7 +76,7 @@ export default function Tenants() {
       const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
       const ownerId = savedUser.id || savedUser.user_id || 1;
 
-      const response = await fetch(`http://localhost:8080/leases/owner/${ownerId}`);
+      const response = await fetch(`${JAVA_BACKEND_URL}/leases/owner/${ownerId}`);
       if (response.ok) {
         const data = await response.json();
         if (data && data.length > 0) {

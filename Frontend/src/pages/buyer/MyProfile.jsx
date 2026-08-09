@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import React, { useEffect, useState } from "react";
 import { CheckCircle2, Edit2, Bookmark, Calendar, BookOpen, MessageSquare, ShieldCheck, Headphones, Mail, Phone, MapPin, Home, DollarSign, BriefcaseBusiness } from "lucide-react";
 import { favouritesApi, profileApi } from "../../utils/buyerApi";
@@ -35,11 +36,11 @@ export default function MyProfile() {
     const token = localStorage.getItem("token");
     if (token) {
       const headers = { Authorization: `Bearer ${token}` };
-      axios.get("http://localhost:8080/visits/buyer", { headers })
+      axios.get(`${JAVA_BACKEND_URL}/visits/buyer`, { headers })
         .then((res) => setVisitsCount(Array.isArray(res.data) ? res.data.length : 0))
         .catch(() => setVisitsCount(0));
 
-      axios.get("http://localhost:8080/bookings/buyer", { headers })
+      axios.get(`${JAVA_BACKEND_URL}/bookings/buyer`, { headers })
         .then((res) => setBookingsCount(Array.isArray(res.data) ? res.data.length : 0))
         .catch(() => setBookingsCount(0));
     }

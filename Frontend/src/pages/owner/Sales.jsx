@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import React, { useState, useEffect } from "react";
 import {
   FaSearch,
@@ -72,7 +73,7 @@ export default function Sales() {
       const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
       const ownerId = savedUser.id || savedUser.user_id || 17;
 
-      const response = await fetch(`http://localhost:8080/sales-offers/owner/${ownerId}`);
+      const response = await fetch(`${JAVA_BACKEND_URL}/sales-offers/owner/${ownerId}`);
       if (response.ok) {
         const data = await response.json();
         if (data && Array.isArray(data) && data.length > 0) {
@@ -112,7 +113,7 @@ export default function Sales() {
         bodyPayload.counterPrice = counterAmount;
       }
 
-      const response = await fetch(`http://localhost:8080/sales-offers/${offerId}/status`, {
+      const response = await fetch(`${JAVA_BACKEND_URL}/sales-offers/${offerId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyPayload),

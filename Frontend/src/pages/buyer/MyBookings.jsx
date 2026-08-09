@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -74,7 +75,7 @@ export default function MyBookings() {
         return;
       }
 
-      const response = await axios.get("http://localhost:8080/bookings/buyer", {
+      const response = await axios.get(`${JAVA_BACKEND_URL}/bookings/buyer`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -121,7 +122,7 @@ export default function MyBookings() {
     if (!window.confirm(`Are you sure you want to cancel booking ${booking.id}?`)) return;
     const token = localStorage.getItem("token");
     try {
-      await axios.delete(`http://localhost:8080/bookings/${targetId}`, {
+      await axios.delete(`${JAVA_BACKEND_URL}/bookings/${targetId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Booking cancelled successfully!");

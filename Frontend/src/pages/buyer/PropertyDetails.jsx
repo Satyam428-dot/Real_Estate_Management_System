@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL, DOTNET_BACKEND_URL } from "../../utils/config";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -34,7 +35,7 @@ import {
 import { GoogleMap, useJsApiLoader, MarkerF } from "@react-google-maps/api";
 import "./PropertyDetails.css";
 
-const API_URL = "http://localhost:8080";
+const API_URL = `${JAVA_BACKEND_URL}`;
 
 // Map Container Styling
 const mapContainerStyle = {
@@ -371,7 +372,7 @@ export default function PropertyDetails() {
     e.preventDefault();
     setSendingInquiry(true);
     const token = localStorage.getItem("token");
-    const DOTNET_API = import.meta.env.VITE_DOTNET_API_URL || "http://localhost:5000/api/inquiries";
+    const DOTNET_API = import.meta.env.VITE_DOTNET_API_URL || `${DOTNET_BACKEND_URL}/api/inquiries`;
 
     // Read logged-in buyer details - Spring Boot stores as "loggedInUser" with fields: userId, email, firstName, lastName
     const userStr = localStorage.getItem("loggedInUser");
@@ -383,7 +384,7 @@ export default function PropertyDetails() {
     // Try to fetch phone from Spring Boot user profile via /users/me (authenticated)
     let buyerPhone = "";
     try {
-      const profileRes = await axios.get(`http://localhost:8080/users/me`, {
+      const profileRes = await axios.get(`${JAVA_BACKEND_URL}/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       buyerPhone = profileRes.data?.phone || profileRes.data?.phoneNumber || "";

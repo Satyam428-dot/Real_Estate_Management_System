@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -108,8 +109,8 @@ export default function ReviewsAndRatings() {
       const token = localStorage.getItem("token");
       // Fetch this buyer's own submitted reviews
       const endpoint = token
-        ? "http://localhost:8080/reviews/buyer"
-        : "http://localhost:8080/reviews";
+        ? `${JAVA_BACKEND_URL}/reviews/buyer`
+        : `${JAVA_BACKEND_URL}/reviews`;
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
       const res = await axios.get(endpoint, config);
       if (res.data && res.data.length > 0) {
@@ -146,7 +147,7 @@ export default function ReviewsAndRatings() {
 
   const fetchBackendProperties = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/properties");
+      const res = await axios.get(`${JAVA_BACKEND_URL}/properties`);
       if (res.data && res.data.length > 0) {
         setPropertiesList(res.data);
         setSelectedPropertyId(res.data[0].id);
@@ -179,7 +180,7 @@ export default function ReviewsAndRatings() {
         amenitiesRating: parseFloat(amenitiesRating),
       };
 
-      await axios.post("http://localhost:8080/reviews", payload, {
+      await axios.post(`${JAVA_BACKEND_URL}/reviews`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

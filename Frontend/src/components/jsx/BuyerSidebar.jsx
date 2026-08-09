@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -16,7 +17,7 @@ import {
 } from "lucide-react";
 import "../css/BuyerSidebar.css";
 
-const API_URL = "http://localhost:8080";
+const API_URL = `${JAVA_BACKEND_URL}`;
 
 export default function BuyerSidebar() {
   const navigate = useNavigate();

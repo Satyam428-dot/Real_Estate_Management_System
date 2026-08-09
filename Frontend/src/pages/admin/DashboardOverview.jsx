@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getLoggedInUser } from "../../utils/auth";
@@ -44,13 +45,13 @@ export default function DashboardOverview() {
 
       const [owners, customers, properties, pendingOwners] = await Promise.all([
         // BACKEND ROUTE: GET all users with role = OWNER
-        axios.get("http://localhost:8080/users/role/owners"),
+        axios.get(`${JAVA_BACKEND_URL}/users/role/owners`),
         // BACKEND ROUTE: GET all users with role = CUSTOMER
-        axios.get("http://localhost:8080/users/role/customers"),
+        axios.get(`${JAVA_BACKEND_URL}/users/role/customers`),
         // BACKEND ROUTE: GET all properties
-        axios.get("http://localhost:8080/properties"),
+        axios.get(`${JAVA_BACKEND_URL}/properties`),
         // BACKEND ROUTE: GET owners awaiting approval
-        axios.get("http://localhost:8080/verify/owners"),
+        axios.get(`${JAVA_BACKEND_URL}/verify/owners`),
       ]);
 
       if (!isMounted.current) return;

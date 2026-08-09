@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useState, useEffect } from "react";
 import {
   FaSearch,
@@ -45,7 +46,7 @@ export default function RentPayments() {
     setLoading(true);
     try {
       console.log(`Fetching payments for Owner ID: ${ownerId}`);
-      const response = await fetch(`http://localhost:8080/payments/owner/${ownerId}`);
+      const response = await fetch(`${JAVA_BACKEND_URL}/payments/owner/${ownerId}`);
       if (response.ok) {
         const data = await response.json();
         console.log("Fetched payments data from backend:", data);
@@ -91,7 +92,7 @@ export default function RentPayments() {
         paymentDate: newPayment.paymentStatus === "PAID" ? new Date().toISOString().split("T")[0] : null,
       };
 
-      const response = await fetch("http://localhost:8080/payments", {
+      const response = await fetch(`${JAVA_BACKEND_URL}/payments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

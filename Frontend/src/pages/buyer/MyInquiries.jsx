@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL, DOTNET_BACKEND_URL } from "../../utils/config";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -66,7 +67,7 @@ export default function MyInquiries() {
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const itemsPerPage = 4;
 
-  const DOTNET_API_URL = import.meta.env.VITE_DOTNET_API_URL || "http://localhost:5000/api/inquiries/buyer";
+  const DOTNET_API_URL = import.meta.env.VITE_DOTNET_API_URL || `${DOTNET_BACKEND_URL}/api/inquiries/buyer`;
 
   useEffect(() => {
     fetchInquiries();
@@ -107,7 +108,7 @@ export default function MyInquiries() {
 
             if (item.propertyId) {
               try {
-                const propRes = await axios.get(`http://localhost:8080/properties/${item.propertyId}`);
+                const propRes = await axios.get(`${JAVA_BACKEND_URL}/properties/${item.propertyId}`);
                 if (propRes.data) {
                   const pData = propRes.data;
                   if (pData.images && pData.images.length > 0 && pData.images[0].imageUrl) {
@@ -162,7 +163,7 @@ export default function MyInquiries() {
     if (!window.confirm(`Are you sure you want to delete inquiry ${inquiry.id}?`)) return;
     const token = localStorage.getItem("token");
     try {
-      await axios.delete(`http://localhost:5000/api/inquiries/${targetId}`, {
+      await axios.delete(`${DOTNET_BACKEND_URL}/api/inquiries/${targetId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Inquiry deleted successfully!");

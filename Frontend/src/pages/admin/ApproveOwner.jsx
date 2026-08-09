@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaCheck, FaFileAlt, FaIdCard, FaTimes, FaUserShield } from "react-icons/fa";
@@ -30,7 +31,7 @@ export default function ApproveOwners() {
   const fetchPendingRequests = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:8080/verify/owners");
+      const response = await axios.get(`${JAVA_BACKEND_URL}/verify/owners`);
       setPendingRequests(response.data);
       setError(null);
     } catch (err) {
@@ -46,7 +47,7 @@ export default function ApproveOwners() {
   const handleStatusUpdate = async (id, status) => {
     try {
       setUpdating(true);
-      await axios.put(`http://localhost:8080/verify/owners/status/${id}`, { status });
+      await axios.put(`${JAVA_BACKEND_URL}/verify/owners/status/${id}`, { status });
       setPendingRequests((prev) => prev.filter((request) => request.id !== id));
       setSelectedOwner(null);
     } catch (err) {

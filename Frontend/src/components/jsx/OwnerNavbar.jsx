@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -13,7 +14,7 @@ import {
 } from "react-icons/fa";
 import "../css/OwnerNavbar.css";
 
-const API_URL = "http://localhost:8080";
+const API_URL = `${JAVA_BACKEND_URL}`;
 
 export default function OwnerNavbar() {
   const navigate = useNavigate();

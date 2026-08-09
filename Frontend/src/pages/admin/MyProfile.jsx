@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 // import "./MyProfile.css";
 // import { useState } from "react";
 
@@ -220,7 +221,7 @@ export default function MyProfile() {
 
   const fetchProfile = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/users/${adminId}`, {
+      const res = await fetch(`${JAVA_BACKEND_URL}/users/${adminId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -263,7 +264,7 @@ export default function MyProfile() {
     setIsSaving(true);
 
     try {
-      const res = await fetch(`http://localhost:8080/users/admin/${adminId}`, {
+      const res = await fetch(`${JAVA_BACKEND_URL}/users/admin/${adminId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

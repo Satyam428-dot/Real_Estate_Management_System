@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL, DOTNET_BACKEND_URL } from "../../utils/config";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -21,7 +22,7 @@ import {
 } from "lucide-react";
 import "./OwnerInquiries.css";
 
-const DOTNET_API_URL = "http://localhost:5000/api/inquiries/owner";
+const DOTNET_API_URL = `${DOTNET_BACKEND_URL}/api/inquiries/owner`;
 
 export default function OwnerInquiries() {
   const [inquiries, setInquiries] = useState([]);
@@ -76,7 +77,7 @@ export default function OwnerInquiries() {
 
             if (item.propertyId) {
               try {
-                const propRes = await axios.get(`http://localhost:8080/properties/${item.propertyId}`);
+                const propRes = await axios.get(`${JAVA_BACKEND_URL}/properties/${item.propertyId}`);
                 if (propRes.data) {
                   const pData = propRes.data;
                   if (pData.images && pData.images.length > 0 && pData.images[0].imageUrl) {
@@ -182,7 +183,7 @@ export default function OwnerInquiries() {
     const token = localStorage.getItem("token");
     try {
       await axios.put(
-        `http://localhost:5000/api/inquiries/${replyModalInquiry.numericId}/reply`,
+        `${DOTNET_BACKEND_URL}/api/inquiries/${replyModalInquiry.numericId}/reply`,
         { replyMessage },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -219,7 +220,7 @@ export default function OwnerInquiries() {
     const token = localStorage.getItem("token");
     try {
       await axios.put(
-        `http://localhost:5000/api/inquiries/${inquiryId}/status`,
+        `${DOTNET_BACKEND_URL}/api/inquiries/${inquiryId}/status`,
         { status: "Closed" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -234,7 +235,7 @@ export default function OwnerInquiries() {
     if (!window.confirm(`Are you sure you want to delete inquiry ${inquiry.id}?`)) return;
     const token = localStorage.getItem("token");
     try {
-      await axios.delete(`http://localhost:5000/api/inquiries/${inquiry.numericId}`, {
+      await axios.delete(`${DOTNET_BACKEND_URL}/api/inquiries/${inquiry.numericId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Inquiry deleted successfully.");

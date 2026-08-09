@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useState, useEffect } from "react";
 import { getUserProfileDetails } from "../../utils/auth";
 import {
@@ -83,9 +84,9 @@ export default function OwnerOverview() {
       const ownerId = details?.userId || localStorage.getItem("userId") || 46;
 
       // 1. Fetch properties for this owner
-      let propsRes = await fetch(`http://localhost:8080/properties/owner/${ownerId}`);
+      let propsRes = await fetch(`${JAVA_BACKEND_URL}/properties/owner/${ownerId}`);
       if (!propsRes.ok) {
-        propsRes = await fetch("http://localhost:8080/properties");
+        propsRes = await fetch(`${JAVA_BACKEND_URL}/properties`);
       }
       if (propsRes.ok) {
         let allProps = await propsRes.json();
@@ -114,7 +115,7 @@ export default function OwnerOverview() {
       }
 
       // 2. Fetch leases
-      const leasesRes = await fetch(`http://localhost:8080/leases/owner/${ownerId}`);
+      const leasesRes = await fetch(`${JAVA_BACKEND_URL}/leases/owner/${ownerId}`);
       if (leasesRes.ok) {
         const ownerLeases = await leasesRes.json();
         if (ownerLeases && ownerLeases.length > 0) {
@@ -126,7 +127,7 @@ export default function OwnerOverview() {
       }
 
       // 3. Fetch rent payments
-      const paymentsRes = await fetch(`http://localhost:8080/payments/owner/${ownerId}`);
+      const paymentsRes = await fetch(`${JAVA_BACKEND_URL}/payments/owner/${ownerId}`);
       if (paymentsRes.ok) {
         const ownerPayments = await paymentsRes.json();
         if (ownerPayments && ownerPayments.length > 0) {

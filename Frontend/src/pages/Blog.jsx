@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../utils/config";
 import { useState, useEffect } from "react";
 import Navbar from "../components/jsx/Navbar";
 import Footer from "../components/jsx/Footer";
@@ -15,7 +16,7 @@ import {
 } from "lucide-react";
 import "./css/Blog.css";
 
-const API_URL = "http://localhost:8080";
+const API_URL = `${JAVA_BACKEND_URL}`;
 
 const categoryList = [
   "All Posts",

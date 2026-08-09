@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
@@ -70,7 +71,7 @@ export default function Profile() {
         if (!userId && details) userId = details.userId;
 
         if (userId && token) {
-          const res = await axios.get(`http://localhost:8080/users/${userId}`, {
+          const res = await axios.get(`${JAVA_BACKEND_URL}/users/${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (res.data) {
@@ -107,7 +108,7 @@ export default function Profile() {
       }
       if (userId) {
         const response = await axios.get(
-          `http://localhost:8080/verify/owner/${userId}/details`,
+          `${JAVA_BACKEND_URL}/verify/owner/${userId}/details`,
           {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           }
@@ -156,7 +157,7 @@ export default function Profile() {
       formData.append("selfieImage", selfieFile);
 
       const response = await axios.post(
-        `http://localhost:8080/verify/owner/${userId}`,
+        `${JAVA_BACKEND_URL}/verify/owner/${userId}`,
         formData,
         {
           headers: {
@@ -231,7 +232,7 @@ export default function Profile() {
       };
 
       if (userId && token) {
-        await axios.put(`http://localhost:8080/users/${userId}`, payload, {
+        await axios.put(`${JAVA_BACKEND_URL}/users/${userId}`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }

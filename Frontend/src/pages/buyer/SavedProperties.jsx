@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -17,7 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import "./SavedProperties.css";
 
-const API_URL = "http://localhost:8080";
+const API_URL = `${JAVA_BACKEND_URL}`;
 
 export default function SavedProperties() {
   const navigate = useNavigate();

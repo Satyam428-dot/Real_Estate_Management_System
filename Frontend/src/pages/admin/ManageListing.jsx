@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaBan, FaTrash, FaSearch, FaCheckCircle, FaBuilding, FaTimes } from "react-icons/fa";
@@ -22,7 +23,7 @@ export default function ManageListings() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-      const response = await axios.get("http://localhost:8080/properties", config);
+      const response = await axios.get(`${JAVA_BACKEND_URL}/properties`, config);
       setProperties(response.data);
       setError(null);
     } catch (err) {
@@ -47,12 +48,12 @@ export default function ManageListings() {
         const token = localStorage.getItem("token");
         const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
         await axios.put(
-          `http://localhost:8080/properties/${property.propertyId}`,
+          `${JAVA_BACKEND_URL}/properties/${property.propertyId}`,
           { blacklist: false },
           config
         );
         await axios.put(
-          `http://localhost:8080/properties/${property.propertyId}/verification-status?status=APPROVED`,
+          `${JAVA_BACKEND_URL}/properties/${property.propertyId}/verification-status?status=APPROVED`,
           {},
           config
         );
@@ -86,12 +87,12 @@ export default function ManageListings() {
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
       await axios.put(
-        `http://localhost:8080/properties/${banningPropertyId}`,
+        `${JAVA_BACKEND_URL}/properties/${banningPropertyId}`,
         { blacklist: true },
         config
       );
       await axios.put(
-        `http://localhost:8080/properties/${banningPropertyId}/verification-status?status=REJECTED&rejectionReason=${encodeURIComponent(
+        `${JAVA_BACKEND_URL}/properties/${banningPropertyId}/verification-status?status=REJECTED&rejectionReason=${encodeURIComponent(
           banReason || "Banned by Admin for policy violation"
         )}`,
         {},
@@ -127,7 +128,7 @@ export default function ManageListings() {
     try {
       const token = localStorage.getItem("token");
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-      await axios.delete(`http://localhost:8080/properties/${propertyId}`, config);
+      await axios.delete(`${JAVA_BACKEND_URL}/properties/${propertyId}`, config);
       setProperties((prev) => prev.filter((p) => p.propertyId !== propertyId));
     } catch (err) {
       console.error("Failed to delete property:", err);

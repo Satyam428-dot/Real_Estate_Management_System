@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -35,7 +36,7 @@ export default function ApproveProperties() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-      const response = await axios.get("http://localhost:8080/properties", config);
+      const response = await axios.get(`${JAVA_BACKEND_URL}/properties`, config);
       setProperties(response.data);
       setError(null);
     } catch (err) {
@@ -56,7 +57,7 @@ export default function ApproveProperties() {
       const token = localStorage.getItem("token");
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
-      let url = `http://localhost:8080/properties/${propertyId}/verification-status?status=${status}`;
+      let url = `${JAVA_BACKEND_URL}/properties/${propertyId}/verification-status?status=${status}`;
       if (reason) {
         url += `&rejectionReason=${encodeURIComponent(reason)}`;
       }
@@ -65,7 +66,7 @@ export default function ApproveProperties() {
 
       // If restoring from blacklist, also set blacklist to false
       await axios.put(
-        `http://localhost:8080/properties/${propertyId}`,
+        `${JAVA_BACKEND_URL}/properties/${propertyId}`,
         { blacklist: false },
         config
       );
@@ -98,12 +99,12 @@ export default function ApproveProperties() {
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
       await axios.put(
-        `http://localhost:8080/properties/${banningPropertyId}`,
+        `${JAVA_BACKEND_URL}/properties/${banningPropertyId}`,
         { blacklist: true },
         config
       );
       await axios.put(
-        `http://localhost:8080/properties/${banningPropertyId}/verification-status?status=REJECTED&rejectionReason=${encodeURIComponent(
+        `${JAVA_BACKEND_URL}/properties/${banningPropertyId}/verification-status?status=REJECTED&rejectionReason=${encodeURIComponent(
           banReason || "Banned by Admin for policy violation"
         )}`,
         {},
@@ -140,12 +141,12 @@ export default function ApproveProperties() {
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
       await axios.put(
-        `http://localhost:8080/properties/${propertyId}`,
+        `${JAVA_BACKEND_URL}/properties/${propertyId}`,
         { blacklist: false },
         config
       );
       await axios.put(
-        `http://localhost:8080/properties/${propertyId}/verification-status?status=APPROVED`,
+        `${JAVA_BACKEND_URL}/properties/${propertyId}/verification-status?status=APPROVED`,
         {},
         config
       );

@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -44,9 +45,9 @@ export default function MyProperties() {
 
       let response;
       if (ownerId) {
-        response = await axios.get(`http://localhost:8080/properties/owner/${ownerId}`);
+        response = await axios.get(`${JAVA_BACKEND_URL}/properties/owner/${ownerId}`);
       } else {
-        response = await axios.get("http://localhost:8080/properties");
+        response = await axios.get(`${JAVA_BACKEND_URL}/properties`);
       }
       setProperties(response.data || []);
     } catch (error) {
@@ -55,7 +56,7 @@ export default function MyProperties() {
       try {
         const details = getUserProfileDetails();
         const ownerId = Number(details?.userId || localStorage.getItem("userId"));
-        const res = await axios.get("http://localhost:8080/properties");
+        const res = await axios.get(`${JAVA_BACKEND_URL}/properties`);
         if (ownerId && Array.isArray(res.data)) {
           const ownerProps = res.data.filter((p) => Number(p.ownerId) === ownerId);
           setProperties(ownerProps);
@@ -134,7 +135,7 @@ export default function MyProperties() {
   const handleAddProperty = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8080/properties", formData);
+      await axios.post(`${JAVA_BACKEND_URL}/properties`, formData);
       setShowModal(false);
       // Reset form
       setFormData({
@@ -168,7 +169,7 @@ export default function MyProperties() {
     }
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:8080/properties/${propertyId}`, {
+      await axios.delete(`${JAVA_BACKEND_URL}/properties/${propertyId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Property deleted successfully.");

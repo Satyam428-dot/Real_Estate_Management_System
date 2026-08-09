@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../utils/config";
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -22,7 +23,7 @@ import Navbar from "../components/jsx/Navbar";
 import Footer from "../components/jsx/Footer";
 import "./buyer/BrowseProperties.css";
 
-const API_URL = "http://localhost:8080";
+const API_URL = `${JAVA_BACKEND_URL}`;
 
 // Preset popular locations for IntelliSense suggestions
 const presetLocations = [

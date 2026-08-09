@@ -1,3 +1,4 @@
+import { JAVA_BACKEND_URL } from "../../utils/config";
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -70,7 +71,7 @@ export default function ScheduleAVisit() {
         messageToOwner: formData.messageToOwner,
       };
 
-      await axios.post("http://localhost:8080/visits", payload, {
+      await axios.post(`${JAVA_BACKEND_URL}/visits`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
