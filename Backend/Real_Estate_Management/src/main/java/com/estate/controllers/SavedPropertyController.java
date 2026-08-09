@@ -19,7 +19,7 @@ import com.estate.service.SavedPropertyService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/favourites")
+@RequestMapping("/saved-properties")
 @RequiredArgsConstructor
 public class SavedPropertyController {
 

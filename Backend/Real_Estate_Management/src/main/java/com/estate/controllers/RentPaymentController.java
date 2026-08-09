@@ -21,7 +21,7 @@ import com.estate.service.RentPaymentService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/rent-payments")
+@RequestMapping("/payments")
 @RequiredArgsConstructor
 public class RentPaymentController {
 
