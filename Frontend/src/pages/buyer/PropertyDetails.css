@@ -1185,12 +1185,13 @@
   justify-content: space-between;
   gap: 8px;
   flex-wrap: nowrap;
+  min-height: 32px;
 }
 
 .emi-icon-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -1200,7 +1201,7 @@
   border-radius: 8px;
   background: #eff6ff;
   color: #2563eb;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
@@ -1214,6 +1215,9 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1;
+  display: flex;
+  align-items: center;
 }
 
 .emi-rate-badge {
@@ -1221,8 +1225,17 @@
   color: #2563eb;
   font-size: 11px;
   font-weight: 700;
-  padding: 4px 9px;
-  border-radius: 20px;
+  padding: 0 10px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  border: 1px solid #bfdbfe;
+  flex-shrink: 0;
+  white-space: nowrap;
+  line-height: 1;
+}
   border: 1px solid #bfdbfe;
   flex-shrink: 0;
   white-space: nowrap;
