@@ -170,7 +170,7 @@ export default function SavedProperties() {
           </button>
         </div>
 
-        {/* Right Action Controls: Sort & View Switches */}
+        {/* Right Action Controls: Sort Dropdown */}
         <div className="toolbar-actions">
           <div className="sort-dropdown-container">
             <select
@@ -182,23 +182,6 @@ export default function SavedProperties() {
               <option value="price-low-high">Price: Low to High</option>
               <option value="price-high-low">Price: High to Low</option>
             </select>
-          </div>
-
-          <div className="view-mode-toggle">
-            <button
-              className={`view-btn ${viewMode === "grid" ? "active" : ""}`}
-              onClick={() => setViewMode("grid")}
-              title="Grid View"
-            >
-              <Grid size={18} />
-            </button>
-            <button
-              className={`view-btn ${viewMode === "list" ? "active" : ""}`}
-              onClick={() => setViewMode("list")}
-              title="List View"
-            >
-              <List size={18} />
-            </button>
           </div>
         </div>
       </div>
