@@ -19,8 +19,7 @@ import com.estate.service.SavedPropertyService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/saved-properties")
-@CrossOrigin(origins = "http://localhost:5173")
+@RequestMapping("/favourites")
 @RequiredArgsConstructor
 public class SavedPropertyController {
 

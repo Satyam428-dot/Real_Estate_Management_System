@@ -55,8 +55,7 @@ public class SecurityConfig {
 			"http://localhost:3000",
 			"http://127.0.0.1:5173",
 			"https://realestatemanagementsystem-dusky.vercel.app",
-			"https://*.vercel.app",
-			"*"
+			"https://*.vercel.app"
 		));
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 		configuration.setAllowedHeaders(List.of("*"));

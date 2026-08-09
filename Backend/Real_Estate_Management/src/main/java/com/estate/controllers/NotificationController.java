@@ -20,7 +20,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/notifications")
-@CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 
 

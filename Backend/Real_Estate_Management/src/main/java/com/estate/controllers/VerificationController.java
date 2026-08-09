@@ -27,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/verify")
-@CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 public class VerificationController {
 	private final VerificationService verificationService;

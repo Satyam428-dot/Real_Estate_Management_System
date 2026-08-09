@@ -25,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/bookings")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class BookingController {
 

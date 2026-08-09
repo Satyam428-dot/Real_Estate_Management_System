@@ -21,8 +21,7 @@ import com.estate.service.RentPaymentService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/payments")
-@CrossOrigin(origins = "http://localhost:5173")
+@RequestMapping("/rent-payments")
 @RequiredArgsConstructor
 public class RentPaymentController {
 
