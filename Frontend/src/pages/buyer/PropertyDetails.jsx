@@ -26,6 +26,8 @@ import {
   Layers,
   ChevronLeft,
   ChevronRight,
+  Send,
+  User as UserIcon,
 } from "lucide-react";
 import { GoogleMap, useJsApiLoader, MarkerF } from "@react-google-maps/api";
 import "./PropertyDetails.css";
@@ -63,15 +65,21 @@ export default function PropertyDetails() {
   const [backendProperty, setBackendProperty] = useState(location.state?.property || null);
   const [loading, setLoading] = useState(false);
 
-  // Image Gallery & Lightbox States
+  // Image Gallery & Slider State
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [showLightbox, setShowLightbox] = useState(false);
 
-  // Fetch from backend API if ID exists
+  // Reviews States
+  const [reviewsList, setReviewsList] = useState([]);
+  const [newRating, setNewRating] = useState(5);
+  const [newComment, setNewComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  // Fetch property details and reviews from backend
   useEffect(() => {
     const targetId = id || location.state?.property?.id || location.state?.property?.propertyId;
     if (targetId) {
       setLoading(true);
+      // 1. Fetch Property Details
       axios
         .get(`${API_URL}/properties/${targetId}`)
         .then((res) => {
@@ -81,6 +89,16 @@ export default function PropertyDetails() {
         })
         .catch((err) => console.error("Could not fetch property from backend:", err))
         .finally(() => setLoading(false));
+
+      // 2. Fetch Reviews for Property
+      axios
+        .get(`${API_URL}/reviews/property/${targetId}`)
+        .then((res) => {
+          if (Array.isArray(res.data)) {
+            setReviewsList(res.data);
+          }
+        })
+        .catch((err) => console.error("Could not fetch property reviews:", err));
     }
   }, [id]);
 
@@ -160,7 +178,7 @@ export default function PropertyDetails() {
     baths: String(p?.bathrooms || p?.baths || "1"),
     halls: String(p?.halls || "1"),
     sqft: p?.areaSqft ? `${p.areaSqft} sq.ft` : (p?.sqft || "N/A"),
-    parking: "1",
+    parking: "1 Covered",
     propertyType: p?.propertyType || "Apartment",
     listingType: p?.listingType || "RENT",
     listedOn: "21 May 2024",
@@ -168,7 +186,7 @@ export default function PropertyDetails() {
     furnishing: "Semi Furnished",
     reraId: "P52100012345",
     description: p?.description || "Experience luxury living in this beautiful property with modern amenities.",
-    highlightsPoints: [
+    highlightsPoints: highlightsList.length > 0 ? highlightsList : [
       "Spacious living and dining area with balcony",
       "Modular kitchen with premium fittings",
       "Vastu compliant and well-ventilated",
@@ -180,12 +198,59 @@ export default function PropertyDetails() {
       phone: p?.ownerPhone || p?.owner?.phone || "7747926022",
       email: p?.ownerEmail || p?.owner?.email || "owner@estate.com",
       rating: 4.8,
-      reviewsCount: 32,
+      reviewsCount: reviewsList.length || 32,
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
     },
     rawPropertyObj: p,
     highlightsList: highlightsList,
     amenities: amenitiesList,
+  };
+
+  // Submit Review Handler
+  const handleAddReview = (e) => {
+    e.preventDefault();
+    const targetId = id || location.state?.property?.id || location.state?.property?.propertyId;
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("Please login to submit a review");
+      return;
+    }
+    if (!newComment.trim()) {
+      toast.error("Please enter a review comment");
+      return;
+    }
+
+    setSubmittingReview(true);
+    axios
+      .post(
+        `${API_URL}/reviews`,
+        {
+          propertyId: Number(targetId),
+          rating: Number(newRating),
+          comment: newComment.trim(),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      .then((res) => {
+        toast.success("Review submitted successfully!");
+        setNewComment("");
+        setNewRating(5);
+        // Refresh reviews list
+        return axios.get(`${API_URL}/reviews/property/${targetId}`);
+      })
+      .then((res) => {
+        if (res?.data && Array.isArray(res.data)) {
+          setReviewsList(res.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to submit review:", err);
+        toast.error("Could not submit review. Please try again.");
+      })
+      .finally(() => setSubmittingReview(false));
   };
 
   const handleWhatsAppClick = () => {
@@ -225,6 +290,11 @@ Best regards!`;
     const query = encodeURIComponent(`${propertyData.title}, ${propertyData.location}`);
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, "_blank");
   };
+
+  // Calculate Average Rating
+  const avgRating = reviewsList.length > 0
+    ? (reviewsList.reduce((acc, r) => acc + (r.rating || 5), 0) / reviewsList.length).toFixed(1)
+    : "4.8";
 
   return (
     <div className="property-details-container">
@@ -355,7 +425,7 @@ Best regards!`;
             )}
           </div>
 
-          {/* Quick Specs */}
+          {/* Quick Specs Bar (Integrated with Real Backend Data) */}
           <div className="quick-specs-bar">
             <div className="spec-item">
               <div className="spec-icon">
@@ -404,119 +474,283 @@ Best regards!`;
             </div>
           </div>
 
-          {/* Tabs */}
+          {/* Tabs Navigation */}
           <div className="pdetails-tabs">
             {[
-              "Overview",
-              "Amenities",
-              "Location",
-              "Floor Plan",
-              "Reviews (28)",
+              { id: "Overview", label: "Overview" },
+              { id: "Amenities", label: `Amenities (${propertyData.amenities.length})` },
+              { id: "Location", label: "Location" },
+              { id: "Floor", label: "Floor Plan" },
+              { id: "Reviews", label: `Reviews (${reviewsList.length})` },
             ].map((tab) => (
               <button
-                key={tab}
-                className={`tab-link ${
-                  activeTab === tab.split(" ")[0] ? "active" : ""
-                }`}
-                onClick={() => setActiveTab(tab.split(" ")[0])}
+                key={tab.id}
+                className={`tab-link ${activeTab === tab.id ? "active" : ""}`}
+                onClick={() => setActiveTab(tab.id)}
               >
-                {tab}
+                {tab.label}
               </button>
             ))}
           </div>
 
-          {/* Overview */}
-          <div className="pdetails-section-card">
-            <div className="about-property-split">
-              <div className="about-text-col">
-                <h3>About this property</h3>
-                <p>{propertyData.description}</p>
-                <ul className="bullet-highlights">
-                  {propertyData.highlightsPoints.map((point, index) => (
-                    <li key={index}>
-                      <CheckCircle2 size={16} className="check-icon" />
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          {/* Tab 1: Overview */}
+          {(activeTab === "Overview" || activeTab === "all") && (
+            <div className="pdetails-section-card">
+              <div className="about-property-split">
+                <div className="about-text-col">
+                  <h3>About this property</h3>
+                  <p>{propertyData.description}</p>
+                  <ul className="bullet-highlights">
+                    {propertyData.highlightsPoints.map((point, index) => (
+                      <li key={index}>
+                        <CheckCircle2 size={16} className="check-icon" />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-              <div className="property-meta-table">
-                <div className="meta-row">
-                  <span className="meta-key">Property ID</span>
-                  <span className="meta-val">PRP-{propertyData.id}</span>
-                </div>
-                <div className="meta-row">
-                  <span className="meta-key">Listed On</span>
-                  <span className="meta-val">{propertyData.listedOn}</span>
-                </div>
-                <div className="meta-row">
-                  <span className="meta-key">Possession</span>
-                  <span className="meta-val">{propertyData.possession}</span>
-                </div>
-                <div className="meta-row">
-                  <span className="meta-key">Furnishing</span>
-                  <span className="meta-val">{propertyData.furnishing}</span>
-                </div>
-                <div className="meta-row">
-                  <span className="meta-key">RERA ID</span>
-                  <span className="meta-val rera-val">
-                    {propertyData.reraId}{" "}
-                    <ShieldCheck size={14} className="rera-icon" />
-                  </span>
+                <div className="property-meta-table">
+                  <div className="meta-row">
+                    <span className="meta-key">Property ID</span>
+                    <span className="meta-val">PRP-{propertyData.id}</span>
+                  </div>
+                  <div className="meta-row">
+                    <span className="meta-key">Listed On</span>
+                    <span className="meta-val">{propertyData.listedOn}</span>
+                  </div>
+                  <div className="meta-row">
+                    <span className="meta-key">Possession</span>
+                    <span className="meta-val">{propertyData.possession}</span>
+                  </div>
+                  <div className="meta-row">
+                    <span className="meta-key">Furnishing</span>
+                    <span className="meta-val">{propertyData.furnishing}</span>
+                  </div>
+                  <div className="meta-row">
+                    <span className="meta-key">RERA ID</span>
+                    <span className="meta-val rera-val">
+                      {propertyData.reraId}{" "}
+                      <ShieldCheck size={14} className="rera-icon" />
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Interactive Google Map Section */}
-          <div className="pdetails-section-card location-card">
-            <div className="location-card-header">
-              <div>
-                <h3>Location</h3>
-                <p className="loc-text">{propertyData.location}</p>
+          {/* Tab 2: Amenities Tab View */}
+          {activeTab === "Amenities" && (
+            <div className="pdetails-section-card">
+              <h3>All Property Amenities ({propertyData.amenities.length})</h3>
+              <p style={{ color: "#64748b", marginBottom: "16px", fontSize: "14px" }}>
+                Features & services available for this property:
+              </p>
+              <div className="amenities-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "16px" }}>
+                {propertyData.amenities.map((amenity, idx) => {
+                  const IconComp = amenity.icon;
+                  return (
+                    <div
+                      className="amenity-item"
+                      key={idx}
+                      style={{ padding: "14px", background: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}
+                    >
+                      <div className="amenity-icon-box" style={{ background: "#eff6ff", color: "#2563eb" }}>
+                        <IconComp size={18} />
+                      </div>
+                      <span style={{ fontWeight: "600", fontSize: "14px" }}>{amenity.name}</span>
+                    </div>
+                  );
+                })}
               </div>
-              <button className="btn-view-map" onClick={handleOpenExternalMap}>
-                <MapIcon size={14} /> Open in Google Maps
-              </button>
             </div>
+          )}
 
-            <div className="map-embed-wrapper" style={{ minHeight: "350px" }}>
-              {loadError && (
-                <div className="map-error">
-                  <p>Unable to load Google Maps. Please check your API key.</p>
+          {/* Tab 3: Location */}
+          {(activeTab === "Location" || activeTab === "all") && (
+            <div className="pdetails-section-card location-card">
+              <div className="location-card-header">
+                <div>
+                  <h3>Location</h3>
+                  <p className="loc-text">{propertyData.location}</p>
                 </div>
-              )}
+                <button className="btn-view-map" onClick={handleOpenExternalMap}>
+                  <MapIcon size={14} /> Open in Google Maps
+                </button>
+              </div>
 
-              {!isLoaded && !loadError && (
-                <div
-                  className="map-loading"
-                  style={{
-                    height: "350px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+              <div className="map-embed-wrapper" style={{ minHeight: "350px" }}>
+                {loadError && (
+                  <div className="map-error">
+                    <p>Unable to load Google Maps. Please check your API key.</p>
+                  </div>
+                )}
+
+                {!isLoaded && !loadError && (
+                  <div
+                    className="map-loading"
+                    style={{
+                      height: "350px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <span>Loading Map...</span>
+                  </div>
+                )}
+
+                {isLoaded && (
+                  <GoogleMap
+                    mapContainerStyle={mapContainerStyle}
+                    center={propertyData.coordinates}
+                    zoom={15}
+                    options={mapOptions}
+                  >
+                    <MarkerF
+                      position={propertyData.coordinates}
+                      title={propertyData.title}
+                    />
+                  </GoogleMap>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Tab 4: Floor Plan Tab View */}
+          {activeTab === "Floor" && (
+            <div className="pdetails-section-card floor-plan-card">
+              <h3>Architectural Floor Plan & Layout</h3>
+              <div className="floor-plan-specs">
+                <div className="fp-spec-box">
+                  <span className="fp-spec-label">Built-up Area</span>
+                  <span className="fp-spec-val">{propertyData.sqft}</span>
+                </div>
+                <div className="fp-spec-box">
+                  <span className="fp-spec-label">Bedrooms</span>
+                  <span className="fp-spec-val">{propertyData.beds} Beds</span>
+                </div>
+                <div className="fp-spec-box">
+                  <span className="fp-spec-label">Bathrooms</span>
+                  <span className="fp-spec-val">{propertyData.baths} Baths</span>
+                </div>
+                <div className="fp-spec-box">
+                  <span className="fp-spec-label">Halls / Living</span>
+                  <span className="fp-spec-val">{propertyData.halls} Hall</span>
+                </div>
+              </div>
+
+              <div className="floor-plan-diagram-box">
+                <div className="fp-diagram-graphic">
+                  <Building size={48} color="#3b82f6" style={{ marginBottom: "12px" }} />
+                  <h4 style={{ margin: 0, fontSize: "18px" }}>2D Floor Plan Overview</h4>
+                </div>
+                <div className="fp-room-grid">
+                  <div className="fp-room-pill">Master Bedroom ({propertyData.beds > 1 ? "Ensuite Bath" : "Standard"})</div>
+                  <div className="fp-room-pill">Living & Dining Room</div>
+                  <div className="fp-room-pill">Modular Kitchen</div>
+                  <div className="fp-room-pill">Balcony / Utility Space</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 5: Reviews Tab View */}
+          {activeTab === "Reviews" && (
+            <div className="pdetails-section-card reviews-section-card">
+              <h3>Buyer Ratings & Reviews ({reviewsList.length})</h3>
+
+              <div className="reviews-summary-bar">
+                <div className="rev-score-box">
+                  <span className="rev-big-num">{avgRating}</span>
+                  <div>
+                    <div className="rev-stars-row">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          size={18}
+                          fill={star <= Math.round(Number(avgRating)) ? "#f59e0b" : "#e2e8f0"}
+                          color={star <= Math.round(Number(avgRating)) ? "#f59e0b" : "#cbd5e1"}
+                        />
+                      ))}
+                    </div>
+                    <span className="rev-count-sub">Based on {reviewsList.length} verified reviews</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reviews List */}
+              <div className="reviews-list-wrapper">
+                {reviewsList.length === 0 ? (
+                  <p style={{ color: "#64748b" }}>No reviews submitted yet for this property. Be the first to write a review!</p>
+                ) : (
+                  reviewsList.map((rev) => (
+                    <div className="review-item-card" key={rev.id || Math.random()}>
+                      <div className="review-user-header">
+                        <div className="rev-user-info">
+                          <img
+                            src={rev.reviewerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80"}
+                            alt={rev.reviewerName || "Buyer"}
+                            className="rev-avatar"
+                          />
+                          <div>
+                            <h5 className="rev-user-name">{rev.reviewerName || "Verified Buyer"}</h5>
+                            <p className="rev-user-role">Verified Buyer</p>
+                          </div>
+                        </div>
+                        <div className="rev-stars-row">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              size={14}
+                              fill={star <= rev.rating ? "#f59e0b" : "#e2e8f0"}
+                              color={star <= rev.rating ? "#f59e0b" : "#cbd5e1"}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="rev-comment-text">{rev.reviewText || rev.comment}</p>
+                      {rev.date && <span className="rev-date">{rev.date}</span>}
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Write Review Form */}
+              <form className="write-review-card" onSubmit={handleAddReview}>
+                <h4>Write a Review</h4>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ fontSize: "14px", fontWeight: "600" }}>Your Rating:</span>
+                  <div className="star-rating-select">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        size={22}
+                        fill={star <= newRating ? "#f59e0b" : "#e2e8f0"}
+                        color={star <= newRating ? "#f59e0b" : "#cbd5e1"}
+                        onClick={() => setNewRating(star)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <textarea
+                  className="review-textarea"
+                  placeholder="Share your experience regarding this property, location, amenities..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                ></textarea>
+
+                <button
+                  type="submit"
+                  className="btn-submit-review"
+                  disabled={submittingReview}
                 >
-                  <span>Loading Map...</span>
-                </div>
-              )}
-
-              {isLoaded && (
-                <GoogleMap
-                  mapContainerStyle={mapContainerStyle}
-                  center={propertyData.coordinates}
-                  zoom={15}
-                  options={mapOptions}
-                >
-                  <MarkerF
-                    position={propertyData.coordinates}
-                    title={propertyData.title}
-                  />
-                </GoogleMap>
-              )}
+                  {submittingReview ? "Submitting..." : "Submit Review"}
+                </button>
+              </form>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right Sidebar */}
