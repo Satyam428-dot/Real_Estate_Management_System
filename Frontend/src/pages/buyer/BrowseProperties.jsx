@@ -253,10 +253,6 @@ export default function BrowseProperties() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    favouritesApi.ids().then(({ data }) => setSavedProperties(data)).catch(() => setSavedProperties([]));
-  }, []);
-
   // Fetch properties from backend API
   useEffect(() => {
     axios
@@ -795,21 +791,6 @@ export default function BrowseProperties() {
                 <option value="price-high-low">Price: High to Low</option>
               </select>
               <ChevronDown size={16} className="dropdown-arrow" />
-            </div>
-
-            <div className="view-mode-switch">
-              <button
-                className={`view-btn ${viewMode === "grid" ? "active" : ""}`}
-                onClick={() => setViewMode("grid")}
-              >
-                <Grid size={18} />
-              </button>
-              <button
-                className={`view-btn ${viewMode === "list" ? "active" : ""}`}
-                onClick={() => setViewMode("list")}
-              >
-                <List size={18} />
-              </button>
             </div>
           </div>
         </div>

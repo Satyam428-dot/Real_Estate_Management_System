@@ -83,7 +83,7 @@ export default function ReviewsAndRatings() {
   const [timeFilter, setTimeFilter] = useState("All Time");
   const [sortBy, setSortBy] = useState("Most Recent");
 
-  const [reviews, setReviews] = useState(seedReviewsData);
+  const [reviews, setReviews] = useState([]);
   const [propertiesList, setPropertiesList] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -105,24 +105,40 @@ export default function ReviewsAndRatings() {
   const fetchBackendReviews = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:8080/reviews");
+      const token = localStorage.getItem("token");
+      // Fetch this buyer's own submitted reviews
+      const endpoint = token
+        ? "http://localhost:8080/reviews/buyer"
+        : "http://localhost:8080/reviews";
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      const res = await axios.get(endpoint, config);
       if (res.data && res.data.length > 0) {
         const formatted = res.data.map((item) => ({
           id: item.id,
+          propertyId: item.propertyId,
           title: item.propertyTitle || "Property Review",
-          location: item.propertyLocation || "Pune",
+          location: item.propertyLocation || "",
           rating: item.rating || 5.0,
           reviewText: item.reviewText || item.comment || "",
-          reviewerName: item.reviewerName || "Verified User",
+          reviewerName: item.reviewerName || "You",
           reviewerRole: item.reviewerRole || "Verified Buyer",
-          date: item.date || "Just now",
+          date: item.date
+            ? new Date(item.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
+            : "Just now",
           reviewerAvatar: item.reviewerAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
           propertyImage: item.propertyImage || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80",
+          locationRating: item.locationRating || 4.5,
+          valueForMoneyRating: item.valueForMoneyRating || 4.5,
+          amenitiesRating: item.amenitiesRating || 4.5,
+          verifiedBuyer: item.verifiedBuyer || false,
         }));
         setReviews(formatted);
+      } else {
+        setReviews([]);
       }
     } catch (err) {
-      console.log("No live reviews yet, displaying default seed reviews.", err);
+      console.log("Could not fetch reviews:", err);
+      setReviews([]);
     } finally {
       setLoading(false);
     }
@@ -163,30 +179,18 @@ export default function ReviewsAndRatings() {
         amenitiesRating: parseFloat(amenitiesRating),
       };
 
-      const res = await axios.post("http://localhost:8080/reviews", payload, {
+      await axios.post("http://localhost:8080/reviews", payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
 
-      const newReviewItem = {
-        id: res.data.id || Date.now(),
-        title: res.data.propertyTitle || "Reviewed Property",
-        location: res.data.propertyLocation || "Pune",
-        rating: res.data.rating || ratingScore,
-        reviewText: res.data.reviewText || reviewComment,
-        reviewerName: res.data.reviewerName || "You",
-        reviewerRole: "Verified Buyer",
-        date: res.data.date || new Date().toISOString().split("T")[0],
-        reviewerAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
-        propertyImage: res.data.propertyImage || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80",
-      };
-
-      setReviews((prev) => [newReviewItem, ...prev]);
-      toast.success("Review & rating saved to database successfully!");
+      toast.success("Review submitted successfully!");
       setIsModalOpen(false);
       setReviewComment("");
+      // Re-fetch buyer's own reviews to show the new one
+      await fetchBackendReviews();
     } catch (err) {
       console.error("Failed to submit review:", err);
       toast.error(

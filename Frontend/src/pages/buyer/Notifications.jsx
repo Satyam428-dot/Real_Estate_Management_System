@@ -56,7 +56,8 @@ export default function Notifications() {
     setLoading(true);
     const token = localStorage.getItem("token");
     if (!token) {
-      setNotifications(fallbackNotifications);
+      const stored = localStorage.getItem("buyer_notifications");
+      setNotifications(stored ? JSON.parse(stored) : fallbackNotifications);
       setLoading(false);
       return;
     }
@@ -82,12 +83,19 @@ export default function Notifications() {
             : "Recently",
         }));
         setNotifications(formatted);
+        // Sync real DB data to localStorage so navbar stays consistent
+        localStorage.setItem("buyer_notifications", JSON.stringify(formatted));
+        window.dispatchEvent(new Event("notificationsUpdated"));
       } else {
+        // API returned 0 items — clear localStorage too so navbar is consistent
+        localStorage.removeItem("buyer_notifications");
         setNotifications([]);
+        window.dispatchEvent(new Event("notificationsUpdated"));
       }
     } catch (err) {
       console.error("Failed to fetch notifications from backend:", err);
-      setNotifications(fallbackNotifications);
+      const stored = localStorage.getItem("buyer_notifications");
+      setNotifications(stored ? JSON.parse(stored) : fallbackNotifications);
     } finally {
       setLoading(false);
     }
@@ -97,9 +105,20 @@ export default function Notifications() {
     fetchNotifications();
   }, []);
 
+  // Helper: persist updated list to localStorage and sync navbar
+  const syncToStorage = (updated) => {
+    localStorage.setItem("buyer_notifications", JSON.stringify(updated));
+    window.dispatchEvent(new Event("notificationsUpdated"));
+  };
+
   // Mark all as read handler
   const handleMarkAllRead = async () => {
     const token = localStorage.getItem("token");
+    // Optimistic update
+    const updated = notifications.map((item) => ({ ...item, isRead: true }));
+    setNotifications(updated);
+    syncToStorage(updated);
+    toast.success("All notifications marked as read.");
     try {
       if (token) {
         await axios.put(
@@ -108,23 +127,21 @@ export default function Notifications() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
       }
-      setNotifications((prev) =>
-        prev.map((item) => ({ ...item, isRead: true }))
-      );
-      toast.success("All notifications marked as read.");
-      window.dispatchEvent(new Event("notificationsUpdated"));
     } catch (err) {
       console.error("Error marking all as read:", err);
-      setNotifications((prev) =>
-        prev.map((item) => ({ ...item, isRead: true }))
-      );
-      window.dispatchEvent(new Event("notificationsUpdated"));
     }
   };
 
   // Toggle single item read status
   const handleToggleRead = async (id, currentStatus) => {
     if (currentStatus) return; // already read
+
+    // Optimistic update
+    const updated = notifications.map((item) =>
+      item.id === id ? { ...item, isRead: true } : item
+    );
+    setNotifications(updated);
+    syncToStorage(updated);
 
     const token = localStorage.getItem("token");
     try {
@@ -135,26 +152,21 @@ export default function Notifications() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
       }
-      setNotifications((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, isRead: true } : item
-        )
-      );
-      window.dispatchEvent(new Event("notificationsUpdated"));
     } catch (err) {
       console.error("Error marking notification as read:", err);
-      setNotifications((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, isRead: true } : item
-        )
-      );
-      window.dispatchEvent(new Event("notificationsUpdated"));
     }
   };
 
   // Delete notification
   const handleDeleteNotification = async (id, e) => {
     e.stopPropagation();
+
+    // Optimistic real-time removal
+    const updated = notifications.filter((item) => item.id !== id);
+    setNotifications(updated);
+    syncToStorage(updated);
+    toast.info("Notification removed.");
+
     const token = localStorage.getItem("token");
     try {
       if (token) {
@@ -162,13 +174,8 @@ export default function Notifications() {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
-      setNotifications((prev) => prev.filter((item) => item.id !== id));
-      toast.info("Notification removed.");
-      window.dispatchEvent(new Event("notificationsUpdated"));
     } catch (err) {
       console.error("Error deleting notification:", err);
-      setNotifications((prev) => prev.filter((item) => item.id !== id));
-      window.dispatchEvent(new Event("notificationsUpdated"));
     }
   };
 

@@ -112,16 +112,24 @@ public class PropertyVisitServiceImpl implements PropertyVisitService {
 
 	private VisitResponseDTO mapToDTO(PropertyVisit visit) {
 		String mainImage = null;
-		if (visit.getProperty().getImages() != null && !visit.getProperty().getImages().isEmpty()) {
+		if (visit.getProperty() != null && visit.getProperty().getImages() != null && !visit.getProperty().getImages().isEmpty()) {
 			mainImage = visit.getProperty().getImages().get(0).getImageUrl();
 		}
 
-		return VisitResponseDTO.builder().id(visit.getId()).propertyId(visit.getProperty().getId())
-				.propertyTitle(visit.getProperty().getTitle()).propertyLocation(visit.getProperty().getAddress())
-				.propertyCity(visit.getProperty().getCity()).propertyImage(mainImage).buyerId(visit.getBuyer().getId())
-				.buyerName(visit.getBuyer().getFirstName() + " " + visit.getBuyer().getLastName())
-				.ownerId(visit.getOwner().getId())
-				.ownerName(visit.getOwner().getFirstName() + " " + visit.getOwner().getLastName())
+		Long buyerId = visit.getBuyer() != null ? visit.getBuyer().getId() : null;
+		String buyerName = visit.getBuyer() != null ? (visit.getBuyer().getFirstName() + " " + visit.getBuyer().getLastName()) : visit.getFullName();
+
+		Long ownerId = visit.getOwner() != null ? visit.getOwner().getId() : null;
+		String ownerName = visit.getOwner() != null ? (visit.getOwner().getFirstName() + " " + visit.getOwner().getLastName()) : "Property Owner";
+
+		return VisitResponseDTO.builder().id(visit.getId()).propertyId(visit.getProperty() != null ? visit.getProperty().getId() : null)
+				.propertyTitle(visit.getProperty() != null ? visit.getProperty().getTitle() : null)
+				.propertyLocation(visit.getProperty() != null ? visit.getProperty().getAddress() : null)
+				.propertyCity(visit.getProperty() != null ? visit.getProperty().getCity() : null)
+				.propertyImage(mainImage).buyerId(buyerId)
+				.buyerName(buyerName)
+				.ownerId(ownerId)
+				.ownerName(ownerName)
 				.fullName(visit.getFullName()).email(visit.getEmail()).phone(visit.getPhone())
 				.visitDate(visit.getVisitDate()).timeSlot(visit.getTimeSlot())
 				.specificRequirements(visit.getSpecificRequirements()).messageToOwner(visit.getMessageToOwner())
