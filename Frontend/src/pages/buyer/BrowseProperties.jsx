@@ -253,10 +253,6 @@ export default function BrowseProperties() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    favouritesApi.ids().then(({ data }) => setSavedProperties(data)).catch(() => setSavedProperties([]));
-  }, []);
-
   // Fetch properties from backend API
   useEffect(() => {
     axios
