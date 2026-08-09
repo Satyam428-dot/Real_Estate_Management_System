@@ -52,6 +52,7 @@ import Maintenance from "./pages/owner/Maintenance";
 import Sales from "./pages/owner/Sales";
 import Reports from "./pages/owner/Reports";
 import VisitRequests from "./pages/owner/VisitRequests";
+import OwnerInquiries from "./pages/owner/OwnerInquiries";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -122,6 +123,7 @@ function App() {
           <Route path="properties" element={<MyProperties />} />
           <Route path="properties/:id" element={<OwnerPropertyDetails />} />
           <Route path="add-property" element={<AddProperty />} />
+          <Route path="inquiries" element={<OwnerInquiries />} />
           <Route path="tenants" element={<Tenants />} />
           <Route path="payments" element={<RentPayments />} />
           <Route path="profile" element={<Profile />} />

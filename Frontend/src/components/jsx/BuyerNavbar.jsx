@@ -100,8 +100,7 @@ export default function BuyerNavbar() {
   const fetchNotifications = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      const stored = localStorage.getItem("buyer_notifications");
-      setNotifications(stored ? JSON.parse(stored) : defaultNotifications);
+      setNotifications([]);
       return;
     }
 
@@ -125,13 +124,16 @@ export default function BuyerNavbar() {
             : "Recently",
         }));
         setNotifications(formatted);
+        // Keep localStorage in sync with real DB data
+        localStorage.setItem("buyer_notifications", JSON.stringify(formatted));
       } else {
-        const stored = localStorage.getItem("buyer_notifications");
-        setNotifications(stored ? JSON.parse(stored) : defaultNotifications);
+        // DB returned empty — clear everything so no stale data shows
+        setNotifications([]);
+        localStorage.removeItem("buyer_notifications");
       }
     } catch (err) {
-      const stored = localStorage.getItem("buyer_notifications");
-      setNotifications(stored ? JSON.parse(stored) : defaultNotifications);
+      // API error — show nothing rather than fake data
+      setNotifications([]);
     } finally {
       setLoadingNotifs(false);
     }

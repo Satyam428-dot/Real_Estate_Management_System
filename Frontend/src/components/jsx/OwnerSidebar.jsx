@@ -11,6 +11,7 @@ import {
   FaCog,
   FaSignOutAlt,
   FaCalendarAlt,
+  FaEnvelope,
 } from "react-icons/fa";
 
 import "../css/OwnerSidebar.css";
@@ -49,6 +50,13 @@ export default function OwnerSidebar() {
           <li className="owner-sidebar-item">
             <FaBuilding className="owner-sidebar-icon" />
             <span>My Properties</span>
+          </li>
+        </NavLink>
+
+        <NavLink to="/owner/inquiries" className="owner-nav-link">
+          <li className="owner-sidebar-item">
+            <FaEnvelope className="owner-sidebar-icon" />
+            <span>Inquiries</span>
           </li>
         </NavLink>
 
