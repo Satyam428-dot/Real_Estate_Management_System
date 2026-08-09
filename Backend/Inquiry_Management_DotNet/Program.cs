@@ -1,0 +1,69 @@
+using Microsoft.EntityFrameworkCore;
+using Inquiry_Management_DotNet.Data;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add Controllers & OpenApi
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddOpenApi();
+
+// Configure CORS for React Frontend (http://localhost:5173)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+// Configure EF Core DbContext with official Oracle MySql.EntityFrameworkCore 10
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (!string.IsNullOrEmpty(connectionString))
+{
+    builder.Services.AddDbContext<InquiryDbContext>(options =>
+    {
+        options.UseMySQL(connectionString);
+    });
+}
+else
+{
+    builder.Services.AddDbContext<InquiryDbContext>(options =>
+    {
+        options.UseInMemoryDatabase("InquiryDb");
+    });
+}
+
+var app = builder.Build();
+
+// Ensure database table exists
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<InquiryDbContext>();
+        db.Database.EnsureCreated();
+        Console.WriteLine("[DotNet Backend] Connected to real_estate_management MySQL database!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[DotNet Backend] Database notice: {ex.Message}");
+    }
+}
+
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+
+app.UseCors("AllowReactApp");
+app.UseAuthorization();
+app.MapControllers();
+
+// Bind to http://localhost:5000
+app.Run("http://localhost:5000");
