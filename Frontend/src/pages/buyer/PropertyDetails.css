@@ -1167,6 +1167,172 @@
   background: #1d4ed8;
 }
 
+/* EMI Calculator Widget Styles */
+.emi-calculator-widget {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.emi-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.emi-icon-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emi-header-icon {
+  color: #2563eb;
+}
+
+.emi-widget-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.emi-rate-badge {
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.emi-result-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+
+.emi-result-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.emi-result-val {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 4px 0;
+}
+
+.emi-per-mo {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.emi-loan-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.emi-slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.emi-slider-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.emi-slider-input {
+  width: 100%;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.btn-apply-loan {
+  background: #1e293b;
+  color: #ffffff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  width: 100%;
+}
+
+.btn-apply-loan:hover {
+  background: #0f172a;
+}
+
+/* Safety & Legal Guarantee Widget */
+.safety-guarantee-widget {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.safety-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.safety-icon {
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.safety-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #14532d;
+}
+
+.safety-header p {
+  margin: 0;
+  font-size: 12px;
+  color: #166534;
+}
+
+.safety-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.safety-bullets li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #15803d;
+}
+
 /* Click Press Animation */
 .btn-whatsapp:active {
   transform: translateY(0);

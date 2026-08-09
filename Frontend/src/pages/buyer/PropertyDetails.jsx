@@ -28,6 +28,7 @@ import {
   ChevronRight,
   Send,
   User as UserIcon,
+  Calculator,
 } from "lucide-react";
 import { GoogleMap, useJsApiLoader, MarkerF } from "@react-google-maps/api";
 import "./PropertyDetails.css";
@@ -73,6 +74,11 @@ export default function PropertyDetails() {
   const [newRating, setNewRating] = useState(5);
   const [newComment, setNewComment] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
+
+  // EMI Calculator States
+  const [loanTenureYears, setLoanTenureYears] = useState(20);
+  const [downPaymentPercent, setDownPaymentPercent] = useState(20);
+  const [interestRate, setInterestRate] = useState(8.5);
 
   // Fetch property details and reviews from backend
   useEffect(() => {
@@ -252,6 +258,16 @@ export default function PropertyDetails() {
       })
       .finally(() => setSubmittingReview(false));
   };
+
+  // Dynamic EMI Calculation
+  const rawPriceNum = typeof p?.price === "number" ? p.price : (parseFloat(p?.price) || 5000000);
+  const loanAmount = Math.max(0, rawPriceNum * (1 - downPaymentPercent / 100));
+  const monthlyRate = (interestRate / 12) / 100;
+  const totalMonths = loanTenureYears * 12;
+
+  const emiVal = monthlyRate > 0 && totalMonths > 0
+    ? Math.round((loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / (Math.pow(1 + monthlyRate, totalMonths) - 1))
+    : 0;
 
   const handleWhatsAppClick = () => {
     const phoneNumber = propertyData.owner.phone;
@@ -798,6 +814,90 @@ Best regards!`;
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* EMI / Home Loan Calculator Widget */}
+          <div className="widget-card emi-calculator-widget">
+            <div className="emi-widget-header">
+              <div className="emi-icon-title">
+                <Calculator size={18} className="emi-header-icon" />
+                <h3>Home Loan Calculator</h3>
+              </div>
+              <span className="emi-rate-badge">{interestRate}% p.a.</span>
+            </div>
+
+            <div className="emi-result-box">
+              <span className="emi-result-label">Est. Monthly EMI</span>
+              <div className="emi-result-val">
+                ₹{emiVal.toLocaleString("en-IN")} <span className="emi-per-mo">/ mo</span>
+              </div>
+              <div className="emi-loan-sub">
+                Loan Amount: ₹{Math.round(loanAmount).toLocaleString("en-IN")} ({100 - downPaymentPercent}% of price)
+              </div>
+            </div>
+
+            {/* Slider 1: Down Payment */}
+            <div className="emi-slider-group">
+              <div className="emi-slider-label">
+                <span>Down Payment ({downPaymentPercent}%)</span>
+                <span>₹{Math.round(rawPriceNum * (downPaymentPercent / 100)).toLocaleString("en-IN")}</span>
+              </div>
+              <input
+                type="range"
+                min="10"
+                max="80"
+                step="5"
+                value={downPaymentPercent}
+                onChange={(e) => setDownPaymentPercent(Number(e.target.value))}
+                className="emi-slider-input"
+              />
+            </div>
+
+            {/* Slider 2: Tenure Years */}
+            <div className="emi-slider-group">
+              <div className="emi-slider-label">
+                <span>Tenure</span>
+                <span>{loanTenureYears} Years</span>
+              </div>
+              <input
+                type="range"
+                min="5"
+                max="30"
+                step="5"
+                value={loanTenureYears}
+                onChange={(e) => setLoanTenureYears(Number(e.target.value))}
+                className="emi-slider-input"
+              />
+            </div>
+
+            <button
+              className="btn-apply-loan"
+              onClick={() => toast.info("Connecting with bank partners for pre-approved home loans...")}
+            >
+              Get Pre-Approved Loan &rarr;
+            </button>
+          </div>
+
+          {/* Safety & Legal Guarantee Widget */}
+          <div className="widget-card safety-guarantee-widget">
+            <div className="safety-header">
+              <ShieldCheck size={24} className="safety-icon" />
+              <div>
+                <h4>Verified Guarantee</h4>
+                <p>100% Legal & Documented</p>
+              </div>
+            </div>
+            <ul className="safety-bullets">
+              <li>
+                <CheckCircle2 size={14} color="#16a34a" /> Title Deed & Tax Receipts Checked
+              </li>
+              <li>
+                <CheckCircle2 size={14} color="#16a34a" /> Verified Property Owner Identity
+              </li>
+              <li>
+                <CheckCircle2 size={14} color="#16a34a" /> Zero Brokerage Direct Contact
+              </li>
+            </ul>
           </div>
         </div>
       </div>
