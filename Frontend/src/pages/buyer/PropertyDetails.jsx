@@ -497,9 +497,11 @@ Best regards!`;
           {(activeTab === "Overview" || activeTab === "all") && (
             <div className="pdetails-section-card">
               <div className="about-property-split">
-                <div className="about-text-col">
+                <div className="about-text-col" style={{ width: "100%" }}>
                   <h3>About this property</h3>
-                  <p>{propertyData.description}</p>
+                  <p style={{ lineHeight: "1.7", color: "#334155" }}>{propertyData.description}</p>
+
+                  <h3 style={{ marginTop: "24px" }}>Property Highlights</h3>
                   <ul className="bullet-highlights">
                     {propertyData.highlightsPoints.map((point, index) => (
                       <li key={index}>
@@ -508,32 +510,6 @@ Best regards!`;
                       </li>
                     ))}
                   </ul>
-                </div>
-
-                <div className="property-meta-table">
-                  <div className="meta-row">
-                    <span className="meta-key">Property ID</span>
-                    <span className="meta-val">PRP-{propertyData.id}</span>
-                  </div>
-                  <div className="meta-row">
-                    <span className="meta-key">Listed On</span>
-                    <span className="meta-val">{propertyData.listedOn}</span>
-                  </div>
-                  <div className="meta-row">
-                    <span className="meta-key">Possession</span>
-                    <span className="meta-val">{propertyData.possession}</span>
-                  </div>
-                  <div className="meta-row">
-                    <span className="meta-key">Furnishing</span>
-                    <span className="meta-val">{propertyData.furnishing}</span>
-                  </div>
-                  <div className="meta-row">
-                    <span className="meta-key">RERA ID</span>
-                    <span className="meta-val rera-val">
-                      {propertyData.reraId}{" "}
-                      <ShieldCheck size={14} className="rera-icon" />
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -821,37 +797,6 @@ Best regards!`;
                   </span>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Property Highlights Widget */}
-          <div className="widget-card highlights-widget">
-            <h3>Property Highlights</h3>
-            <ul className="highlights-list">
-              {propertyData.highlightsList.map((item, idx) => (
-                <li key={idx}>
-                  <CheckCircle2 size={15} className="highlight-icon" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Amenities Widget */}
-          <div className="widget-card amenities-widget">
-            <h3>Amenities ({propertyData.amenities.length})</h3>
-            <div className="amenities-grid">
-              {propertyData.amenities.map((amenity, idx) => {
-                const IconComp = amenity.icon;
-                return (
-                  <div className="amenity-item" key={idx}>
-                    <div className="amenity-icon-box">
-                      <IconComp size={16} />
-                    </div>
-                    <span>{amenity.name}</span>
-                  </div>
-                );
-              })}
             </div>
           </div>
         </div>
