@@ -105,6 +105,19 @@ export default function PropertyDetails() {
           }
         })
         .catch((err) => console.error("Could not fetch property reviews:", err));
+
+      // 3. Check if Property is Saved by Buyer
+      const token = localStorage.getItem("token");
+      if (token) {
+        axios
+          .get(`${API_URL}/saved-properties/check/${targetId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((res) => {
+            setIsSaved(!!res.data);
+          })
+          .catch((err) => console.error("Could not check saved status:", err));
+      }
     }
   }, [id]);
 
@@ -259,6 +272,61 @@ export default function PropertyDetails() {
       .finally(() => setSubmittingReview(false));
   };
 
+  // Toggle Save Property API Handler
+  const handleToggleSave = () => {
+    const targetId = id || location.state?.property?.id || location.state?.property?.propertyId;
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("Please login to save properties");
+      return;
+    }
+
+    if (isSaved) {
+      axios
+        .delete(`${API_URL}/saved-properties/${targetId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then(() => {
+          setIsSaved(false);
+          toast.info("Property removed from your Saved list.");
+        })
+        .catch((err) => {
+          console.error("Error unsaving property:", err);
+          toast.error("Could not remove property from Saved list.");
+        });
+    } else {
+      axios
+        .post(`${API_URL}/saved-properties/${targetId}`, {}, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then(() => {
+          setIsSaved(true);
+          toast.success("Property saved to your Saved list!");
+        })
+        .catch((err) => {
+          console.error("Error saving property:", err);
+          toast.error("Could not save property.");
+        });
+    }
+  };
+
+  // Share Property Handler
+  const handleShareProperty = () => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: propertyData.title,
+          text: `Check out "${propertyData.title}" listed for ${propertyData.price} in ${propertyData.location}!`,
+          url: window.location.href,
+        })
+        .catch(() => {});
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("Property link copied to clipboard!");
+    }
+  };
+
   // Dynamic EMI Calculation
   const rawPriceNum = typeof p?.price === "number" ? p.price : (parseFloat(p?.price) || 5000000);
   const loanAmount = Math.max(0, rawPriceNum * (1 - downPaymentPercent / 100));
@@ -354,7 +422,7 @@ Best regards!`;
           <div className="title-actions">
             <button
               className={`action-btn-outline ${isSaved ? "saved" : ""}`}
-              onClick={() => setIsSaved(!isSaved)}
+              onClick={handleToggleSave}
             >
               <Heart
                 size={16}
@@ -363,7 +431,7 @@ Best regards!`;
               />
               <span>{isSaved ? "Saved" : "Save"}</span>
             </button>
-            <button className="action-btn-outline">
+            <button className="action-btn-outline" onClick={handleShareProperty}>
               <Share2 size={16} />
               <span>Share</span>
             </button>
