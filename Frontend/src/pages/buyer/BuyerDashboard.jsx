@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import BuyerSidebar from "../../components/jsx/BuyerSidebar";
 import BuyerNavbar from "../../components/jsx/BuyerNavbar";
+import Chatbot from "../../components/jsx/Chatbot";
 import "./BuyerDashboard.css";
 
 export default function BuyerDashboard() {
@@ -20,6 +21,9 @@ export default function BuyerDashboard() {
           <Outlet />
         </div>
       </main>
+
+      {/* Floating AI Assistant Chatbot */}
+      <Chatbot mode="floating" title="Real Estate AI Assistant" />
     </div>
   );
 }
