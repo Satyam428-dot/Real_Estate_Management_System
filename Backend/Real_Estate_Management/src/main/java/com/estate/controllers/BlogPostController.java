@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/blogs")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class BlogPostController {
 
