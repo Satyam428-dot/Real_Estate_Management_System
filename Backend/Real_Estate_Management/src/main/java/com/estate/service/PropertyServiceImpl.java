@@ -264,10 +264,15 @@ public class PropertyServiceImpl implements PropertyService {
 	}
 
 	private PropertyResponseDTO toResponse(Property property) {
+		if (property == null) return null;
 		PropertyResponseDTO response = new PropertyResponseDTO();
 		response.setPropertyId(property.getId());
-		response.setOwnerId(property.getOwner().getId());
-		response.setOwnerName(property.getOwner().getFirstName() + " " + property.getOwner().getLastName());
+		if (property.getOwner() != null) {
+			response.setOwnerId(property.getOwner().getId());
+			String fName = property.getOwner().getFirstName() != null ? property.getOwner().getFirstName() : "";
+			String lName = property.getOwner().getLastName() != null ? property.getOwner().getLastName() : "";
+			response.setOwnerName((fName + " " + lName).trim());
+		}
 		response.setTitle(property.getTitle());
 		response.setDescription(property.getDescription());
 		response.setPrice(property.getPrice());
@@ -291,14 +296,23 @@ public class PropertyServiceImpl implements PropertyService {
 		response.setNocCertificateUrl(property.getNocCertificateUrl());
 		response.setRejectionReason(property.getRejectionReason());
 		response.setUpdatedAt(property.getUpdatedAt());
-		response.setImages(property.getImages().stream()
-				.sorted(Comparator.comparing(PropertyImage::getIsMain).reversed()).map(image -> {
-					PropertyImageDTO dto = new PropertyImageDTO();
-					dto.setId(image.getId());
-					dto.setImageUrl(image.getImageUrl());
-					dto.setIsMain(image.getIsMain());
-					return dto;
-				}).toList());
+
+		if (property.getImages() != null) {
+			response.setImages(property.getImages().stream()
+					.filter(img -> img != null)
+					.sorted(Comparator.comparing(
+						(PropertyImage img) -> Boolean.TRUE.equals(img.getIsMain())
+					).reversed())
+					.map(image -> {
+						PropertyImageDTO dto = new PropertyImageDTO();
+						dto.setId(image.getId());
+						dto.setImageUrl(image.getImageUrl());
+						dto.setIsMain(image.getIsMain());
+						return dto;
+					}).toList());
+		} else {
+			response.setImages(List.of());
+		}
 		return response;
 	}
 }
