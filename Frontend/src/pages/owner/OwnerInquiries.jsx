@@ -19,6 +19,8 @@ import {
   Calendar,
   AlertCircle,
   Check,
+  MapPin,
+  Tag
 } from "lucide-react";
 import "./OwnerInquiries.css";
 
@@ -207,12 +209,10 @@ export default function OwnerInquiries() {
 
   // Filtered inquiries
   const filteredInquiries = inquiries.filter((inquiry) => {
-    // Status Filter
     if (activeTab === "Awaiting" && inquiry.status !== "Awaiting Response" && inquiry.status !== "Awaiting") return false;
     if (activeTab === "Replied" && inquiry.status !== "Replied") return false;
     if (activeTab === "Closed" && inquiry.status !== "Closed") return false;
 
-    // Search Query Filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchName = inquiry.buyerName?.toLowerCase().includes(q);
@@ -241,45 +241,47 @@ export default function OwnerInquiries() {
 
   return (
     <div className="owner-inquiries-page">
-      <div className="inquiries-header-banner">
-        <div className="banner-content">
-          <h1><MessageSquare className="banner-icon" /> Property Inquiries</h1>
-          <p>Manage and respond to direct buyer inquiries for your listed properties.</p>
+      {/* Top Banner Header */}
+      <div className="inquiries-banner-header">
+        <div className="banner-title-group">
+          <h1><MessageSquare className="icon-main" /> Property Inquiries</h1>
+          <p>Review, respond, and manage direct inquiries from interested property buyers.</p>
         </div>
       </div>
 
-      <div className="inquiries-container">
-        {/* Filter and Search Bar */}
-        <div className="inquiries-controls-card">
-          <div className="tabs-row">
+      {/* Main Container */}
+      <div className="inquiries-main-wrapper">
+        {/* Controls Bar: Tabs & Search */}
+        <div className="controls-card">
+          <div className="tabs-nav-bar">
             {["All", "Awaiting", "Replied", "Closed"].map((tab) => (
               <button
                 key={tab}
-                className={`tab-btn ${activeTab === tab ? "active" : ""}`}
+                className={`tab-nav-item ${activeTab === tab ? "active" : ""}`}
                 onClick={() => setActiveTab(tab)}
               >
-                {tab} ({counts[tab] || 0})
+                {tab} <span className="tab-badge">{counts[tab] || 0}</span>
               </button>
             ))}
           </div>
 
-          <div className="search-sort-row">
-            <div className="search-input-wrapper">
-              <Search className="search-icon" />
+          <div className="search-sort-bar">
+            <div className="search-input-box">
+              <Search className="icon-search" />
               <input
                 type="text"
-                placeholder="Search by buyer, property, message or ID..."
+                placeholder="Search by buyer, email, property title..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               {searchQuery && (
-                <button className="clear-search-btn" onClick={() => setSearchQuery("")}>
+                <button className="btn-clear-search" onClick={() => setSearchQuery("")}>
                   <X className="w-4 h-4" />
                 </button>
               )}
             </div>
 
-            <div className="sort-wrapper">
+            <div className="sort-dropdown-box">
               <label>Sort:</label>
               <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                 <option value="Latest">Latest First</option>
@@ -291,107 +293,110 @@ export default function OwnerInquiries() {
 
         {/* Content Section */}
         {loading ? (
-          <div className="inquiries-loading-state">
-            <div className="spinner"></div>
-            <p>Loading your incoming inquiries...</p>
+          <div className="loading-card-box">
+            <div className="loading-spinner"></div>
+            <p>Fetching inquiries for your properties...</p>
           </div>
         ) : paginatedInquiries.length === 0 ? (
-          <div className="inquiries-empty-card">
-            <AlertCircle className="empty-icon" />
+          <div className="empty-inquiries-card">
+            <AlertCircle className="icon-empty" />
             <h3>No inquiries found</h3>
             <p>
               {searchQuery
-                ? `No inquiries matching "${searchQuery}"`
+                ? `No inquiries match "${searchQuery}"`
                 : activeTab !== "All"
-                ? `No inquiries found under the "${activeTab}" filter.`
-                : "You have no incoming buyer inquiries for your properties at this moment."}
+                ? `No inquiries found in "${activeTab}" category.`
+                : "You currently have no incoming buyer inquiries."}
             </p>
           </div>
         ) : (
-          <div className="inquiries-list">
-            {paginatedInquiries.map((inquiry) => (
-              <div key={inquiry.numericId} className={`inquiry-card status-${inquiry.status.toLowerCase().replace(/\s+/g, "-")}`}>
-                {/* Property Header Header */}
-                <div className="card-top-header">
-                  <div className="property-info-brief">
-                    <img src={inquiry.image} alt={inquiry.title} className="prop-thumb" />
-                    <div>
-                      <h3 className="prop-title">{inquiry.title}</h3>
-                      <span className="prop-location"><Building className="w-3 h-3 inline mr-1" /> {inquiry.location}</span>
+          <div className="inquiries-card-list">
+            {paginatedInquiries.map((inquiry) => {
+              const statusSlug = inquiry.status.toLowerCase().replace(/\s+/g, "-");
+              return (
+                <div key={inquiry.numericId} className={`inquiry-item-card status-border-${statusSlug}`}>
+                  {/* 1. Header: Property Thumbnail + Title & Location + Status Badge */}
+                  <div className="card-top-header">
+                    <img src={inquiry.image} alt={inquiry.title} className="property-thumbnail" />
+                    <div className="property-header-details">
+                      <div className="title-and-status">
+                        <h3 className="property-title">{inquiry.title}</h3>
+                        <span className={`status-badge badge-${statusSlug}`}>
+                          {inquiry.status.toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="property-sub-meta">
+                        <span className="location-tag"><MapPin className="ic-sm" /> {inquiry.location}</span>
+                        {inquiry.price && <span className="price-tag">{inquiry.price}</span>}
+                        <span className="inquiry-code-tag"><Tag className="ic-sm" /> {inquiry.id}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="inquiry-badge-tag">
-                    <span className={`status-pill pill-${inquiry.status.toLowerCase().replace(/\s+/g, "-")}`}>
-                      {inquiry.status.toUpperCase()}
-                    </span>
-                    <span className="inquiry-code">{inquiry.id}</span>
+
+                  {/* 2. Buyer Info Bar */}
+                  <div className="buyer-info-bar">
+                    <div className="buyer-info-chip"><User className="ic-chip" /> <span>{inquiry.buyerName}</span></div>
+                    <div className="buyer-info-chip"><Mail className="ic-chip" /> <span>{inquiry.buyerEmail}</span></div>
+                    <div className="buyer-info-chip"><Phone className="ic-chip" /> <span>{inquiry.buyerPhone}</span></div>
+                    <div className="buyer-info-chip"><Calendar className="ic-chip" /> <span>Received: {inquiry.enquiredOn}</span></div>
                   </div>
-                </div>
 
-                {/* Buyer Details Row */}
-                <div className="buyer-meta-bar">
-                  <div className="buyer-detail"><User className="meta-ic" /> {inquiry.buyerName}</div>
-                  <div className="buyer-detail"><Mail className="meta-ic" /> {inquiry.buyerEmail}</div>
-                  <div className="buyer-detail"><Phone className="meta-ic" /> {inquiry.buyerPhone}</div>
-                  <div className="buyer-detail"><Calendar className="meta-ic" /> Received: {inquiry.enquiredOn}</div>
-                </div>
+                  {/* 3. Messages Stack */}
+                  <div className="messages-container">
+                    <div className="buyer-message-card">
+                      <div className="msg-card-label"><MessageSquare className="ic-msg" /> Buyer Message:</div>
+                      <p className="msg-text">{inquiry.message}</p>
+                    </div>
 
-                {/* Message Box */}
-                <div className="inquiry-message-box">
-                  <div className="box-title">Buyer Message:</div>
-                  <p>{inquiry.message}</p>
-                </div>
-
-                {/* Owner Reply Box (If Replied) */}
-                {inquiry.replyMessage && (
-                  <div className="owner-reply-box">
-                    <div className="reply-box-title"><Check className="w-4 h-4 inline mr-1 text-green-600" /> Your Reply:</div>
-                    <p>{inquiry.replyMessage}</p>
-                  </div>
-                )}
-
-                {/* Card Actions Footer */}
-                <div className="card-actions-footer">
-                  <div className="left-meta">
-                    <span className="prop-id-tag">Property ID: #{inquiry.propertyId || inquiry.numericId}</span>
-                  </div>
-                  <div className="right-btn-group">
-                    <button
-                      className="btn-action btn-reply"
-                      onClick={() => {
-                        setReplyModalInquiry(inquiry);
-                        setReplyMessage(inquiry.replyMessage || "");
-                      }}
-                    >
-                      <Reply className="btn-ic" /> {inquiry.replyMessage ? "Edit Reply" : "Reply"}
-                    </button>
-
-                    {inquiry.status !== "Closed" && (
-                      <button
-                        className="btn-action btn-close-inquiry"
-                        onClick={() => handleCloseInquiry(inquiry.numericId)}
-                      >
-                        <CheckCircle2 className="btn-ic" /> Mark Closed
-                      </button>
+                    {inquiry.replyMessage && (
+                      <div className="owner-reply-card">
+                        <div className="reply-card-label"><Check className="ic-reply" /> Your Reply:</div>
+                        <p className="reply-text">{inquiry.replyMessage}</p>
+                      </div>
                     )}
+                  </div>
 
-                    <button
-                      className="btn-action btn-delete-inquiry"
-                      onClick={() => handleDeleteInquiry(inquiry)}
-                      title="Delete Inquiry"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  {/* 4. Footer Actions */}
+                  <div className="card-footer-bar">
+                    <span className="property-id-label">Property ID: #{inquiry.propertyId || inquiry.numericId}</span>
+                    <div className="actions-group">
+                      <button
+                        className="btn-action-primary"
+                        onClick={() => {
+                          setReplyModalInquiry(inquiry);
+                          setReplyMessage(inquiry.replyMessage || "");
+                        }}
+                      >
+                        <Reply className="btn-ic" /> {inquiry.replyMessage ? "Edit Reply" : "Reply"}
+                      </button>
+
+                      {inquiry.status !== "Closed" && (
+                        <button
+                          className="btn-action-secondary"
+                          onClick={() => handleCloseInquiry(inquiry.numericId)}
+                        >
+                          <CheckCircle2 className="btn-ic" /> Mark Closed
+                        </button>
+                      )}
+
+                      <button
+                        className="btn-action-danger"
+                        onClick={() => handleDeleteInquiry(inquiry)}
+                        title="Delete Inquiry"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
-        {/* Pagination Controls */}
+        {/* Pagination Bar */}
         {totalPages > 1 && (
-          <div className="pagination-bar">
+          <div className="pagination-wrapper">
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((prev) => prev - 1)}
@@ -413,33 +418,33 @@ export default function OwnerInquiries() {
 
       {/* Reply Modal */}
       {replyModalInquiry && (
-        <div className="modal-backdrop">
-          <div className="modal-content-card">
-            <div className="modal-header">
-              <h3><Reply className="inline mr-2 text-blue-600" /> Reply to {replyModalInquiry.buyerName}</h3>
-              <button className="modal-close-icon" onClick={() => setReplyModalInquiry(null)}>
+        <div className="modal-overlay-bg">
+          <div className="modal-dialog-box">
+            <div className="modal-dialog-header">
+              <h3><Reply className="ic-modal-header" /> Reply to {replyModalInquiry.buyerName}</h3>
+              <button className="btn-modal-close" onClick={() => setReplyModalInquiry(null)}>
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleSendReply}>
-              <div className="modal-body">
-                <div className="inquiry-summary-snippet">
+              <div className="modal-dialog-body">
+                <div className="modal-inquiry-snippet">
                   <strong>Property:</strong> {replyModalInquiry.title} <br />
-                  <strong>Message:</strong> "{replyModalInquiry.message}"
+                  <strong>Buyer Message:</strong> "{replyModalInquiry.message}"
                 </div>
 
-                <div className="form-group mt-3">
+                <div className="form-field-group">
                   <label>Your Reply Message:</label>
                   <textarea
                     rows="4"
-                    placeholder="Type your response to the buyer here..."
+                    placeholder="Write your response to the buyer..."
                     value={replyMessage}
                     onChange={(e) => setReplyMessage(e.target.value)}
                     required
                   />
                 </div>
               </div>
-              <div className="modal-footer">
+              <div className="modal-dialog-footer">
                 <button
                   type="button"
                   className="btn-modal-cancel"
