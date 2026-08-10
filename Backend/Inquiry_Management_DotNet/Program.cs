@@ -3,10 +3,9 @@ using Inquiry_Management_DotNet.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add Controllers & OpenApi
+// Add Controllers
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
 
 // Configure CORS for React Frontend & Vercel
 builder.Services.AddCors(options =>
@@ -53,12 +52,6 @@ using (var scope = app.Services.CreateScope())
     {
         Console.WriteLine($"[DotNet Backend] Database notice: {ex.Message}");
     }
-}
-
-// Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
 }
 
 app.UseCors("AllowReactApp");
