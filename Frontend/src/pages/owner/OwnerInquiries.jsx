@@ -54,18 +54,10 @@ export default function OwnerInquiries() {
       const user = userStr ? JSON.parse(userStr) : null;
       const ownerId = user?.id || user?.userId || user?.ownerId;
 
-      // Try fetching with logged in ownerId first
       let url = ownerId ? `${DOTNET_API_URL}?ownerId=${ownerId}` : DOTNET_API_URL;
-      let response = await axios.get(url, {
+      const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      // If specific ownerId query returns 0 items, fetch all incoming inquiries
-      if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
-        response = await axios.get(DOTNET_API_URL, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
 
       if (response.data && Array.isArray(response.data)) {
         const enriched = await Promise.all(
@@ -105,9 +97,9 @@ export default function OwnerInquiries() {
               numericId: item.inquiryId || item.id,
               propertyId: item.propertyId,
               buyerId: item.buyerId,
-              buyerName: item.fullName || "Abhishek Dhoran",
-              buyerEmail: item.email || "abhishek.dhoran@gmail.com",
-              buyerPhone: item.phone || "7747926022",
+              buyerName: item.fullName || "Buyer",
+              buyerEmail: item.email || "buyer@gmail.com",
+              buyerPhone: item.phone || "N/A",
               title: realTitle,
               location: realLocation,
               price: realPrice || "Contact for Price",
@@ -125,47 +117,7 @@ export default function OwnerInquiries() {
       }
     } catch (err) {
       console.warn("Dotnet API fetch fallback:", err.message);
-      // Fallback sample data if server is offline
-      setInquiries([
-        {
-          id: "ENQ-000004",
-          numericId: 4,
-          propertyId: 44,
-          buyerId: 1,
-          buyerName: "Abhishek Dhoran",
-          buyerEmail: "abhishek.dhoran@gmail.com",
-          buyerPhone: "+91 7747926022",
-          title: "Luxury 3BHK Oceanfront Apartment in Bandra West",
-          location: "Carter Road, Bandra West, Mumbai",
-          price: "₹85,000 / month",
-          subject: "Inquiry regarding Property: Luxury 3BHK Oceanfront Apartment",
-          message: "Hi, I am interested in your Bandra West property. Is covered car parking available for 2 sedans?",
-          replyMessage: null,
-          status: "Awaiting Response",
-          enquiredOn: "8/9/2026",
-          lastUpdate: "8/9/2026",
-          image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80",
-        },
-        {
-          id: "ENQ-000001",
-          numericId: 1,
-          propertyId: 10,
-          buyerId: 1,
-          buyerName: "Priya Sharma",
-          buyerEmail: "priya.sharma@gmail.com",
-          buyerPhone: "+91 9823011223",
-          title: "Luxury 2BHK Apartment in Baner",
-          location: "Baner, Pune",
-          price: "₹ 28,000 / month",
-          subject: "Maintenance fee query",
-          message: "Is the monthly maintenance fee included in the ₹28,000 rent?",
-          replyMessage: "Yes, monthly maintenance is completely included in the rent.",
-          status: "Replied",
-          enquiredOn: "8/4/2026",
-          lastUpdate: "8/5/2026",
-          image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80",
-        },
-      ]);
+      setInquiries([]);
     } finally {
       setLoading(false);
     }
@@ -193,7 +145,6 @@ export default function OwnerInquiries() {
       fetchOwnerInquiries();
     } catch (err) {
       console.warn("Dotnet API reply fallback:", err.message);
-      // Local state update fallback
       setInquiries((prev) =>
         prev.map((i) =>
           i.numericId === replyModalInquiry.numericId
@@ -211,7 +162,6 @@ export default function OwnerInquiries() {
 
   // Mark Inquiry as Closed
   const handleCloseInquiry = async (inquiryId) => {
-    // Optimistic real-time UI update
     setInquiries((prev) =>
       prev.map((i) => (i.numericId === inquiryId ? { ...i, status: "Closed" } : i))
     );
@@ -241,40 +191,41 @@ export default function OwnerInquiries() {
       toast.success("Inquiry deleted successfully.");
       fetchOwnerInquiries();
     } catch (err) {
+      console.warn("Delete warning:", err.message);
       setInquiries((prev) => prev.filter((i) => i.numericId !== inquiry.numericId));
       toast.success("Inquiry removed.");
     }
   };
 
-  // KPI Calculations
-  const totalCount = inquiries.length;
-  const awaitingCount = inquiries.filter(
-    (i) => i.status.toLowerCase() === "awaiting response"
-  ).length;
-  const repliedCount = inquiries.filter(
-    (i) => i.status.toLowerCase() === "replied"
-  ).length;
-  const closedCount = inquiries.filter(
-    (i) => i.status.toLowerCase() === "closed"
-  ).length;
+  // Counts for Tabs
+  const counts = {
+    All: inquiries.length,
+    Awaiting: inquiries.filter((i) => i.status === "Awaiting Response" || i.status === "Awaiting").length,
+    Replied: inquiries.filter((i) => i.status === "Replied").length,
+    Closed: inquiries.filter((i) => i.status === "Closed").length,
+  };
 
-  // Filtered & Sorted List
+  // Filtered inquiries
   const filteredInquiries = inquiries.filter((inquiry) => {
-    const matchesTab =
-      activeTab === "All" ||
-      (activeTab === "Awaiting Reply" && inquiry.status.toLowerCase() === "awaiting response") ||
-      (activeTab === "Replied" && inquiry.status.toLowerCase() === "replied") ||
-      (activeTab === "Closed" && inquiry.status.toLowerCase() === "closed");
+    // Status Filter
+    if (activeTab === "Awaiting" && inquiry.status !== "Awaiting Response" && inquiry.status !== "Awaiting") return false;
+    if (activeTab === "Replied" && inquiry.status !== "Replied") return false;
+    if (activeTab === "Closed" && inquiry.status !== "Closed") return false;
 
-    const matchesSearch =
-      inquiry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inquiry.buyerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inquiry.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inquiry.message.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesTab && matchesSearch;
+    // Search Query Filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchName = inquiry.buyerName?.toLowerCase().includes(q);
+      const matchEmail = inquiry.buyerEmail?.toLowerCase().includes(q);
+      const matchTitle = inquiry.title?.toLowerCase().includes(q);
+      const matchId = inquiry.id?.toLowerCase().includes(q);
+      const matchMsg = inquiry.message?.toLowerCase().includes(q);
+      if (!matchName && !matchEmail && !matchTitle && !matchId && !matchMsg) return false;
+    }
+    return true;
   });
 
+  // Sorting
   const sortedInquiries = [...filteredInquiries].sort((a, b) => {
     if (sortBy === "Latest") return b.numericId - a.numericId;
     if (sortBy === "Oldest") return a.numericId - b.numericId;
@@ -282,7 +233,7 @@ export default function OwnerInquiries() {
   });
 
   // Pagination
-  const totalPages = Math.ceil(sortedInquiries.length / itemsPerPage) || 1;
+  const totalPages = Math.ceil(sortedInquiries.length / itemsPerPage);
   const paginatedInquiries = sortedInquiries.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -290,227 +241,146 @@ export default function OwnerInquiries() {
 
   return (
     <div className="owner-inquiries-page">
-      {/* Header */}
-      <div className="owner-inquiries-header">
-        <div>
-          <h1>Buyer Inquiries</h1>
-          <p>Review and respond to inquiries from prospective buyers and tenants.</p>
+      <div className="inquiries-header-banner">
+        <div className="banner-content">
+          <h1><MessageSquare className="banner-icon" /> Property Inquiries</h1>
+          <p>Manage and respond to direct buyer inquiries for your listed properties.</p>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="kpi-grid">
-        <div className="kpi-card blue">
-          <div className="kpi-icon">
-            <MessageSquare size={22} />
-          </div>
-          <div className="kpi-info">
-            <span className="kpi-num">{totalCount}</span>
-            <span className="kpi-label">Total Inquiries</span>
-          </div>
-        </div>
-
-        <div className="kpi-card orange">
-          <div className="kpi-icon">
-            <Clock size={22} />
-          </div>
-          <div className="kpi-info">
-            <span className="kpi-num">{awaitingCount}</span>
-            <span className="kpi-label">Awaiting Response</span>
-          </div>
-        </div>
-
-        <div className="kpi-card green">
-          <div className="kpi-icon">
-            <CheckCircle2 size={22} />
-          </div>
-          <div className="kpi-info">
-            <span className="kpi-num">{repliedCount}</span>
-            <span className="kpi-label">Replied</span>
-          </div>
-        </div>
-
-        <div className="kpi-card red">
-          <div className="kpi-icon">
-            <XCircle size={22} />
-          </div>
-          <div className="kpi-info">
-            <span className="kpi-num">{closedCount}</span>
-            <span className="kpi-label">Closed</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="owner-inquiries-container">
-        {/* Controls Toolbar */}
-        <div className="toolbar-bar">
-          {/* Status Tabs */}
-          <div className="tab-group">
-            <button
-              className={`tab-btn ${activeTab === "All" ? "active" : ""}`}
-              onClick={() => setActiveTab("All")}
-            >
-              All ({totalCount})
-            </button>
-            <button
-              className={`tab-btn awaiting ${activeTab === "Awaiting Reply" ? "active" : ""}`}
-              onClick={() => setActiveTab("Awaiting Reply")}
-            >
-              Awaiting ({awaitingCount})
-            </button>
-            <button
-              className={`tab-btn replied ${activeTab === "Replied" ? "active" : ""}`}
-              onClick={() => setActiveTab("Replied")}
-            >
-              Replied ({repliedCount})
-            </button>
-            <button
-              className={`tab-btn closed ${activeTab === "Closed" ? "active" : ""}`}
-              onClick={() => setActiveTab("Closed")}
-            >
-              Closed ({closedCount})
-            </button>
+      <div className="inquiries-container">
+        {/* Filter and Search Bar */}
+        <div className="inquiries-controls-card">
+          <div className="tabs-row">
+            {["All", "Awaiting", "Replied", "Closed"].map((tab) => (
+              <button
+                key={tab}
+                className={`tab-btn ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab} ({counts[tab] || 0})
+              </button>
+            ))}
           </div>
 
-          {/* Search & Sort */}
-          <div className="search-sort-group">
+          <div className="search-sort-row">
             <div className="search-input-wrapper">
-              <Search size={16} className="search-icon" />
+              <Search className="search-icon" />
               <input
                 type="text"
-                placeholder="Search by buyer, property, message..."
+                placeholder="Search by buyer, property, message or ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+              {searchQuery && (
+                <button className="clear-search-btn" onClick={() => setSearchQuery("")}>
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
-            <select
-              className="sort-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="Latest">Sort: Latest</option>
-              <option value="Oldest">Sort: Oldest</option>
-            </select>
+            <div className="sort-wrapper">
+              <label>Sort:</label>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                <option value="Latest">Latest First</option>
+                <option value="Oldest">Oldest First</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Cards List */}
+        {/* Content Section */}
         {loading ? (
-          <div className="loading-state">
-            <p>Loading buyer inquiries...</p>
+          <div className="inquiries-loading-state">
+            <div className="spinner"></div>
+            <p>Loading your incoming inquiries...</p>
           </div>
-        ) : sortedInquiries.length === 0 ? (
-          <div className="empty-state">
-            <Building size={48} className="empty-icon" />
-            <h3>No Inquiries Found</h3>
-            <p>No buyer inquiries match your current filter or search criteria.</p>
+        ) : paginatedInquiries.length === 0 ? (
+          <div className="inquiries-empty-card">
+            <AlertCircle className="empty-icon" />
+            <h3>No inquiries found</h3>
+            <p>
+              {searchQuery
+                ? `No inquiries matching "${searchQuery}"`
+                : activeTab !== "All"
+                ? `No inquiries found under the "${activeTab}" filter.`
+                : "You have no incoming buyer inquiries for your properties at this moment."}
+            </p>
           </div>
         ) : (
-          <div className="inquiry-cards-list">
+          <div className="inquiries-list">
             {paginatedInquiries.map((inquiry) => (
-              <div className="owner-inquiry-card" key={inquiry.id}>
-                {/* Top Row: Thumbnail + Property Header */}
+              <div key={inquiry.numericId} className={`inquiry-card status-${inquiry.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                {/* Property Header Header */}
                 <div className="card-top-header">
-                  <div className="prop-thumb-wrapper">
-                    <img
-                      src={inquiry.image}
-                      alt={inquiry.title}
-                      onError={(e) => {
-                        e.target.src =
-                          "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80";
-                      }}
-                    />
-                  </div>
-
-                  <div className="prop-header-info">
-                    <div className="title-code-row">
-                      <h3>{inquiry.title}</h3>
-                      <span className="code-pill">{inquiry.id}</span>
+                  <div className="property-info-brief">
+                    <img src={inquiry.image} alt={inquiry.title} className="prop-thumb" />
+                    <div>
+                      <h3 className="prop-title">{inquiry.title}</h3>
+                      <span className="prop-location"><Building className="w-3 h-3 inline mr-1" /> {inquiry.location}</span>
                     </div>
-                    <p className="prop-location">📍 {inquiry.location}</p>
                   </div>
-
-                  <span
-                    className={`status-pill ${
-                      inquiry.status.toLowerCase() === "awaiting response"
-                        ? "awaiting"
-                        : inquiry.status.toLowerCase()
-                    }`}
-                  >
-                    {inquiry.status}
-                  </span>
+                  <div className="inquiry-badge-tag">
+                    <span className={`status-pill pill-${inquiry.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                      {inquiry.status.toUpperCase()}
+                    </span>
+                    <span className="inquiry-code">{inquiry.id}</span>
+                  </div>
                 </div>
 
-                {/* Buyer Meta Bar */}
+                {/* Buyer Details Row */}
                 <div className="buyer-meta-bar">
-                  <div className="meta-item">
-                    <User size={14} />
-                    <span>{inquiry.buyerName}</span>
-                  </div>
-                  <div className="meta-item">
-                    <Mail size={14} />
-                    <span>{inquiry.buyerEmail}</span>
-                  </div>
-                  <div className="meta-item">
-                    <Phone size={14} />
-                    <span>{inquiry.buyerPhone}</span>
-                  </div>
-                  <div className="meta-item">
-                    <Calendar size={14} />
-                    <span>Received: {inquiry.enquiredOn}</span>
-                  </div>
+                  <div className="buyer-detail"><User className="meta-ic" /> {inquiry.buyerName}</div>
+                  <div className="buyer-detail"><Mail className="meta-ic" /> {inquiry.buyerEmail}</div>
+                  <div className="buyer-detail"><Phone className="meta-ic" /> {inquiry.buyerPhone}</div>
+                  <div className="buyer-detail"><Calendar className="meta-ic" /> Received: {inquiry.enquiredOn}</div>
                 </div>
 
-                {/* Message Bubble */}
-                <div className="message-box">
-                  <span className="message-title">Buyer Message:</span>
-                  <p className="message-text">{inquiry.message}</p>
+                {/* Message Box */}
+                <div className="inquiry-message-box">
+                  <div className="box-title">Buyer Message:</div>
+                  <p>{inquiry.message}</p>
                 </div>
 
-                {/* Owner Reply (if replied) */}
+                {/* Owner Reply Box (If Replied) */}
                 {inquiry.replyMessage && (
-                  <div className="reply-box">
-                    <span className="reply-title">Your Reply:</span>
-                    <p className="reply-text">{inquiry.replyMessage}</p>
+                  <div className="owner-reply-box">
+                    <div className="reply-box-title"><Check className="w-4 h-4 inline mr-1 text-green-600" /> Your Reply:</div>
+                    <p>{inquiry.replyMessage}</p>
                   </div>
                 )}
 
-                {/* Action Buttons Footer */}
-                <div className="card-action-footer">
+                {/* Card Actions Footer */}
+                <div className="card-actions-footer">
                   <div className="left-meta">
-                    <span>Property ID: #{inquiry.propertyId}</span>
+                    <span className="prop-id-tag">Property ID: #{inquiry.propertyId || inquiry.numericId}</span>
                   </div>
-
                   <div className="right-btn-group">
                     <button
-                      className="btn-reply-action"
+                      className="btn-action btn-reply"
                       onClick={() => {
                         setReplyModalInquiry(inquiry);
                         setReplyMessage(inquiry.replyMessage || "");
                       }}
                     >
-                      <Reply size={15} />
-                      {inquiry.replyMessage ? "Edit Reply" : "Reply to Buyer"}
+                      <Reply className="btn-ic" /> {inquiry.replyMessage ? "Edit Reply" : "Reply"}
                     </button>
 
-                    {inquiry.status.toLowerCase() !== "closed" && (
+                    {inquiry.status !== "Closed" && (
                       <button
-                        className="btn-close-action"
+                        className="btn-action btn-close-inquiry"
                         onClick={() => handleCloseInquiry(inquiry.numericId)}
                       >
-                        <Check size={15} />
-                        Mark Closed
+                        <CheckCircle2 className="btn-ic" /> Mark Closed
                       </button>
                     )}
 
                     <button
-                      className="btn-delete-action"
+                      className="btn-action btn-delete-inquiry"
                       onClick={() => handleDeleteInquiry(inquiry)}
-                      title="Delete inquiry"
+                      title="Delete Inquiry"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -519,12 +389,12 @@ export default function OwnerInquiries() {
           </div>
         )}
 
-        {/* Pagination Bar */}
+        {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="pagination-bar">
             <button
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
             >
               Previous
             </button>
@@ -533,7 +403,7 @@ export default function OwnerInquiries() {
             </span>
             <button
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
             >
               Next
             </button>
@@ -543,54 +413,46 @@ export default function OwnerInquiries() {
 
       {/* Reply Modal */}
       {replyModalInquiry && (
-        <div className="owner-modal-overlay" onClick={() => setReplyModalInquiry(null)}>
-          <div className="owner-modal-card" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-backdrop">
+          <div className="modal-content-card">
             <div className="modal-header">
-              <div>
-                <h3>Reply to Buyer</h3>
-                <p className="modal-subtitle">
-                  Inquiry {replyModalInquiry.id} • {replyModalInquiry.buyerName}
-                </p>
-              </div>
-              <button className="close-btn" onClick={() => setReplyModalInquiry(null)}>
-                <X size={20} />
+              <h3><Reply className="inline mr-2 text-blue-600" /> Reply to {replyModalInquiry.buyerName}</h3>
+              <button className="modal-close-icon" onClick={() => setReplyModalInquiry(null)}>
+                <X className="w-5 h-5" />
               </button>
             </div>
-
-            <form onSubmit={handleSendReply} className="modal-form">
-              {/* Buyer Question Summary Box */}
-              <div className="buyer-question-summary">
-                <div className="summary-title-row">
-                  <strong>{replyModalInquiry.title}</strong>
-                  <span>{replyModalInquiry.enquiredOn}</span>
+            <form onSubmit={handleSendReply}>
+              <div className="modal-body">
+                <div className="inquiry-summary-snippet">
+                  <strong>Property:</strong> {replyModalInquiry.title} <br />
+                  <strong>Message:</strong> "{replyModalInquiry.message}"
                 </div>
-                <p>"{replyModalInquiry.message}"</p>
-              </div>
 
-              {/* Reply Message Textarea */}
-              <div className="form-group">
-                <label>Your Response / Reply</label>
-                <textarea
-                  rows="5"
-                  placeholder="Type your response to the buyer (e.g. Yes, covered parking is available and you can visit this weekend)..."
-                  value={replyMessage}
-                  onChange={(e) => setReplyMessage(e.target.value)}
-                  required
-                ></textarea>
+                <div className="form-group mt-3">
+                  <label>Your Reply Message:</label>
+                  <textarea
+                    rows="4"
+                    placeholder="Type your response to the buyer here..."
+                    value={replyMessage}
+                    onChange={(e) => setReplyMessage(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
-
-              {/* Modal Action Buttons */}
-              <div className="modal-btn-row">
+              <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn-cancel"
+                  className="btn-modal-cancel"
                   onClick={() => setReplyModalInquiry(null)}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn-send" disabled={submittingReply}>
-                  <Send size={16} />
-                  {submittingReply ? "Sending..." : "Send Reply to Buyer"}
+                <button
+                  type="submit"
+                  className="btn-modal-submit"
+                  disabled={submittingReply}
+                >
+                  {submittingReply ? "Sending..." : "Send Reply"} <Send className="w-4 h-4 inline ml-1" />
                 </button>
               </div>
             </form>
