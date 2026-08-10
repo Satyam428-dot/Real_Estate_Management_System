@@ -395,7 +395,7 @@ export default function PropertyDetails() {
     const payload = {
       buyerId: buyerId ? Number(buyerId) : undefined,
       propertyId: Number(backendProperty?.propertyId || backendProperty?.id || id || 1),
-      ownerId: Number(backendProperty?.owner?.id || backendProperty?.ownerId || 2),
+      ownerId: Number(backendProperty?.ownerId || backendProperty?.owner?.id || backendProperty?.user?.id || 2),
       fullName: buyerName,
       email: buyerEmail,
       phone: buyerPhone,

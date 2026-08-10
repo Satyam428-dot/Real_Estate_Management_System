@@ -76,17 +76,17 @@ namespace Inquiry_Management_DotNet.Controllers
             return Ok(inquiries.Select(MapToDto));
         }
 
-        // 3. Get Incoming Inquiries for Owner (GET /api/inquiries/owner)
+        // 3. Get Incoming Inquiries for Owner (GET /api/inquiries/owner?ownerId=X)
         [HttpGet("owner")]
         public async Task<ActionResult<IEnumerable<InquiryResponseDto>>> GetOwnerInquiries([FromQuery] long? ownerId)
         {
-            var query = _context.Inquiries.AsQueryable();
-            if (ownerId.HasValue)
+            if (!ownerId.HasValue || ownerId.Value <= 0)
             {
-                query = query.Where(i => i.OwnerId == ownerId.Value);
+                return BadRequest(new { message = "ownerId query parameter is required to fetch owner inquiries" });
             }
 
-            var inquiries = await query
+            var inquiries = await _context.Inquiries
+                .Where(i => i.OwnerId == ownerId.Value)
                 .OrderByDescending(i => i.InquiryId)
                 .ToListAsync();
 

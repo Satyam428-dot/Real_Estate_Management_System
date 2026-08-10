@@ -52,11 +52,17 @@ export default function OwnerInquiries() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const userStr = localStorage.getItem("user");
+      const userStr = localStorage.getItem("loggedInUser") || localStorage.getItem("user");
       const user = userStr ? JSON.parse(userStr) : null;
-      const ownerId = user?.id || user?.userId || user?.ownerId;
+      const ownerId = user?.userId || user?.id || user?.ownerId;
 
-      let url = ownerId ? `${DOTNET_API_URL}?ownerId=${ownerId}` : DOTNET_API_URL;
+      if (!ownerId) {
+        setInquiries([]);
+        setLoading(false);
+        return;
+      }
+
+      let url = `${DOTNET_API_URL}?ownerId=${ownerId}`;
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
